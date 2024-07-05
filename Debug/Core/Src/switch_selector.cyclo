@@ -1,0 +1,4 @@
+../Core/Src/switch_selector.c:11:9:switch_selector_setup	4
+../Core/Src/switch_selector.c:56:9:switch_selector_deinit	1
+../Core/Src/switch_selector.c:63:9:switch_selector_read	2
+../Core/Src/switch_selector.c:77:9:switch_selector_read_bit	2

@@ -1,0 +1,17 @@
+../Core/Src/deadline_timer.c:12:9:deadline_timer_setup	1
+../Core/Src/deadline_timer.c:26:9:deadline_timer_setup_shared_clock	1
+../Core/Src/deadline_timer.c:47:6:deadline_timer_assign_current	1
+../Core/Src/deadline_timer.c:54:9:deadline_timer_force_expiration	1
+../Core/Src/deadline_timer.c:59:9:deadline_timer_check	1
+../Core/Src/deadline_timer.c:81:9:deadline_timer_count	1
+../Core/Src/deadline_timer.c:87:9:deadline_timer_set_current_time	1
+../Core/Src/deadline_timer.c:93:9:deadline_timer_set_deadline	1
+../Core/Src/deadline_timer.c:101:9:deadline_timer_set_initial_time	1
+../Core/Src/deadline_timer.c:108:9:deadline_timer_get_current_time	1
+../Core/Src/deadline_timer.c:114:9:deadline_timer_get_deadline	1
+../Core/Src/deadline_timer.c:120:9:deadline_timer_get_initial_time	1
+../Core/Src/deadline_timer.c:128:9:timer_clock_clear	1
+../Core/Src/deadline_timer.c:136:9:timer_clock_set_time	1
+../Core/Src/deadline_timer.c:144:9:timer_clock_get_time	1
+../Core/Src/deadline_timer.c:151:9:deadline_timer_increment	2
+../Core/Src/deadline_timer.c:177:9:deadline_timer_compare_check	3
