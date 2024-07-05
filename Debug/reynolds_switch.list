@@ -1,5 +1,5 @@
 
-reynolds_pinout.elf:     file format elf32-littlearm
+reynolds_switch.elf:     file format elf32-littlearm
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
