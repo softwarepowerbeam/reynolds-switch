@@ -293,8 +293,8 @@ int main(void)
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
 //  motion_initial_conf.threshold = 135;
 //  motion_initial_conf.threshold = 80;
-//  motion_initial_conf.threshold = 2;
-  motion_initial_conf.threshold = 50;
+  motion_initial_conf.threshold = 2;
+//  motion_initial_conf.threshold = 50;
   motion_initial_conf.window_time = PYD1598_WT_2_SEC;
 
   //Hardware assignation:

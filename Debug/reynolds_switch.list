@@ -2973,11 +2973,11 @@ int main(void)
  80010e0:	715a      	strb	r2, [r3, #5]
 //  motion_initial_conf.threshold = 135;
 //  motion_initial_conf.threshold = 80;
-//  motion_initial_conf.threshold = 2;
-  motion_initial_conf.threshold = 50;
+  motion_initial_conf.threshold = 2;
  80010e2:	4be9      	ldr	r3, [pc, #932]	; (8001488 <main+0x41c>)
- 80010e4:	2232      	movs	r2, #50	; 0x32
+ 80010e4:	2202      	movs	r2, #2
  80010e6:	701a      	strb	r2, [r3, #0]
+//  motion_initial_conf.threshold = 50;
   motion_initial_conf.window_time = PYD1598_WT_2_SEC;
  80010e8:	4be7      	ldr	r3, [pc, #924]	; (8001488 <main+0x41c>)
  80010ea:	2200      	movs	r2, #0
