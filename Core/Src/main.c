@@ -293,7 +293,8 @@ int main(void)
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
 //  motion_initial_conf.threshold = 135;
 //  motion_initial_conf.threshold = 80;
-  motion_initial_conf.threshold = 20;
+//  motion_initial_conf.threshold = 2;
+  motion_initial_conf.threshold = 50;
   motion_initial_conf.window_time = PYD1598_WT_2_SEC;
 
   //Hardware assignation:
@@ -407,7 +408,7 @@ int main(void)
   light_2_state = MOTION_LIGHT_IDLE;
 
   //Light UV
-  timer_motion_uv.msec = 5000;
+  timer_motion_uv.msec = 10000;
   deadline_timer_setup(&deadline_motion_uv, timer_motion_uv);
   timer_motion_uv_safe.msec = 5000;
   deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv);
