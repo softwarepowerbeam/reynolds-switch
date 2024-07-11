@@ -18,6 +18,12 @@ typedef enum button_status
 	BUTTON_ON,
 }button_status_t;
 
+//Push button memory
+typedef enum button_push_status
+{
+	BUTTON_PUSH_OFF = 0,
+	BUTTON_PUSH_ON,
+}button_push_status_t;
 
 typedef enum button_debounce_state_fsm
 {
@@ -58,6 +64,7 @@ typedef struct button
 {
 	button_status_t status;
 	button_edge_t edge;
+	button_push_status_t push_status;
 	button_isr_status_t edge_attended;
 	button_gpio_t hardware_input;
 
@@ -75,7 +82,6 @@ typedef struct push_button
 	button_status_t last_status;
 	button_edge_t edge;
 	button_gpio_t hardware_input;
-
 
 }push_button_t;
 

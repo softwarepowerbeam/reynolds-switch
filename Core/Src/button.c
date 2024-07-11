@@ -19,6 +19,7 @@ uint8_t button_setup(button_t *button, button_gpio_t hardware_input)
 	button->debounce_lock = BUTTON_DEBOUNCE_LOCK_OFF;
 	button->debounce_idx = 0;
 	button->debounce_count_limit = 1;
+	button->push_status = BUTTON_PUSH_OFF;//For push button only
 
 	return 0;
 

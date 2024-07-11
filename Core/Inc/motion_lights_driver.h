@@ -61,6 +61,12 @@ typedef enum motion_light_uv_abort
 	MOTION_ABORT_FALSE
 }motion_light_uv_abort_t;
 
+typedef enum motion_uv_wait_signal
+{
+	MOTION_UV_WAIT_TRUE,
+	MOTION_UV_WAIT_FALSE
+}motion_uv_wait_signal_t;
+
 
 typedef enum motion_sensed_t
 {

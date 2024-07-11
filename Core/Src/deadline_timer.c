@@ -4,9 +4,13 @@
  *  Created on: Jun 10, 2024
  *      Author: Eduardo
  */
+#include "tim.h"
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <deadline_timer.h>
+#include "deadline_timer.h"
 
 //TODO: (High) fix this to include seconds
 uint8_t deadline_timer_setup(deadline_timer_t *deadline_timer,
@@ -66,6 +70,10 @@ uint8_t deadline_timer_check(deadline_timer_t *deadline_timer,
 	deadline_timer_expired_t deadline_expired_msec = TIMER_EXPIRED_FALSE;
 
 
+//	uint32_t time_current = deadline_timer->time_current.msec;
+//	uint32_t deadline = deadline_timer->deadline.msec;
+//	uint32_t time_initial = deadline_timer->time_initial.msec;
+
 	deadline_timer_compare_check(deadline_timer->time_current.msec,
 											deadline_timer->deadline.msec,
 											deadline_timer->time_initial.msec,
@@ -98,9 +106,74 @@ uint8_t deadline_timer_set_deadline(deadline_timer_t *deadline_timer,
 
 	return 0;
 }
+
 uint8_t deadline_timer_set_initial_time(deadline_timer_t *deadline_timer)
 {
-	deadline_timer->time_initial = deadline_timer->time_current;
+	//TODO: (Interesting) memcpy fails after several asignations.
+	//TODO: (high) find out what is happening
+
+	//copy uint32_t variables directly to avoid a race condition
+	deadline_timer->time_initial.counts = deadline_timer->time_current.counts;
+	deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+
+
+
+//	memmove(&deadline_timer->time_initial,
+//				&deadline_timer->time_current,
+//				sizeof(timer_clock_t) ); //fails
+
+//Test to check if a race condition occurs
+//	HAL_NVIC_DisableIRQ(TIM16_IRQn);
+//	deadline_timer->time_initial = deadline_timer->time_current; //fails
+//	HAL_NVIC_EnableIRQ(TIM16_IRQn);
+
+
+#ifdef MEMORY_COPPY_ERROR_TEST
+	static uint8_t idx = 0;
+
+//	temporal = (timer_clock_t*) malloc(sizeof(timer_clock_t));
+
+//	memcpy(&deadline_timer->time_initial,
+//			&deadline_timer->time_current,
+//			sizeof(timer_clock_t) ); //fails
+
+
+	timer_clock_t *temporal;
+
+	memcpy(temporal,
+			&deadline_timer->time_current,
+			sizeof(timer_clock_t) );
+
+	memcpy(&deadline_timer->time_initial,
+			temporal,
+			sizeof(timer_clock_t) );
+
+
+	if(deadline_timer->time_initial.msec > deadline_timer->time_current.msec)
+	{
+		idx++;
+
+		deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+		deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+		deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+
+	}
+
+	free(temporal);
+#endif //MEMORY_COPPY_ERROR_TEST
+
+	static uint8_t idx = 0;
+
+	if(deadline_timer->time_initial.msec > deadline_timer->time_current.msec)
+	{
+		idx++;
+
+//			deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+//			deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+//			deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
+
+	}
+
 	return 0;
 }
 
@@ -133,8 +206,7 @@ uint8_t timer_clock_clear(timer_clock_t *timer)
 	return 0;
 }
 
-uint8_t timer_clock_set_time(timer_clock_t *timer,
-												timer_clock_t new_time)
+uint8_t timer_clock_set_time(timer_clock_t *timer, timer_clock_t new_time)
 {
 	timer->msec = new_time.msec;
 	timer->sec = new_time.sec;
@@ -159,6 +231,7 @@ uint8_t deadline_timer_increment(timer_clock_t *timer)
 //		timer->sec++;
 		timer->msec = 0;
 	}
+
 //	if(timer->sec >= (DEADLINE_MAX_SEC) )
 //	{
 //		timer->sec = 0;

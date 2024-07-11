@@ -24,6 +24,8 @@ uint8_t led_signal_fsm(led_signal_t *led_signal)
 	switch(type)
 	{
 		case LED_SIGNAL_OFF:
+			led_signal_turn_off(*led_signal);
+			led_signal->state = LED_SIGNAL_STATE_IDDLE;
 			break;
 		case LED_SIGNAL_SOLID:
 			led_signal_solid_fsm(led_signal);

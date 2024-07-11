@@ -113,8 +113,6 @@ void SystemClock_Config(void);
 /****************************PYD 1598 routines*********************************/
 
 //App routines:
-//TODO: (high) deprecate this:
-void event_detection();
 
 void motion_light_control_fsm(light_t *light,
 						button_t *button,
@@ -133,6 +131,17 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 						motion_light_uv_abort_t *uv_abort,
 						led_signal_t *signal);
 
+void motion_uv_ctrl_wait_fsm(light_t *light_uv,
+									button_t *button_uv,
+									pyd1598_sensor_t *motion_sensor,
+									deadline_timer_t *deadline_timer,
+									deadline_timer_t *deadline_safe_timer,
+									motion_light_uv_state_t *fsm_state,
+									motion_sensed_t *motion_sensed,
+									motion_light_uv_abort_t *uv_abort,
+									motion_uv_wait_signal_t wait,
+									led_signal_t *signal);
+
 void direct_light_control_fsm(light_t *light,
 						button_t *button,
 						deadline_timer_t *deadline_timer,
@@ -146,6 +155,7 @@ void events_detection(pyd1598_sensor_t *motion,
 							motion_sensed_t *motion_light_2,
 							motion_sensed_t *motion_uv,
 							motion_light_uv_abort_t *abort_signal_uv);
+
 void events_detection_motion_in_one_lamp(pyd1598_sensor_t *motion,
 							deadline_timer_t *deadline_events,
 							button_t *button_lamp_1,
@@ -154,6 +164,16 @@ void events_detection_motion_in_one_lamp(pyd1598_sensor_t *motion,
 							motion_sensed_t *motion_light_1,
 							motion_sensed_t *motion_uv,
 							motion_light_uv_abort_t *abort_signal_uv);
+
+void events_detection_uv_waits(pyd1598_sensor_t *motion,
+							deadline_timer_t *deadline_events,
+							button_t *button_lamp_1, button_t *button_lamp_2,
+							button_t *button_lamp_uv,
+							motion_sensed_t *motion_light_1,
+							motion_sensed_t *motion_light_2,
+							motion_sensed_t *motion_uv,
+							motion_light_uv_abort_t *abort_signal_uv);
+
 
 void discreate_actuator(light_t *actuator, deadline_timer_t *deadline_timer);
 
@@ -220,8 +240,8 @@ deadline_timer_t deadline_motion_uv_safe;
 timer_clock_t timer_motion_uv_safe;//Change this to main
 motion_light_uv_state_t uv_state;//Change this to main
 
-motion_light_uv_abort_t abort_uv;
-
+motion_light_uv_abort_t abort_uv = MOTION_ABORT_FALSE;
+motion_uv_wait_signal_t wait = MOTION_UV_WAIT_FALSE;
 
 
 /******************************************************************************/
@@ -293,7 +313,7 @@ int main(void)
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
 //  motion_initial_conf.threshold = 135;
 //  motion_initial_conf.threshold = 80;
-  motion_initial_conf.threshold = 2;
+  motion_initial_conf.threshold = 20;
 //  motion_initial_conf.threshold = 50;
   motion_initial_conf.window_time = PYD1598_WT_2_SEC;
 
@@ -398,20 +418,22 @@ int main(void)
   //-------------
 //TODO: (medium) create a typedef for all this
   //Light 1
-  timer_motion_light_1.msec = 5000;
+//  timer_motion_light_1.msec = 120000;
+  timer_motion_light_1.msec = 300000;
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
   light_1_state = MOTION_LIGHT_IDLE;
 
   //Light 2
-  timer_motion_light_2.msec = 5000;
+  timer_motion_light_2.msec = 300000;
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
   light_2_state = MOTION_LIGHT_IDLE;
 
   //Light UV
-  timer_motion_uv.msec = 10000;
+  timer_motion_uv.msec = 120000;
   deadline_timer_setup(&deadline_motion_uv, timer_motion_uv);
-  timer_motion_uv_safe.msec = 5000;
-  deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv);
+
+  timer_motion_uv_safe.msec = 300000;
+  deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv_safe);
   uv_state = MOTION_LIGHT_UV_IDLE;
   abort_uv = MOTION_ABORT_FALSE;
 
@@ -436,8 +458,6 @@ int main(void)
   HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
 
-
-
   light_ask_off_pulse_fsm(&light_1);
   light_ask_off_pulse_fsm(&light_2);
   light_ask_off_pulse_fsm(&light_uv);
@@ -461,17 +481,15 @@ int main(void)
 
 #ifdef DEBUG_REYNOLDS
 
-//	  event_detection();
-
-
 	  switch(switch_selector.value)
 	  {
 		  case MOTION_SWITCH_MODE_0:
-			  events_detection(&motion_sensor, &deadline_buttons,
-			  			  	  	  &button_light_1, &button_light_2, &button_uv,
-			  					  &motion_sensed_light_1, &motion_sensed_light_2,
-			  					  &motion_sensed_uv,
-			  					  &abort_uv);
+
+			  events_detection_uv_waits(&motion_sensor, &deadline_buttons,
+								  &button_light_1, &button_light_2, &button_uv,
+								  &motion_sensed_light_1, &motion_sensed_light_2,
+								  &motion_sensed_uv,
+								  &abort_uv);
 
 			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
 									&deadline_motion_light_1, &light_1_state,
@@ -481,10 +499,23 @@ int main(void)
 										&deadline_motion_light_2, &light_2_state,
 										&motion_sensed_light_2);
 
-			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
+			  if((light_1.light_status == LIGHT_ON) ||
+				 (light_2.light_status == LIGHT_ON))
+			  {
+				  wait = MOTION_UV_WAIT_TRUE;
+			  }
+			  else
+			  {
+				  wait = MOTION_UV_WAIT_FALSE;
+			  }
+
+			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
 								&deadline_motion_uv, &deadline_motion_uv_safe,
-								&uv_state,&motion_sensed_uv, &abort_uv, &signal_led);
+								&uv_state,&motion_sensed_uv, &abort_uv, wait,
+								&signal_led);
+
 			  break;
+
 		  case MOTION_SWITCH_MODE_1:
 
 			  events_detection_motion_in_one_lamp(&motion_sensor, &deadline_buttons,
@@ -502,11 +533,27 @@ int main(void)
 
 			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
 								&deadline_motion_uv, &deadline_motion_uv_safe,
-								&uv_state,&motion_sensed_uv, &abort_uv, &signal_led);
+								&uv_state, &motion_sensed_uv, &abort_uv,
+								&signal_led);
 			  break;
 		  case MOTION_SWITCH_MODE_2:
-			  //do nothing
-			  __NOP();
+			  events_detection(&motion_sensor, &deadline_buttons,
+								  &button_light_1, &button_light_2, &button_uv,
+								  &motion_sensed_light_1, &motion_sensed_light_2,
+								  &motion_sensed_uv,
+								  &abort_uv);
+
+			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
+									&deadline_motion_light_1, &light_1_state,
+									&motion_sensed_light_1);
+
+			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
+										&deadline_motion_light_2, &light_2_state,
+										&motion_sensed_light_2);
+
+			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
+								&deadline_motion_uv, &deadline_motion_uv_safe,
+								&uv_state,&motion_sensed_uv, &abort_uv, &signal_led);
 			  break;
 		  case MOTION_SWITCH_MODE_3:
 			  //do nothing
@@ -679,8 +726,7 @@ void events_detection(pyd1598_sensor_t *motion,
 	sense_button_event(deadline_events, button_lamp_uv);
 
 
-	//Activating a switch while uv fsm is running acts as motion detection
-
+	//Activating a switch while uv fsm is running turn off UV lamp
 	button_check_isr_request(*button_lamp_1, &button_isr_stat, &check_edge);
 	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
 	{
@@ -712,6 +758,69 @@ void events_detection(pyd1598_sensor_t *motion,
 	}
 
 }
+
+void events_detection_uv_waits(pyd1598_sensor_t *motion,
+							deadline_timer_t *deadline_events,
+							button_t *button_lamp_1, button_t *button_lamp_2,
+							button_t *button_lamp_uv,
+							motion_sensed_t *motion_light_1,
+							motion_sensed_t *motion_light_2,
+							motion_sensed_t *motion_uv,
+							motion_light_uv_abort_t *abort_signal_uv)
+{
+	//variables to check motion events
+	pyd1598_motion_isr_status_t motion_isr_status;
+
+	//To check button states:
+	button_isr_status_t button_isr_stat;
+	button_edge_t check_edge;
+
+
+	//Reading if there is a motion interrupt pending to solve
+	pyd1598_read_wakeup_signal(motion, &motion_isr_status);
+	//Activating flags
+	if(motion_isr_status == PYD1598_MOTION_ISR_UNATTENDED)
+	{
+		*motion_light_1 = MOTION_ISR_UNATTENDED;
+		*motion_light_2 = MOTION_ISR_UNATTENDED;
+		*motion_uv = MOTION_ISR_UNATTENDED;
+		motion->motion_sensed = PYD1598_MOTION_ISR_ATTENDED;
+	}
+
+	//Reading Buttons
+	sense_button_event(deadline_events, button_lamp_1);
+	sense_button_event(deadline_events, button_lamp_2);
+	sense_button_event(deadline_events, button_lamp_uv);
+
+
+	//Activating a switch while uv fsm is running turn off UV lamp
+	button_check_isr_request(*button_lamp_1, &button_isr_stat, &check_edge);
+	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
+	{
+		*abort_signal_uv = MOTION_ABORT_TRUE;
+	}
+
+	button_check_isr_request(*button_lamp_2, &button_isr_stat, &check_edge);
+	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
+	{
+		*abort_signal_uv = MOTION_ABORT_TRUE;
+	}
+
+	//Check if lamp buttons are active to invalidate UV button events.
+	button_check_isr_request(*button_lamp_uv, &button_isr_stat, &check_edge);
+	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
+	{
+		if(button_lamp_uv->push_status != BUTTON_PUSH_ON)
+		{
+			button_lamp_uv->push_status = BUTTON_PUSH_ON;
+		}
+		else
+		{
+			button_lamp_uv->push_status = BUTTON_PUSH_OFF;
+		}
+	}
+}
+
 
 
 void events_detection_motion_in_one_lamp(pyd1598_sensor_t *motion,
@@ -773,112 +882,6 @@ void events_detection_motion_in_one_lamp(pyd1598_sensor_t *motion,
 
 }
 
-
-//TODO: (high) deprecate this for events_detection(...) function
-void event_detection()
-{
-
-	deadline_timer_expired_t switch_1_timer_expired;
-	deadline_timer_expired_t switch_2_timer_expired;
-	deadline_timer_expired_t switch_uv_timer_expired;
-
-	//Reading if there is an interrupt pending to solve
-	pyd1598_motion_isr_status_t motion_isr_status;
-
-	pyd1598_read_wakeup_signal(&motion_sensor, &motion_isr_status);
-
-
-	if(motion_isr_status == PYD1598_MOTION_ISR_UNATTENDED)
-	{
-		//TODO: (low) Create a mechanism to do this addition
-		motion_sensed_light_1 = MOTION_ISR_UNATTENDED;
-		motion_sensed_light_2 = MOTION_ISR_UNATTENDED;
-		motion_sensed_uv = MOTION_ISR_UNATTENDED;
-		motion_sensor.motion_sensed = PYD1598_MOTION_ISR_ATTENDED;
-	}
-
-
-
-	if(button_light_1.debounce_lock == BUTTON_DEBOUNCE_LOCK_ON)
-	{
-		//TODO: (medium) Check if a new timer should be configured
-		deadline_timer_check(&deadline_buttons, &switch_1_timer_expired);
-
-		if(switch_1_timer_expired == TIMER_EXPIRED_TRUE)
-		{
-			button_debounce_fsm(&button_light_1);
-			deadline_timer_set_initial_time(&deadline_buttons);
-		}
-	}
-
-	if(button_light_2.debounce_lock == BUTTON_DEBOUNCE_LOCK_ON)
-	{//TODO: (medium) Check if a new timer should be configured
-		deadline_timer_check(&deadline_buttons, &switch_2_timer_expired);
-
-		if(switch_2_timer_expired == TIMER_EXPIRED_TRUE)
-		{
-			button_debounce_fsm(&button_light_2);
-			deadline_timer_set_initial_time(&deadline_buttons);
-		}
-	}
-
-
-	if(button_uv.debounce_lock == BUTTON_DEBOUNCE_LOCK_ON)
-	{//TODO: (medium) Check if a new timer should be configured
-		deadline_timer_check(&deadline_buttons, &switch_uv_timer_expired);
-
-		if(switch_uv_timer_expired == TIMER_EXPIRED_TRUE)
-		{
-			button_debounce_fsm(&button_uv);
-			deadline_timer_set_initial_time(&deadline_buttons);
-		}
-	}
-
-
-
-
-	//Activating a switch while uv fsm is running acts as motion detection
-	button_isr_status_t button_isr_stat;
-	button_edge_t check_edge;
-
-	button_check_isr_request(button_light_1, &button_isr_stat, &check_edge);
-	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
-	{
-//		motion_sensed_uv = MOTION_ISR_UNATTENDED;
-		abort_uv = MOTION_ABORT_TRUE;
-	}
-	button_check_isr_request(button_light_2, &button_isr_stat, &check_edge);
-	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
-	{
-		abort_uv = MOTION_ABORT_TRUE;
-//		motion_sensed_uv = MOTION_ISR_UNATTENDED;
-	}
-
-
-
-
-	button_isr_status_t button_isr_status;
-	button_edge_t edge;
-
-	button_check_isr_request(button_uv, &button_isr_status, &edge);
-
-	if(button_isr_status == BUTTON_ISR_UNATTENDED)
-	{
-		button_status_t status_button_light_1;
-		button_status_t status_button_light_2;
-
-		button_get_status(&button_light_1,&status_button_light_1);
-		button_get_status(&button_light_2,&status_button_light_2);
-
-		if( (status_button_light_1 == BUTTON_ON) ||
-			(status_button_light_2 == BUTTON_ON))
-		{
-			button_set_isr_attended(&button_uv);
-		}
-	}
-
-}
-
 void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
 {
 
@@ -898,13 +901,12 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
 
 }
 
-
 void motion_light_control_fsm(light_t *light,
-						button_t *button,
-						pyd1598_sensor_t *motion_sensor,
-						deadline_timer_t *deadline_timer,
-						motion_light_state_t *fsm_state,
-						motion_sensed_t *motion_sensed)
+								button_t *button,
+								pyd1598_sensor_t *motion_sensor,
+								deadline_timer_t *deadline_timer,
+								motion_light_state_t *fsm_state,
+								motion_sensed_t *motion_sensed)
 {
 
 	button_isr_status_t button_isr_status;
@@ -933,7 +935,6 @@ void motion_light_control_fsm(light_t *light,
 			(*fsm_state == MOTION_LIGHT_IDLE))
 		{
 			*fsm_state = MOTION_LIGHT_CHECK_BUTTON;
-
 			*motion_sensed = MOTION_ISR_ATTENDED;
 		}
 
@@ -1014,17 +1015,15 @@ void motion_light_control_fsm(light_t *light,
 
 }
 
-
-
 void motion_light_uv_control_fsm(light_t *light_uv,
-						button_t *button_uv,
-						pyd1598_sensor_t *motion_sensor,
-						deadline_timer_t *deadline_timer,
-						deadline_timer_t *deadline_safe_timer,
-						motion_light_uv_state_t *fsm_state,
-						motion_sensed_t *motion_sensed,
-						motion_light_uv_abort_t *uv_abort,
-						led_signal_t *signal)
+									button_t *button_uv,
+									pyd1598_sensor_t *motion_sensor,
+									deadline_timer_t *deadline_timer,
+									deadline_timer_t *deadline_safe_timer,
+									motion_light_uv_state_t *fsm_state,
+									motion_sensed_t *motion_sensed,
+									motion_light_uv_abort_t *uv_abort,
+									led_signal_t *signal)
 {
 	button_isr_status_t button_isr_status;
 	button_edge_t edge = button_uv->edge;
@@ -1136,6 +1135,149 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 
 }
 
+
+void motion_uv_ctrl_wait_fsm(light_t *light_uv,
+									button_t *button_uv,
+									pyd1598_sensor_t *motion_sensor,
+									deadline_timer_t *deadline_timer,
+									deadline_timer_t *deadline_safe_timer,
+									motion_light_uv_state_t *fsm_state,
+									motion_sensed_t *motion_sensed,
+									motion_light_uv_abort_t *uv_abort,
+									motion_uv_wait_signal_t wait,
+									led_signal_t *signal)
+{
+	button_isr_status_t button_isr_status;
+	button_edge_t edge = button_uv->edge;
+	pyd1598_motion_isr_status_t motion_isr_status;
+
+	button_check_isr_request(*button_uv, &button_isr_status, &edge);
+	pyd1598_check_isr_request(*motion_sensor, &motion_isr_status);
+
+
+	if(button_isr_status == BUTTON_ISR_UNATTENDED)
+	{
+
+		//Change if abort is not required with a second push
+		if(button_uv->push_status == BUTTON_PUSH_ON)
+		{
+			*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+		}
+		else
+		{
+			*fsm_state = MOTION_LIGHT_UV_ABORT;
+		}
+
+		button_isr_status = PYD1598_WAKEUP_ISR_ATTENDED;
+	}
+
+	if(*uv_abort == MOTION_ABORT_TRUE)
+	{
+		*fsm_state = MOTION_LIGHT_UV_ABORT;
+		*uv_abort = MOTION_ABORT_FALSE;
+	}
+
+
+	switch(*fsm_state)
+	{
+		case MOTION_LIGHT_UV_IDLE:
+
+			__NOP();//Do nothing
+
+			break;
+
+		case MOTION_LIGHT_UV_INIT_SAFE_TIMER:
+			//TODO: (high) add a timeout
+			deadline_timer_set_initial_time(deadline_safe_timer);
+			//Start LED indicator
+			led_signal_start(signal);
+			signal->type = LED_SIGNAL_BLINK;
+
+			*fsm_state = MOTION_LIGHT_UV_WAIT_SAFE_TIMER;
+			break;
+
+		case MOTION_LIGHT_UV_WAIT_SAFE_TIMER:
+
+			deadline_timer_expired_t deadline_safe_expired;
+			deadline_timer_check(deadline_safe_timer, &deadline_safe_expired);
+
+			if(deadline_safe_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
+			{
+				*fsm_state = MOTION_LIGHT_UV_TURN_ON_LIGHT;
+			}
+			else
+			{
+				if(*motion_sensed == MOTION_ISR_UNATTENDED)
+				{
+					*motion_sensed = MOTION_ISR_ATTENDED;
+					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+				}
+				if(wait == MOTION_UV_WAIT_TRUE)
+				{
+					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+				}
+				else
+				{
+					__NOP();
+				}
+
+			}
+
+			break;
+		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
+			//this is done in another fsm
+			light_ask_on_pulse_fsm(light_uv);
+			signal->type = LED_SIGNAL_SOLID;
+			*fsm_state = MOTION_LIGHT_UV_INIT_TIMER;
+
+			break;
+		case MOTION_LIGHT_UV_INIT_TIMER:
+			deadline_timer_set_initial_time(deadline_timer);
+			*fsm_state = MOTION_LIGHT_UV_WAIT_EXPIRATION;
+			break;
+		case MOTION_LIGHT_UV_WAIT_EXPIRATION:
+			deadline_timer_expired_t deadline_expired;
+			deadline_timer_check(deadline_timer, &deadline_expired);
+
+			if(deadline_expired == TIMER_EXPIRED_TRUE)
+			{
+				*fsm_state = MOTION_LIGHT_UV_TURN_OFF_LIGHT;
+			}
+			else
+			{
+				//Do nothing
+			}
+
+			if(*motion_sensed == MOTION_ISR_UNATTENDED)
+			{
+				*motion_sensed = MOTION_ISR_ATTENDED;
+				*fsm_state = MOTION_LIGHT_UV_ABORT;
+			}
+
+			break;
+		case MOTION_LIGHT_UV_ABORT:
+
+			*fsm_state = MOTION_LIGHT_UV_TURN_OFF_LIGHT;
+			break;
+		case MOTION_LIGHT_UV_TURN_OFF_LIGHT:
+			//this is done in another fsm
+			deadline_timer_force_expiration(deadline_timer);
+			button_uv->push_status = BUTTON_PUSH_OFF;
+
+			//Stop LED indicator
+			led_signal_stop(signal);
+			light_ask_off_pulse_fsm(light_uv);
+
+
+			*fsm_state = MOTION_LIGHT_UV_IDLE;
+			break;
+		default:
+			*fsm_state = MOTION_LIGHT_UV_IDLE;
+			break;
+	}
+
+	button_uv->edge_attended = button_isr_status;
+}
 
 
 
