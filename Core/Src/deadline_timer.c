@@ -109,70 +109,11 @@ uint8_t deadline_timer_set_deadline(deadline_timer_t *deadline_timer,
 
 uint8_t deadline_timer_set_initial_time(deadline_timer_t *deadline_timer)
 {
-	//TODO: (Interesting) memcpy fails after several asignations.
-	//TODO: (high) find out what is happening
-
+	//memcpy fails after several assignations.
 	//copy uint32_t variables directly to avoid a race condition
 	deadline_timer->time_initial.counts = deadline_timer->time_current.counts;
 	deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
 
-
-
-//	memmove(&deadline_timer->time_initial,
-//				&deadline_timer->time_current,
-//				sizeof(timer_clock_t) ); //fails
-
-//Test to check if a race condition occurs
-//	HAL_NVIC_DisableIRQ(TIM16_IRQn);
-//	deadline_timer->time_initial = deadline_timer->time_current; //fails
-//	HAL_NVIC_EnableIRQ(TIM16_IRQn);
-
-
-#ifdef MEMORY_COPPY_ERROR_TEST
-	static uint8_t idx = 0;
-
-//	temporal = (timer_clock_t*) malloc(sizeof(timer_clock_t));
-
-//	memcpy(&deadline_timer->time_initial,
-//			&deadline_timer->time_current,
-//			sizeof(timer_clock_t) ); //fails
-
-
-	timer_clock_t *temporal;
-
-	memcpy(temporal,
-			&deadline_timer->time_current,
-			sizeof(timer_clock_t) );
-
-	memcpy(&deadline_timer->time_initial,
-			temporal,
-			sizeof(timer_clock_t) );
-
-
-	if(deadline_timer->time_initial.msec > deadline_timer->time_current.msec)
-	{
-		idx++;
-
-		deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
-		deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
-		deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
-
-	}
-
-	free(temporal);
-#endif //MEMORY_COPPY_ERROR_TEST
-
-	static uint8_t idx = 0;
-
-	if(deadline_timer->time_initial.msec > deadline_timer->time_current.msec)
-	{
-		idx++;
-
-//			deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
-//			deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
-//			deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
-
-	}
 
 	return 0;
 }

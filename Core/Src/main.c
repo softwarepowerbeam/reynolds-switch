@@ -77,7 +77,36 @@ typedef enum action
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+//CONFIGURE THE BASIC MOTION PARAMETERS HERE:
+#define FACTORY_PARAMETERS
 
+#ifndef FACTORY_PARAMETERS
+
+#define 	FAST_TEST
+#endif //FAST_TEST
+
+#ifdef FACTORY_PARAMETERS
+#define MOTION_SENSOR_DETECTION_THRESHOLD	2	//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define LAMP1_ON_TIME_MS					300000 //!<Waiting period of Lamp 1 illumination in milisec
+#define LAMP2_ON_TIME_MS					300000 //!<Waiting period of Lamp 2 illumination in milisec
+#define LAMP_UV_SAFETY_TIME_MS				300000 //!<Waiting period before turning on UV light in milisec
+#define LAMP_UV_ON_TIME_MS					120000 //!<Waiting period of Lamp UV illumination in milisec
+const pyd1598_window_time_t MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+#endif //FAST_TEST
+
+
+//#define FAST_TEST
+#ifdef FAST_TEST
+
+#define MOTION_SENSOR_DETECTION_THRESHOLD	2		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define LAMP1_ON_TIME_MS					10000 	//!<Waiting period of Lamp 1 illumination in milisec
+#define LAMP2_ON_TIME_MS					10000 	//!<Waiting period of Lamp 2 illumination in milisec
+#define LAMP_UV_SAFETY_TIME_MS				10000 	//!<Waiting period before turning on UV light in milisec
+#define LAMP_UV_ON_TIME_MS					12000
+const pyd1598_window_time_t MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+
+
+#endif //FAST_TEST
 
 /* USER CODE END PM */
 
@@ -313,9 +342,10 @@ int main(void)
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
 //  motion_initial_conf.threshold = 135;
 //  motion_initial_conf.threshold = 80;
-  motion_initial_conf.threshold = 20;
+  motion_initial_conf.threshold = MOTION_SENSOR_DETECTION_THRESHOLD;
 //  motion_initial_conf.threshold = 50;
-  motion_initial_conf.window_time = PYD1598_WT_2_SEC;
+//  motion_initial_conf.window_time = PYD1598_WT_2_SEC;//PYD1598_WT_8_SEC
+  motion_initial_conf.window_time = MOTION_SENSOR_WINDOW;
 
   //Hardware assignation:
   pyd1598_hardware_interface_t setin_pin;
@@ -419,20 +449,20 @@ int main(void)
 //TODO: (medium) create a typedef for all this
   //Light 1
 //  timer_motion_light_1.msec = 120000;
-  timer_motion_light_1.msec = 300000;
+  timer_motion_light_1.msec = LAMP1_ON_TIME_MS;
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
   light_1_state = MOTION_LIGHT_IDLE;
 
   //Light 2
-  timer_motion_light_2.msec = 300000;
+  timer_motion_light_2.msec = LAMP2_ON_TIME_MS;
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
   light_2_state = MOTION_LIGHT_IDLE;
 
   //Light UV
-  timer_motion_uv.msec = 120000;
+  timer_motion_uv.msec = LAMP_UV_ON_TIME_MS;
   deadline_timer_setup(&deadline_motion_uv, timer_motion_uv);
 
-  timer_motion_uv_safe.msec = 300000;
+  timer_motion_uv_safe.msec = LAMP_UV_SAFETY_TIME_MS;
   deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv_safe);
   uv_state = MOTION_LIGHT_UV_IDLE;
   abort_uv = MOTION_ABORT_FALSE;
@@ -518,10 +548,16 @@ int main(void)
 
 		  case MOTION_SWITCH_MODE_1:
 
-			  events_detection_motion_in_one_lamp(&motion_sensor, &deadline_buttons,
-								  &button_light_1, &button_light_2, &button_uv,
-								  &motion_sensed_light_1, &motion_sensed_uv,
-								  &abort_uv);
+//			  events_detection_motion_in_one_lamp(&motion_sensor, &deadline_buttons,
+//								  &button_light_1, &button_light_2, &button_uv,
+//								  &motion_sensed_light_1, &motion_sensed_uv,
+//								  &abort_uv);
+
+			  events_detection_uv_waits(&motion_sensor, &deadline_buttons,
+			  								  &button_light_1, &button_light_2, &button_uv,
+			  								  &motion_sensed_light_1, &motion_sensed_light_2,
+			  								  &motion_sensed_uv,
+			  								  &abort_uv);
 
 			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
 									&deadline_motion_light_1, &light_1_state,
@@ -531,32 +567,53 @@ int main(void)
 												  &deadline_motion_light_2,
 												  &light_2_no_motion_state);
 
-			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
+//			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
+//								&deadline_motion_uv, &deadline_motion_uv_safe,
+//								&uv_state, &motion_sensed_uv, &abort_uv,
+//								&signal_led);
+
+			  if(light_1.light_status == LIGHT_ON)
+			  {
+				  wait = MOTION_UV_WAIT_TRUE;
+			  }
+			  else
+			  {
+				  wait = MOTION_UV_WAIT_FALSE;
+			  }
+
+			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
 								&deadline_motion_uv, &deadline_motion_uv_safe,
-								&uv_state, &motion_sensed_uv, &abort_uv,
+								&uv_state,&motion_sensed_uv, &abort_uv, wait,
 								&signal_led);
+
+
 			  break;
 		  case MOTION_SWITCH_MODE_2:
-			  events_detection(&motion_sensor, &deadline_buttons,
-								  &button_light_1, &button_light_2, &button_uv,
-								  &motion_sensed_light_1, &motion_sensed_light_2,
-								  &motion_sensed_uv,
-								  &abort_uv);
+//			  events_detection(&motion_sensor, &deadline_buttons,
+//								  &button_light_1, &button_light_2, &button_uv,
+//								  &motion_sensed_light_1, &motion_sensed_light_2,
+//								  &motion_sensed_uv,
+//								  &abort_uv);
+//
+//			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
+//									&deadline_motion_light_1, &light_1_state,
+//									&motion_sensed_light_1);
+//
+//			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
+//										&deadline_motion_light_2, &light_2_state,
+//										&motion_sensed_light_2);
+//
+//			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
+//								&deadline_motion_uv, &deadline_motion_uv_safe,
+//								&uv_state,&motion_sensed_uv, &abort_uv, &signal_led);
+			  led_signal_start(&signal_led);
+			  signal_led.type = LED_SIGNAL_BLINK;
 
-			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
-									&deadline_motion_light_1, &light_1_state,
-									&motion_sensed_light_1);
-
-			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
-										&deadline_motion_light_2, &light_2_state,
-										&motion_sensed_light_2);
-
-			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
-								&deadline_motion_uv, &deadline_motion_uv_safe,
-								&uv_state,&motion_sensed_uv, &abort_uv, &signal_led);
 			  break;
 		  case MOTION_SWITCH_MODE_3:
 			  //do nothing
+			  led_signal_start(&signal_led);
+			  signal_led.type = LED_SIGNAL_BLINK;
 			  __NOP();
 			  break;
 		  default:
@@ -792,7 +849,7 @@ void events_detection_uv_waits(pyd1598_sensor_t *motion,
 	sense_button_event(deadline_events, button_lamp_2);
 	sense_button_event(deadline_events, button_lamp_uv);
 
-
+#ifdef ABORT_WITH_BUTTONS
 	//Activating a switch while uv fsm is running turn off UV lamp
 	button_check_isr_request(*button_lamp_1, &button_isr_stat, &check_edge);
 	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
@@ -805,6 +862,7 @@ void events_detection_uv_waits(pyd1598_sensor_t *motion,
 	{
 		*abort_signal_uv = MOTION_ABORT_TRUE;
 	}
+#endif //ABORT_WITH_BUTTONS
 
 	//Check if lamp buttons are active to invalidate UV button events.
 	button_check_isr_request(*button_lamp_uv, &button_isr_stat, &check_edge);
