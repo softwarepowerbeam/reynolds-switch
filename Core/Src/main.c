@@ -77,33 +77,63 @@ typedef enum action
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
-//CONFIGURE THE BASIC MOTION PARAMETERS HERE:
+//CONFIGURE THE BASIC MOTION PARAMETERS HERE:<---------------------------------------------------------------------------|
 #define FACTORY_PARAMETERS
 
 #ifndef FACTORY_PARAMETERS
-
 #define 	FAST_TEST
 #endif //FAST_TEST
 
+#define MINUTS_2_MILI_SECONDS	60000
+#define HOURS_2_MILI_SECONDS	60 * MINUTS_2_MILI_SECONDS
+
 #ifdef FACTORY_PARAMETERS
-#define MOTION_SENSOR_DETECTION_THRESHOLD	2	//!< Range 0-255 (0 more sensitive -255 less sensitive)
-#define LAMP1_ON_TIME_MS					300000 //!<Waiting period of Lamp 1 illumination in milisec
-#define LAMP2_ON_TIME_MS					300000 //!<Waiting period of Lamp 2 illumination in milisec
-#define LAMP_UV_SAFETY_TIME_MS				300000 //!<Waiting period before turning on UV light in milisec
-#define LAMP_UV_ON_TIME_MS					120000 //!<Waiting period of Lamp UV illumination in milisec
-const pyd1598_window_time_t MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+//Office Mode:
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		2		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
+
+#define OFFICE_LAMP1_ON_TIME_MS				5 * MINUTS_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
+#define OFFICE_LAMP2_ON_TIME_MS				5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
+#define OFFICE_LAMP_UV_SAFETY_TIME_MS		5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
+#define OFFICE_LAMP_UV_ON_TIME_MS			20 * MINUTS_2_MILI_SECONDS	//!<Waiting period of Lamp UV illumination in milisec
+#define OFFICE_LAMP_UV_TIMEOUT_MS			30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+
+
+//Residential mode:
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	2		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
+
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
+#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
+#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		3 * HOURS_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+
 #endif //FAST_TEST
 
 
 //#define FAST_TEST
 #ifdef FAST_TEST
 
-#define MOTION_SENSOR_DETECTION_THRESHOLD	2		//!< Range 0-255 (0 more sensitive -255 less sensitive)
-#define LAMP1_ON_TIME_MS					10000 	//!<Waiting period of Lamp 1 illumination in milisec
-#define LAMP2_ON_TIME_MS					10000 	//!<Waiting period of Lamp 2 illumination in milisec
-#define LAMP_UV_SAFETY_TIME_MS				10000 	//!<Waiting period before turning on UV light in milisec
-#define LAMP_UV_ON_TIME_MS					12000
-const pyd1598_window_time_t MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		20		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
+
+#define OFFICE_LAMP1_ON_TIME_MS				10000	//!<Waiting period of Lamp 1 illumination in milisec
+#define OFFICE_LAMP2_ON_TIME_MS				10000 	//!<Waiting period of Lamp 2 illumination in milisec
+#define OFFICE_LAMP_UV_SAFETY_TIME_MS		10000 	//!<Waiting period before turning on UV light in milisec
+#define OFFICE_LAMP_UV_ON_TIME_MS			12000	//!<Waiting period of Lamp UV illumination in milisec
+#define OFFICE_LAMP_UV_TIMEOUT_MS			30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+
+
+//Residential mode:
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	20		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
+
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		10000 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
+#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	10000 	//!<Waiting period before turning on UV light in milisec
+#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		12000 	//!<Waiting period of Lamp UV illumination in milisec
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
 
 
 #endif //FAST_TEST
@@ -165,6 +195,8 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 									pyd1598_sensor_t *motion_sensor,
 									deadline_timer_t *deadline_timer,
 									deadline_timer_t *deadline_safe_timer,
+									deadline_timer_t *deadline_timeout,
+									deadline_timer_t *deadline_wait_timeout,
 									motion_light_uv_state_t *fsm_state,
 									motion_sensed_t *motion_sensed,
 									motion_light_uv_abort_t *uv_abort,
@@ -220,23 +252,34 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button);
 
 #endif //DEBUG_REYNOLDS
 
-
+//TODO: (low) Change to main process
 //Testing upper layer:
+
+
+
+
 
 //Motion Sensor declarations
 pyd1598_sensor_t motion_sensor;
 pyd1598_config_t motion_initial_conf;
+
+
+//General Clock
+timer_clock_t deadline;
 
 //Lights declarations
 deadline_timer_t deadline_timer_light_1;
 deadline_timer_t deadline_timer_light_2;
 deadline_timer_t deadline_timer_uv;
 
-timer_clock_t deadline;
-
 light_t light_1;
 light_t light_2;
 light_t light_uv;
+
+
+
+//General Clock
+timer_clock_t general_clock;
 
 //Buttons declarations
 deadline_timer_t deadline_buttons;
@@ -250,8 +293,9 @@ motion_sensed_t motion_sensed_uv;
 
 
 //LED indicator
+deadline_timer_t deadline_led_indicator;//TODO: (High) deprecate this variable
 
-deadline_timer_t deadline_led_indicator;
+
 
 //Application declarations
 deadline_timer_t deadline_motion_light_1;
@@ -263,11 +307,23 @@ timer_clock_t timer_motion_light_2;//Change this to main
 motion_light_state_t light_2_state;//Change this to main
 motion_light_no_motion_state_t light_2_no_motion_state;//Change this to main
 
+//UV motion timers
 deadline_timer_t deadline_motion_uv;
 timer_clock_t timer_motion_uv;//Change this to main
+
 deadline_timer_t deadline_motion_uv_safe;
 timer_clock_t timer_motion_uv_safe;//Change this to main
+
+deadline_timer_t deadline_motion_uv_timeout;//Change this to main
+timer_clock_t timer_motion_uv_timeout;
+
+deadline_timer_t deadline_uv_wait_timeout;//Change this to main
+timer_clock_t timer_uv_wait_timeout;
+
 motion_light_uv_state_t uv_state;//Change this to main
+
+
+
 
 motion_light_uv_abort_t abort_uv = MOTION_ABORT_FALSE;
 motion_uv_wait_signal_t wait = MOTION_UV_WAIT_FALSE;
@@ -316,7 +372,7 @@ int main(void)
 //  HAL_DIRECT_LINK_conf_as_interrupt_input();
 
 
-#ifdef DEBUG_REYNOLDS
+
 
 
   //DIP SWITCH SETUP
@@ -329,23 +385,44 @@ int main(void)
 
   switch_selector_setup(&switch_selector, switch_selector_gpio, 2);
 
+
+
+
+
   //MOTION SENSOR SETUP
   //-------------------
 
-  //This seems to be a good initial conf.
+  switch(switch_selector.value)
+  {
+	case MOTION_SWITCH_MODE_0:
+		motion_initial_conf.threshold = OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD;
+		motion_initial_conf.window_time = OFFICE_MOTION_SENSOR_WINDOW;
+	  break;
+	case MOTION_SWITCH_MODE_1:
+		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
+		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
+	  break;
+	case MOTION_SWITCH_MODE_2:
+		//do nothing
+		__NOP();
+		break;
+	case MOTION_SWITCH_MODE_3:
+		//do nothing
+		__NOP();
+		break;
+	default:
+		//do nothing
+		__NOP();
+	  break;
+  }
+
+  //Good initial conf.
   motion_initial_conf.blind_time = PYD1598_BT_0_5_SEC;
   motion_initial_conf.count_mode = PYD1598_COUNT_MODE_NO_BPF_SIGN_CHANGE;
   motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_4HZ;
-//  motion_initial_conf.op_mode = PYD1598_FORCE_READOUT;
   motion_initial_conf.op_mode = PYD1598_WAKE_UP;
   motion_initial_conf.pulse_counter = PYD1598_PC_1_PULSE;
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
-//  motion_initial_conf.threshold = 135;
-//  motion_initial_conf.threshold = 80;
-  motion_initial_conf.threshold = MOTION_SENSOR_DETECTION_THRESHOLD;
-//  motion_initial_conf.threshold = 50;
-//  motion_initial_conf.window_time = PYD1598_WT_2_SEC;//PYD1598_WT_8_SEC
-  motion_initial_conf.window_time = MOTION_SENSOR_WINDOW;
 
   //Hardware assignation:
   pyd1598_hardware_interface_t setin_pin;
@@ -369,9 +446,8 @@ int main(void)
 
   //LIGHTS SETUP
   //-----------
-  //timers config:
+
   deadline.msec = 20;
-  deadline.sec = 0;
   deadline_timer_setup(&deadline_timer_light_1, deadline);
   deadline_timer_setup(&deadline_timer_light_2, deadline);
   deadline_timer_setup(&deadline_timer_uv, deadline);
@@ -397,7 +473,6 @@ int main(void)
   light_1_output_b.port = LAMP1_OUTB_GPIO_Port;
   light_2_output_b.port = LAMP2_OUTB_GPIO_Port;
   light_uv_output_b.port = UV_OUTB_GPIO_Port;
-
 
   light_setup(&light_1,light_1_output_a, light_1_output_b);
   light_setup(&light_2,light_2_output_a, light_2_output_b);
@@ -437,35 +512,71 @@ int main(void)
   led_signal_setup(&signal_led, signal_led_gpio);
   deadline.msec = 500;
   deadline.sec = 0;
-//  deadline_timer_setup(&deadline_led_indicator, deadline);
 
-  deadline_timer_setup_shared_clock(&deadline_led_indicator,
-		  	  	  	  	  	  	  &deadline_buttons.time_current, deadline);
+//  deadline_timer_setup_shared_clock(&deadline_led_indicator, &deadline_buttons.time_current,
+//  		  	  	  	  	  	  	  	  	  deadline);
+  deadline_timer_setup(&deadline_led_indicator, deadline);
 
   led_signal_type_selector(&signal_led, LED_SIGNAL_SOLID);
 
   //APPLICATION LIGHT SETUP
   //-------------
 //TODO: (medium) create a typedef for all this
+
+
+  /*
+     * MOTION_SWITCH_MODE_0	=	OFFFICE
+     * MOTION_SWITCH_MODE_1	=	RESIDENTIAL
+     * MOTION_SWITCH_MODE_2	=
+     * */
+    //timers config:
+    switch(switch_selector.value)
+    {
+      case MOTION_SWITCH_MODE_0:
+    	  timer_motion_light_1.msec = OFFICE_LAMP1_ON_TIME_MS;
+    	  timer_motion_light_2.msec = OFFICE_LAMP2_ON_TIME_MS;
+    	  timer_motion_uv_safe.msec = OFFICE_LAMP_UV_SAFETY_TIME_MS;
+    	  timer_motion_uv.msec = OFFICE_LAMP_UV_ON_TIME_MS;
+    	  timer_motion_uv_timeout.msec = OFFICE_LAMP_UV_TIMEOUT_MS;
+    	  break;
+      case MOTION_SWITCH_MODE_1:
+    	  timer_motion_light_1.msec = RESIDENTIAL_LAMP1_ON_TIME_MS;
+		  timer_motion_light_2.msec = RESIDENTIAL_LAMP2_ON_TIME_MS;
+		  timer_motion_uv_safe.msec = RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS;
+		  timer_motion_uv.msec = RESIDENTIAL_LAMP_UV_ON_TIME_MS;
+		  timer_motion_uv_timeout.msec = RESIDENTIAL_LAMP_UV_TIMEOUT_MS;
+    	  break;
+      case MOTION_SWITCH_MODE_2:
+    	  break;
+      case MOTION_SWITCH_MODE_3:
+    	  //do nothing
+    	  __NOP();
+    	  break;
+      default:
+    	  //do nothing
+    	  __NOP();
+    	  break;
+    }
+
   //Light 1
-//  timer_motion_light_1.msec = 120000;
-  timer_motion_light_1.msec = LAMP1_ON_TIME_MS;
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
   light_1_state = MOTION_LIGHT_IDLE;
-
   //Light 2
-  timer_motion_light_2.msec = LAMP2_ON_TIME_MS;
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
   light_2_state = MOTION_LIGHT_IDLE;
-
   //Light UV
-  timer_motion_uv.msec = LAMP_UV_ON_TIME_MS;
   deadline_timer_setup(&deadline_motion_uv, timer_motion_uv);
-
-  timer_motion_uv_safe.msec = LAMP_UV_SAFETY_TIME_MS;
+  //Light safe UV
   deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv_safe);
+  //Light UV Timeout
+  deadline_timer_setup(&deadline_motion_uv_timeout, timer_motion_uv_timeout);
+  //Light UV Wait Timeout
+  deadline.msec = 5000;
+  deadline_timer_setup(&deadline_uv_wait_timeout, deadline);
+
   uv_state = MOTION_LIGHT_UV_IDLE;
   abort_uv = MOTION_ABORT_FALSE;
+  //Light timeout UV
 
   //motion switch
   motion_sensed_light_1 = MOTION_ISR_ATTENDED;
@@ -492,6 +603,8 @@ int main(void)
   light_ask_off_pulse_fsm(&light_2);
   light_ask_off_pulse_fsm(&light_uv);
   led_signal_stop(&signal_led);
+
+#ifdef DEBUG_REYNOLDS
 #endif //DEBUG_REYNOLDS
 
 
@@ -509,7 +622,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	/**************************************************************************/
 
-#ifdef DEBUG_REYNOLDS
+
 
 	  switch(switch_selector.value)
 	  {
@@ -541,7 +654,9 @@ int main(void)
 
 			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
 								&deadline_motion_uv, &deadline_motion_uv_safe,
-								&uv_state,&motion_sensed_uv, &abort_uv, wait,
+								&deadline_motion_uv_timeout,
+								&deadline_uv_wait_timeout,
+								&uv_state, &motion_sensed_uv, &abort_uv, wait,
 								&signal_led);
 
 			  break;
@@ -583,7 +698,9 @@ int main(void)
 
 			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
 								&deadline_motion_uv, &deadline_motion_uv_safe,
-								&uv_state,&motion_sensed_uv, &abort_uv, wait,
+								&deadline_motion_uv_timeout,
+								&deadline_uv_wait_timeout,
+								&uv_state, &motion_sensed_uv, &abort_uv, wait,
 								&signal_led);
 
 
@@ -637,7 +754,7 @@ int main(void)
 	  }
 
 
-
+#ifdef DEBUG_REYNOLDS
 //	  printf("Hello World %d \n\r", test);
 //	  HAL_Delay(1000);
 #endif //DEBUG_REYNOLDS
@@ -1199,6 +1316,8 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 									pyd1598_sensor_t *motion_sensor,
 									deadline_timer_t *deadline_timer,
 									deadline_timer_t *deadline_safe_timer,
+									deadline_timer_t *deadline_timeout,
+									deadline_timer_t *deadline_wait_timeout,
 									motion_light_uv_state_t *fsm_state,
 									motion_sensed_t *motion_sensed,
 									motion_light_uv_abort_t *uv_abort,
@@ -1208,6 +1327,9 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 	button_isr_status_t button_isr_status;
 	button_edge_t edge = button_uv->edge;
 	pyd1598_motion_isr_status_t motion_isr_status;
+	deadline_timer_expired_t deadline_safe_expired;
+	deadline_timer_expired_t deadline_timeout_expired;
+	deadline_timer_expired_t deadline_wait_timeout_expired;
 
 	button_check_isr_request(*button_uv, &button_isr_status, &edge);
 	pyd1598_check_isr_request(*motion_sensor, &motion_isr_status);
@@ -1219,7 +1341,7 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 		//Change if abort is not required with a second push
 		if(button_uv->push_status == BUTTON_PUSH_ON)
 		{
-			*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+			*fsm_state = MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER;
 		}
 		else
 		{
@@ -1243,20 +1365,62 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			__NOP();//Do nothing
 
 			break;
+		case MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER:
+			//Initialize deadline_timeout
+			deadline_timer_set_initial_time(deadline_timeout);
+			deadline_timer_set_initial_time(deadline_wait_timeout);
 
-		case MOTION_LIGHT_UV_INIT_SAFE_TIMER:
-			//TODO: (high) add a timeout
-			deadline_timer_set_initial_time(deadline_safe_timer);
 			//Start LED indicator
 			led_signal_start(signal);
 			signal->type = LED_SIGNAL_BLINK;
+
+			*fsm_state = MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT;
+
+			break;
+		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
+
+			deadline_timer_check(deadline_wait_timeout,
+									&deadline_wait_timeout_expired);
+
+			if(deadline_wait_timeout_expired == TIMER_EXPIRED_TRUE)
+			{
+				*fsm_state = MOTION_LIGHT_UV_CHECK_TIMEOUT_TIMER;
+			}
+			__NOP();//Do nothing
+
+			break;
+		case MOTION_LIGHT_UV_CHECK_TIMEOUT_TIMER:
+
+			deadline_timer_check(deadline_timeout, &deadline_timeout_expired);
+
+			if(deadline_timeout_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
+			{
+				*fsm_state = MOTION_LIGHT_UV_ABORT;
+			}
+			else
+			{
+				if(*motion_sensed == MOTION_ISR_UNATTENDED)
+				{
+					deadline_timer_set_initial_time(deadline_wait_timeout);
+					*motion_sensed = MOTION_ISR_ATTENDED;
+					*fsm_state = MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT;
+				}
+				else
+				{
+					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+				}
+			}
+
+			break;
+		case MOTION_LIGHT_UV_INIT_SAFE_TIMER:
+			//TODO: (high) add a timeout
+			deadline_timer_set_initial_time(deadline_safe_timer);
 
 			*fsm_state = MOTION_LIGHT_UV_WAIT_SAFE_TIMER;
 			break;
 
 		case MOTION_LIGHT_UV_WAIT_SAFE_TIMER:
 
-			deadline_timer_expired_t deadline_safe_expired;
 			deadline_timer_check(deadline_safe_timer, &deadline_safe_expired);
 
 			if(deadline_safe_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
@@ -1268,8 +1432,9 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 				if(*motion_sensed == MOTION_ISR_UNATTENDED)
 				{
 					*motion_sensed = MOTION_ISR_ATTENDED;
-					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+					*fsm_state = MOTION_LIGHT_UV_ABORT;
 				}
+
 				if(wait == MOTION_UV_WAIT_TRUE)
 				{
 					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
@@ -1320,6 +1485,8 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 		case MOTION_LIGHT_UV_TURN_OFF_LIGHT:
 			//this is done in another fsm
 			deadline_timer_force_expiration(deadline_timer);
+			deadline_timer_force_expiration(deadline_timeout);
+			deadline_timer_force_expiration(deadline_wait_timeout);
 			button_uv->push_status = BUTTON_PUSH_OFF;
 
 			//Stop LED indicator
@@ -1445,6 +1612,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		deadline_timer_count(&deadline_motion_uv_safe);
 
 		deadline_timer_count(&deadline_led_indicator);
+
+		deadline_timer_count(&deadline_motion_uv_timeout);
+		deadline_timer_count(&deadline_uv_wait_timeout);
 
 	}
 

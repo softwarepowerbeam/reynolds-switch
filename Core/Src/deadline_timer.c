@@ -35,12 +35,9 @@ uint8_t deadline_timer_setup_shared_clock(deadline_timer_t *deadline_timer,
 
 	deadline_timer->deadline_expired = TIMER_EXPIRED_FALSE;
 
-
-
 //	deadline_timer->time_current = time_current;
 	deadline_timer_assign_current(&deadline_timer->time_current, time_current);
 
-//	timer_clock_clear(&deadline_timer->time_current);
 	timer_clock_clear(&deadline_timer->time_initial);
 	timer_clock_clear(&deadline_timer->time_goal);
 	timer_clock_set_time(&deadline_timer->deadline, deadline);
