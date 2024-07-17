@@ -84,18 +84,18 @@ typedef enum action
 #define 	FAST_TEST
 #endif //FAST_TEST
 
-#define MINUTS_2_MILI_SECONDS	60000
-#define HOURS_2_MILI_SECONDS	60 * MINUTS_2_MILI_SECONDS
+#define MINUTES_2_MILI_SECONDS	60000
+#define HOURS_2_MILI_SECONDS	60 * MINUTES_2_MILI_SECONDS
 
 #ifdef FACTORY_PARAMETERS
 //Office Mode:
 #define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		2		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define OFFICE_LAMP1_ON_TIME_MS				5 * MINUTS_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
-#define OFFICE_LAMP2_ON_TIME_MS				5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
-#define OFFICE_LAMP_UV_SAFETY_TIME_MS		5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
-#define OFFICE_LAMP_UV_ON_TIME_MS			20 * MINUTS_2_MILI_SECONDS	//!<Waiting period of Lamp UV illumination in milisec
+#define OFFICE_LAMP1_ON_TIME_MS				5 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
+#define OFFICE_LAMP2_ON_TIME_MS				5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
+#define OFFICE_LAMP_UV_SAFETY_TIME_MS		5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
+#define OFFICE_LAMP_UV_ON_TIME_MS			20 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp UV illumination in milisec
 #define OFFICE_LAMP_UV_TIMEOUT_MS			30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
 
 
@@ -103,9 +103,9 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 #define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	2		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define RESIDENTIAL_LAMP1_ON_TIME_MS		5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
-#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	5 * MINUTS_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
+#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
 #define RESIDENTIAL_LAMP_UV_ON_TIME_MS		3 * HOURS_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
 #define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
 
