@@ -1,5 +1,5 @@
 
-reynolds_switch.elf:     file format elf32-littlearm
+reynolds-switch.elf:     file format elf32-littlearm
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  000144c4  00000000  00000000  00031a5d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00010518  00000000  00000000  00045f21  2**0
+ 18 .debug_line   0001051a  00000000  00000000  00045f21  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0007c1eb  00000000  00000000  00056439  2**0
+ 19 .debug_str    0007c1ed  00000000  00000000  0005643b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00003594  00000000  00000000  000d2624  2**2
+ 20 .debug_frame  00003594  00000000  00000000  000d2628  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000006f  00000000  00000000  000d5bb8  2**0
+ 21 .debug_line_str 0000006f  00000000  00000000  000d5bbc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2872,7 +2872,7 @@ int main(void)
 	case MOTION_SWITCH_MODE_0:
 		motion_initial_conf.threshold = OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD;
  8001050:	4bbb      	ldr	r3, [pc, #748]	; (8001340 <main+0x35c>)
- 8001052:	2202      	movs	r2, #2
+ 8001052:	220a      	movs	r2, #10
  8001054:	701a      	strb	r2, [r3, #0]
 		motion_initial_conf.window_time = OFFICE_MOTION_SENSOR_WINDOW;
  8001056:	2203      	movs	r2, #3
@@ -2883,7 +2883,7 @@ int main(void)
 	case MOTION_SWITCH_MODE_1:
 		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
  800105e:	4bb8      	ldr	r3, [pc, #736]	; (8001340 <main+0x35c>)
- 8001060:	2202      	movs	r2, #2
+ 8001060:	220a      	movs	r2, #10
  8001062:	701a      	strb	r2, [r3, #0]
 		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
  8001064:	2203      	movs	r2, #3
@@ -4809,7 +4809,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001bd4:	781b      	ldrb	r3, [r3, #0]
  8001bd6:	2b0a      	cmp	r3, #10
  8001bd8:	d900      	bls.n	8001bdc <motion_uv_ctrl_wait_fsm+0xa4>
- 8001bda:	e0c2      	b.n	8001d62 <motion_uv_ctrl_wait_fsm+0x22a>
+ 8001bda:	e0c1      	b.n	8001d60 <motion_uv_ctrl_wait_fsm+0x228>
  8001bdc:	009a      	lsls	r2, r3, #2
  8001bde:	4b68      	ldr	r3, [pc, #416]	; (8001d80 <motion_uv_ctrl_wait_fsm+0x248>)
  8001be0:	18d3      	adds	r3, r2, r3
@@ -4822,7 +4822,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001be6:	46c0      	nop			; (mov r8, r8)
 
 			break;
- 8001be8:	e0c0      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001be8:	e0c1      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER:
 			//Initialize deadline_timeout
 			deadline_timer_set_initial_time(deadline_timeout);
@@ -4850,7 +4850,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001c0c:	701a      	strb	r2, [r3, #0]
 
 			break;
- 8001c0e:	e0ad      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001c0e:	e0ae      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
 
 			deadline_timer_check(deadline_wait_timeout,
@@ -4877,7 +4877,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001c2c:	46c0      	nop			; (mov r8, r8)
 
 			break;
- 8001c2e:	e09d      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001c2e:	e09e      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_CHECK_TIMEOUT_TIMER:
 
 			deadline_timer_check(deadline_timeout, &deadline_timeout_expired);
@@ -4904,7 +4904,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
 			}
 
 			break;
- 8001c4c:	e08e      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001c4c:	e08f      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 				if(*motion_sensed == MOTION_ISR_UNATTENDED)
  8001c4e:	6bbb      	ldr	r3, [r7, #56]	; 0x38
  8001c50:	781b      	ldrb	r3, [r3, #0]
@@ -4923,13 +4923,13 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001c66:	2203      	movs	r2, #3
  8001c68:	701a      	strb	r2, [r3, #0]
 			break;
- 8001c6a:	e07f      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001c6a:	e080      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
  8001c6c:	6b7b      	ldr	r3, [r7, #52]	; 0x34
  8001c6e:	2204      	movs	r2, #4
  8001c70:	701a      	strb	r2, [r3, #0]
 			break;
- 8001c72:	e07b      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001c72:	e07c      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_INIT_SAFE_TIMER:
 			//TODO: (high) add a timeout
 			deadline_timer_set_initial_time(deadline_safe_timer);
@@ -4942,7 +4942,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001c7e:	2205      	movs	r2, #5
  8001c80:	701a      	strb	r2, [r3, #0]
 			break;
- 8001c82:	e073      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001c82:	e074      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 
 		case MOTION_LIGHT_UV_WAIT_SAFE_TIMER:
 
@@ -4964,18 +4964,18 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001c9a:	6b7b      	ldr	r3, [r7, #52]	; 0x34
  8001c9c:	2206      	movs	r2, #6
  8001c9e:	701a      	strb	r2, [r3, #0]
-					__NOP();
+					}
 				}
 
 			}
 
 			break;
- 8001ca0:	e064      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001ca0:	e062      	b.n	8001d68 <motion_uv_ctrl_wait_fsm+0x230>
 				if(*motion_sensed == MOTION_ISR_UNATTENDED)
  8001ca2:	6bbb      	ldr	r3, [r7, #56]	; 0x38
  8001ca4:	781b      	ldrb	r3, [r3, #0]
  8001ca6:	2b02      	cmp	r3, #2
- 8001ca8:	d105      	bne.n	8001cb6 <motion_uv_ctrl_wait_fsm+0x17e>
+ 8001ca8:	d106      	bne.n	8001cb8 <motion_uv_ctrl_wait_fsm+0x180>
 					*motion_sensed = MOTION_ISR_ATTENDED;
  8001caa:	6bbb      	ldr	r3, [r7, #56]	; 0x38
  8001cac:	2200      	movs	r2, #0
@@ -4984,160 +4984,160 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
  8001cb0:	6b7b      	ldr	r3, [r7, #52]	; 0x34
  8001cb2:	220a      	movs	r2, #10
  8001cb4:	701a      	strb	r2, [r3, #0]
-				if(wait == MOTION_UV_WAIT_TRUE)
- 8001cb6:	2340      	movs	r3, #64	; 0x40
- 8001cb8:	18fb      	adds	r3, r7, r3
- 8001cba:	781b      	ldrb	r3, [r3, #0]
- 8001cbc:	2b00      	cmp	r3, #0
- 8001cbe:	d103      	bne.n	8001cc8 <motion_uv_ctrl_wait_fsm+0x190>
-					*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
- 8001cc0:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001cc2:	2204      	movs	r2, #4
- 8001cc4:	701a      	strb	r2, [r3, #0]
 			break;
- 8001cc6:	e051      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
-					__NOP();
- 8001cc8:	46c0      	nop			; (mov r8, r8)
+ 8001cb6:	e057      	b.n	8001d68 <motion_uv_ctrl_wait_fsm+0x230>
+					if(wait == MOTION_UV_WAIT_TRUE)
+ 8001cb8:	2340      	movs	r3, #64	; 0x40
+ 8001cba:	18fb      	adds	r3, r7, r3
+ 8001cbc:	781b      	ldrb	r3, [r3, #0]
+ 8001cbe:	2b00      	cmp	r3, #0
+ 8001cc0:	d152      	bne.n	8001d68 <motion_uv_ctrl_wait_fsm+0x230>
+						*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+ 8001cc2:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001cc4:	2204      	movs	r2, #4
+ 8001cc6:	701a      	strb	r2, [r3, #0]
 			break;
- 8001cca:	e04f      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001cc8:	e04e      	b.n	8001d68 <motion_uv_ctrl_wait_fsm+0x230>
 		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
 			//this is done in another fsm
 			light_ask_on_pulse_fsm(light_uv);
- 8001ccc:	68fb      	ldr	r3, [r7, #12]
- 8001cce:	0018      	movs	r0, r3
- 8001cd0:	f7ff f86b 	bl	8000daa <light_ask_on_pulse_fsm>
+ 8001cca:	68fb      	ldr	r3, [r7, #12]
+ 8001ccc:	0018      	movs	r0, r3
+ 8001cce:	f7ff f86c 	bl	8000daa <light_ask_on_pulse_fsm>
 			signal->type = LED_SIGNAL_SOLID;
- 8001cd4:	6c7b      	ldr	r3, [r7, #68]	; 0x44
- 8001cd6:	2201      	movs	r2, #1
- 8001cd8:	725a      	strb	r2, [r3, #9]
+ 8001cd2:	6c7b      	ldr	r3, [r7, #68]	; 0x44
+ 8001cd4:	2201      	movs	r2, #1
+ 8001cd6:	725a      	strb	r2, [r3, #9]
 			*fsm_state = MOTION_LIGHT_UV_INIT_TIMER;
- 8001cda:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001cdc:	2207      	movs	r2, #7
- 8001cde:	701a      	strb	r2, [r3, #0]
+ 8001cd8:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001cda:	2207      	movs	r2, #7
+ 8001cdc:	701a      	strb	r2, [r3, #0]
 
 			break;
- 8001ce0:	e044      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001cde:	e046      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_INIT_TIMER:
 			deadline_timer_set_initial_time(deadline_timer);
- 8001ce2:	683b      	ldr	r3, [r7, #0]
- 8001ce4:	0018      	movs	r0, r3
- 8001ce6:	f7fe fc08 	bl	80004fa <deadline_timer_set_initial_time>
+ 8001ce0:	683b      	ldr	r3, [r7, #0]
+ 8001ce2:	0018      	movs	r0, r3
+ 8001ce4:	f7fe fc09 	bl	80004fa <deadline_timer_set_initial_time>
 			*fsm_state = MOTION_LIGHT_UV_WAIT_EXPIRATION;
- 8001cea:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001cec:	2208      	movs	r2, #8
- 8001cee:	701a      	strb	r2, [r3, #0]
+ 8001ce8:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001cea:	2208      	movs	r2, #8
+ 8001cec:	701a      	strb	r2, [r3, #0]
 			break;
- 8001cf0:	e03c      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001cee:	e03e      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_WAIT_EXPIRATION:
 			deadline_timer_expired_t deadline_expired;
 			deadline_timer_check(deadline_timer, &deadline_expired);
- 8001cf2:	2411      	movs	r4, #17
- 8001cf4:	193a      	adds	r2, r7, r4
- 8001cf6:	683b      	ldr	r3, [r7, #0]
- 8001cf8:	0011      	movs	r1, r2
- 8001cfa:	0018      	movs	r0, r3
- 8001cfc:	f7fe fbc6 	bl	800048c <deadline_timer_check>
+ 8001cf0:	2411      	movs	r4, #17
+ 8001cf2:	193a      	adds	r2, r7, r4
+ 8001cf4:	683b      	ldr	r3, [r7, #0]
+ 8001cf6:	0011      	movs	r1, r2
+ 8001cf8:	0018      	movs	r0, r3
+ 8001cfa:	f7fe fbc7 	bl	800048c <deadline_timer_check>
 
 			if(deadline_expired == TIMER_EXPIRED_TRUE)
- 8001d00:	193b      	adds	r3, r7, r4
- 8001d02:	781b      	ldrb	r3, [r3, #0]
- 8001d04:	2b01      	cmp	r3, #1
- 8001d06:	d102      	bne.n	8001d0e <motion_uv_ctrl_wait_fsm+0x1d6>
+ 8001cfe:	193b      	adds	r3, r7, r4
+ 8001d00:	781b      	ldrb	r3, [r3, #0]
+ 8001d02:	2b01      	cmp	r3, #1
+ 8001d04:	d102      	bne.n	8001d0c <motion_uv_ctrl_wait_fsm+0x1d4>
 			{
 				*fsm_state = MOTION_LIGHT_UV_TURN_OFF_LIGHT;
- 8001d08:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001d0a:	2209      	movs	r2, #9
- 8001d0c:	701a      	strb	r2, [r3, #0]
+ 8001d06:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001d08:	2209      	movs	r2, #9
+ 8001d0a:	701a      	strb	r2, [r3, #0]
 			else
 			{
 				//Do nothing
 			}
 
 			if(*motion_sensed == MOTION_ISR_UNATTENDED)
- 8001d0e:	6bbb      	ldr	r3, [r7, #56]	; 0x38
- 8001d10:	781b      	ldrb	r3, [r3, #0]
- 8001d12:	2b02      	cmp	r3, #2
- 8001d14:	d129      	bne.n	8001d6a <motion_uv_ctrl_wait_fsm+0x232>
+ 8001d0c:	6bbb      	ldr	r3, [r7, #56]	; 0x38
+ 8001d0e:	781b      	ldrb	r3, [r3, #0]
+ 8001d10:	2b02      	cmp	r3, #2
+ 8001d12:	d12b      	bne.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
 			{
 				*motion_sensed = MOTION_ISR_ATTENDED;
- 8001d16:	6bbb      	ldr	r3, [r7, #56]	; 0x38
- 8001d18:	2200      	movs	r2, #0
- 8001d1a:	701a      	strb	r2, [r3, #0]
+ 8001d14:	6bbb      	ldr	r3, [r7, #56]	; 0x38
+ 8001d16:	2200      	movs	r2, #0
+ 8001d18:	701a      	strb	r2, [r3, #0]
 				*fsm_state = MOTION_LIGHT_UV_ABORT;
- 8001d1c:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001d1e:	220a      	movs	r2, #10
- 8001d20:	701a      	strb	r2, [r3, #0]
+ 8001d1a:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001d1c:	220a      	movs	r2, #10
+ 8001d1e:	701a      	strb	r2, [r3, #0]
 			}
 
 			break;
- 8001d22:	e022      	b.n	8001d6a <motion_uv_ctrl_wait_fsm+0x232>
+ 8001d20:	e024      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
 		case MOTION_LIGHT_UV_ABORT:
 
 			*fsm_state = MOTION_LIGHT_UV_TURN_OFF_LIGHT;
- 8001d24:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001d26:	2209      	movs	r2, #9
- 8001d28:	701a      	strb	r2, [r3, #0]
+ 8001d22:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001d24:	2209      	movs	r2, #9
+ 8001d26:	701a      	strb	r2, [r3, #0]
 			break;
- 8001d2a:	e01f      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001d28:	e021      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		case MOTION_LIGHT_UV_TURN_OFF_LIGHT:
 			//this is done in another fsm
 			deadline_timer_force_expiration(deadline_timer);
- 8001d2c:	683b      	ldr	r3, [r7, #0]
- 8001d2e:	0018      	movs	r0, r3
- 8001d30:	f7fe fb9f 	bl	8000472 <deadline_timer_force_expiration>
+ 8001d2a:	683b      	ldr	r3, [r7, #0]
+ 8001d2c:	0018      	movs	r0, r3
+ 8001d2e:	f7fe fba0 	bl	8000472 <deadline_timer_force_expiration>
 			deadline_timer_force_expiration(deadline_timeout);
- 8001d34:	6afb      	ldr	r3, [r7, #44]	; 0x2c
- 8001d36:	0018      	movs	r0, r3
- 8001d38:	f7fe fb9b 	bl	8000472 <deadline_timer_force_expiration>
+ 8001d32:	6afb      	ldr	r3, [r7, #44]	; 0x2c
+ 8001d34:	0018      	movs	r0, r3
+ 8001d36:	f7fe fb9c 	bl	8000472 <deadline_timer_force_expiration>
 			deadline_timer_force_expiration(deadline_wait_timeout);
- 8001d3c:	6b3b      	ldr	r3, [r7, #48]	; 0x30
- 8001d3e:	0018      	movs	r0, r3
- 8001d40:	f7fe fb97 	bl	8000472 <deadline_timer_force_expiration>
+ 8001d3a:	6b3b      	ldr	r3, [r7, #48]	; 0x30
+ 8001d3c:	0018      	movs	r0, r3
+ 8001d3e:	f7fe fb98 	bl	8000472 <deadline_timer_force_expiration>
 			button_uv->push_status = BUTTON_PUSH_OFF;
- 8001d44:	68bb      	ldr	r3, [r7, #8]
- 8001d46:	2200      	movs	r2, #0
- 8001d48:	709a      	strb	r2, [r3, #2]
+ 8001d42:	68bb      	ldr	r3, [r7, #8]
+ 8001d44:	2200      	movs	r2, #0
+ 8001d46:	709a      	strb	r2, [r3, #2]
 
 			//Stop LED indicator
 			led_signal_stop(signal);
- 8001d4a:	6c7b      	ldr	r3, [r7, #68]	; 0x44
- 8001d4c:	0018      	movs	r0, r3
- 8001d4e:	f7fe ff4a 	bl	8000be6 <led_signal_stop>
+ 8001d48:	6c7b      	ldr	r3, [r7, #68]	; 0x44
+ 8001d4a:	0018      	movs	r0, r3
+ 8001d4c:	f7fe ff4b 	bl	8000be6 <led_signal_stop>
 			light_ask_off_pulse_fsm(light_uv);
- 8001d52:	68fb      	ldr	r3, [r7, #12]
- 8001d54:	0018      	movs	r0, r3
- 8001d56:	f7ff f807 	bl	8000d68 <light_ask_off_pulse_fsm>
+ 8001d50:	68fb      	ldr	r3, [r7, #12]
+ 8001d52:	0018      	movs	r0, r3
+ 8001d54:	f7ff f808 	bl	8000d68 <light_ask_off_pulse_fsm>
 
 
 			*fsm_state = MOTION_LIGHT_UV_IDLE;
- 8001d5a:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001d5c:	2200      	movs	r2, #0
- 8001d5e:	701a      	strb	r2, [r3, #0]
+ 8001d58:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001d5a:	2200      	movs	r2, #0
+ 8001d5c:	701a      	strb	r2, [r3, #0]
 			break;
- 8001d60:	e004      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001d5e:	e006      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 		default:
 			*fsm_state = MOTION_LIGHT_UV_IDLE;
- 8001d62:	6b7b      	ldr	r3, [r7, #52]	; 0x34
- 8001d64:	2200      	movs	r2, #0
- 8001d66:	701a      	strb	r2, [r3, #0]
+ 8001d60:	6b7b      	ldr	r3, [r7, #52]	; 0x34
+ 8001d62:	2200      	movs	r2, #0
+ 8001d64:	701a      	strb	r2, [r3, #0]
 			break;
- 8001d68:	e000      	b.n	8001d6c <motion_uv_ctrl_wait_fsm+0x234>
+ 8001d66:	e002      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
 			break;
- 8001d6a:	46c0      	nop			; (mov r8, r8)
+ 8001d68:	46c0      	nop			; (mov r8, r8)
+ 8001d6a:	e000      	b.n	8001d6e <motion_uv_ctrl_wait_fsm+0x236>
+			break;
+ 8001d6c:	46c0      	nop			; (mov r8, r8)
 	}
 
 	button_uv->edge_attended = button_isr_status;
- 8001d6c:	2317      	movs	r3, #23
- 8001d6e:	18fb      	adds	r3, r7, r3
- 8001d70:	781a      	ldrb	r2, [r3, #0]
- 8001d72:	68bb      	ldr	r3, [r7, #8]
- 8001d74:	70da      	strb	r2, [r3, #3]
+ 8001d6e:	2317      	movs	r3, #23
+ 8001d70:	18fb      	adds	r3, r7, r3
+ 8001d72:	781a      	ldrb	r2, [r3, #0]
+ 8001d74:	68bb      	ldr	r3, [r7, #8]
+ 8001d76:	70da      	strb	r2, [r3, #3]
 }
- 8001d76:	46c0      	nop			; (mov r8, r8)
- 8001d78:	46bd      	mov	sp, r7
- 8001d7a:	b006      	add	sp, #24
- 8001d7c:	bdb0      	pop	{r4, r5, r7, pc}
- 8001d7e:	46c0      	nop			; (mov r8, r8)
+ 8001d78:	46c0      	nop			; (mov r8, r8)
+ 8001d7a:	46bd      	mov	sp, r7
+ 8001d7c:	b006      	add	sp, #24
+ 8001d7e:	bdb0      	pop	{r4, r5, r7, pc}
  8001d80:	08005740 	.word	0x08005740
 
 08001d84 <direct_light_control_fsm>:
