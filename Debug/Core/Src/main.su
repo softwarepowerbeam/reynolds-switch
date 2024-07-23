@@ -8,8 +8,8 @@
 ../Core/Src/main.c:1079:6:motion_light_control_fsm	56	static,ignoring_inline_asm
 ../Core/Src/main.c:1193:6:motion_light_uv_control_fsm	128	static,ignoring_inline_asm
 ../Core/Src/main.c:1314:6:motion_uv_ctrl_wait_fsm	128	static,ignoring_inline_asm
-../Core/Src/main.c:1507:6:direct_light_control_fsm	64	static,ignoring_inline_asm
-../Core/Src/main.c:1578:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:1623:6:HAL_GPIO_EXTI_Rising_Callback	16	static,ignoring_inline_asm
-../Core/Src/main.c:1666:6:HAL_GPIO_EXTI_Falling_Callback	16	static
-../Core/Src/main.c:1733:6:Error_Handler	8	static,ignoring_inline_asm
+../Core/Src/main.c:1521:6:direct_light_control_fsm	64	static,ignoring_inline_asm
+../Core/Src/main.c:1592:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:1637:6:HAL_GPIO_EXTI_Rising_Callback	16	static,ignoring_inline_asm
+../Core/Src/main.c:1680:6:HAL_GPIO_EXTI_Falling_Callback	16	static
+../Core/Src/main.c:1747:6:Error_Handler	8	static,ignoring_inline_asm

@@ -1379,6 +1379,19 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			break;
 		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
 
+			deadline_timer_check(deadline_timeout, &deadline_timeout_expired);
+
+			if(deadline_timeout_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
+			{
+				*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+			}
+
+			break;
+
+
+#ifdef TEST_TIMEOUT
+		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
+
 			deadline_timer_check(deadline_wait_timeout,
 									&deadline_wait_timeout_expired);
 
@@ -1412,6 +1425,7 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			}
 
 			break;
+#endif //TEST_TIMEOUT
 		case MOTION_LIGHT_UV_INIT_SAFE_TIMER:
 			//TODO: (high) add a timeout
 			deadline_timer_set_initial_time(deadline_safe_timer);

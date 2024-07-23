@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := reynolds-switch
+BUILD_ARTIFACT_NAME := reynolds_switch
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-reynolds-switch.elf \
+reynolds_switch.elf \
 
 MAP_FILES += \
-reynolds-switch.map \
+reynolds_switch.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-reynolds-switch.list \
+reynolds_switch.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: reynolds-switch.elf secondary-outputs
+main-build: reynolds_switch.elf secondary-outputs
 
 # Tool invocations
-reynolds-switch.elf reynolds-switch.map: $(OBJS) $(USER_OBJS) C:\Users\Eduardo\STM32CubeIDE\workspace_raynolds\reynolds-switch\STM32C011F6UX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "reynolds-switch.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\Eduardo\STM32CubeIDE\workspace_raynolds\reynolds-switch\STM32C011F6UX_FLASH.ld" --specs=nosys.specs -Wl,-Map="reynolds-switch.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+reynolds_switch.elf reynolds_switch.map: $(OBJS) $(USER_OBJS) C:\Users\Eduardo\STM32CubeIDE\workspace_reynolds\reynolds_switch\STM32C011F6UX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "reynolds_switch.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\Eduardo\STM32CubeIDE\workspace_reynolds\reynolds_switch\STM32C011F6UX_FLASH.ld" --specs=nosys.specs -Wl,-Map="reynolds_switch.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-reynolds-switch.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "reynolds-switch.list"
+reynolds_switch.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "reynolds_switch.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout reynolds-switch.elf reynolds-switch.list reynolds-switch.map
+	-$(RM) default.size.stdout reynolds_switch.elf reynolds_switch.list reynolds_switch.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
