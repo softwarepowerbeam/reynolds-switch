@@ -113,7 +113,6 @@ const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 #endif //FAST_TEST
 
 
-//#define FAST_TEST
 #ifdef FAST_TEST
 
 #define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		4		//!< Range 0-255 (0 more sensitive -255 less sensitive)
