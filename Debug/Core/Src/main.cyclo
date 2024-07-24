@@ -7,9 +7,9 @@
 ../Core/Src/main.c:1060:6:sense_button_event	3
 ../Core/Src/main.c:1079:6:motion_light_control_fsm	16
 ../Core/Src/main.c:1193:6:motion_light_uv_control_fsm	16
-../Core/Src/main.c:1314:6:motion_uv_ctrl_wait_fsm	21
-../Core/Src/main.c:1521:6:direct_light_control_fsm	10
-../Core/Src/main.c:1592:6:HAL_TIM_PeriodElapsedCallback	4
-../Core/Src/main.c:1637:6:HAL_GPIO_EXTI_Rising_Callback	8
-../Core/Src/main.c:1680:6:HAL_GPIO_EXTI_Falling_Callback	7
-../Core/Src/main.c:1747:6:Error_Handler	1
+../Core/Src/main.c:1314:6:motion_uv_ctrl_wait_fsm	22
+../Core/Src/main.c:1528:6:direct_light_control_fsm	10
+../Core/Src/main.c:1599:6:HAL_TIM_PeriodElapsedCallback	4
+../Core/Src/main.c:1644:6:HAL_GPIO_EXTI_Rising_Callback	8
+../Core/Src/main.c:1687:6:HAL_GPIO_EXTI_Falling_Callback	7
+../Core/Src/main.c:1754:6:Error_Handler	1

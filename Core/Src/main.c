@@ -1379,10 +1379,17 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			break;
 		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
 
+			if(*motion_sensed == MOTION_ISR_UNATTENDED)
+			{
+				*motion_sensed = MOTION_ISR_ATTENDED;
+			}
+
+
 			deadline_timer_check(deadline_timeout, &deadline_timeout_expired);
 
 			if(deadline_timeout_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
 			{
+				*motion_sensed = MOTION_ISR_ATTENDED;
 				*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
 			}
 
