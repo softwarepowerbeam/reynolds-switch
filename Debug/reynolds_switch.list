@@ -37,11 +37,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000abd  00000000  00000000  00030fb0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000144d0  00000000  00000000  00031a6d  2**0
+ 17 .debug_macro  000144c4  00000000  00000000  00031a6d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00010505  00000000  00000000  00045f3d  2**0
+ 18 .debug_line   00010505  00000000  00000000  00045f31  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0007c1fe  00000000  00000000  00056442  2**0
+ 19 .debug_str    0007c207  00000000  00000000  00056436  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  20 .debug_frame  00003594  00000000  00000000  000d2640  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -2270,7 +2270,7 @@ int main(void)
 	case MOTION_SWITCH_MODE_0:
 		motion_initial_conf.threshold = OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD;
  8001068:	4bbc      	ldr	r3, [pc, #752]	; (800135c <main+0x360>)
- 800106a:	2232      	movs	r2, #50	; 0x32
+ 800106a:	2205      	movs	r2, #5
  800106c:	701a      	strb	r2, [r3, #0]
 		motion_initial_conf.window_time = OFFICE_MOTION_SENSOR_WINDOW;
  800106e:	2203      	movs	r2, #3
@@ -2281,7 +2281,7 @@ int main(void)
 	case MOTION_SWITCH_MODE_1:
 		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
  8001076:	4bb9      	ldr	r3, [pc, #740]	; (800135c <main+0x360>)
- 8001078:	2232      	movs	r2, #50	; 0x32
+ 8001078:	2203      	movs	r2, #3
  800107a:	701a      	strb	r2, [r3, #0]
 		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
  800107c:	2203      	movs	r2, #3
@@ -2318,17 +2318,17 @@ int main(void)
  8001096:	4bb1      	ldr	r3, [pc, #708]	; (800135c <main+0x360>)
  8001098:	2200      	movs	r2, #0
  800109a:	71da      	strb	r2, [r3, #7]
-  motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_4HZ;
+  motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_2HZ;
  800109c:	4baf      	ldr	r3, [pc, #700]	; (800135c <main+0x360>)
- 800109e:	2200      	movs	r2, #0
+ 800109e:	2201      	movs	r2, #1
  80010a0:	719a      	strb	r2, [r3, #6]
   motion_initial_conf.op_mode = PYD1598_WAKE_UP;
  80010a2:	4bae      	ldr	r3, [pc, #696]	; (800135c <main+0x360>)
  80010a4:	2202      	movs	r2, #2
  80010a6:	711a      	strb	r2, [r3, #4]
-  motion_initial_conf.pulse_counter = PYD1598_PC_1_PULSE;
+  motion_initial_conf.pulse_counter = PYD1598_PC_2_PULSES;
  80010a8:	4bac      	ldr	r3, [pc, #688]	; (800135c <main+0x360>)
- 80010aa:	2200      	movs	r2, #0
+ 80010aa:	2201      	movs	r2, #1
  80010ac:	709a      	strb	r2, [r3, #2]
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
  80010ae:	4bab      	ldr	r3, [pc, #684]	; (800135c <main+0x360>)
@@ -2790,14 +2790,14 @@ int main(void)
  800139c:	20000368 	.word	0x20000368
  80013a0:	20000388 	.word	0x20000388
  80013a4:	20000458 	.word	0x20000458
- 80013a8:	0000ea60 	.word	0x0000ea60
+ 80013a8:	000927c0 	.word	0x000927c0
  80013ac:	200004e0 	.word	0x200004e0
  80013b0:	200005e8 	.word	0x200005e8
  80013b4:	20000568 	.word	0x20000568
- 80013b8:	0001d4c0 	.word	0x0001d4c0
+ 80013b8:	00124f80 	.word	0x00124f80
  80013bc:	20000668 	.word	0x20000668
  80013c0:	00002710 	.word	0x00002710
- 80013c4:	0002bf20 	.word	0x0002bf20
+ 80013c4:	00a4cb80 	.word	0x00a4cb80
     	  break;
  80013c8:	46c0      	nop			; (mov r8, r8)
     }

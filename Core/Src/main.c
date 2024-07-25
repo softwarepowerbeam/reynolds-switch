@@ -92,7 +92,7 @@ typedef enum action
 
 #ifdef FACTORY_PARAMETERS
 //Office Mode:
-#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		10		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		5		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 #define OFFICE_LAMP1_ON_TIME_MS				10 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
@@ -106,7 +106,7 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 #endif	//TEST_TIMEOUT
 
 //Residential mode:
-#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	10		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	3		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 #define RESIDENTIAL_LAMP1_ON_TIME_MS		10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
@@ -428,9 +428,9 @@ int main(void)
   //Good initial conf.
   motion_initial_conf.blind_time = PYD1598_BT_0_5_SEC;
   motion_initial_conf.count_mode = PYD1598_COUNT_MODE_NO_BPF_SIGN_CHANGE;
-  motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_4HZ;
+  motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_2HZ;
   motion_initial_conf.op_mode = PYD1598_WAKE_UP;
-  motion_initial_conf.pulse_counter = PYD1598_PC_1_PULSE;
+  motion_initial_conf.pulse_counter = PYD1598_PC_2_PULSES;
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
 
   //Hardware assignation:
