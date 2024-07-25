@@ -83,6 +83,7 @@ uint8_t led_signal_solid_fsm(led_signal_t *led_signal)
 			break;
 		default:
 			state = LED_SIGNAL_STATE_IDDLE;
+			led_signal_turn_off(*led_signal);
 			break;
 
 	}
@@ -113,6 +114,7 @@ uint8_t led_signal_togle_fsm(led_signal_t *led_signal)
 		case LED_SIGNAL_STATE_TOGLE:
 
 			led_signal_toggle(*led_signal);
+
 			if(control == LED_SIGNAL_CTRL_STOP)
 			{
 				state = LED_SIGNAL_STATE_END;
@@ -124,6 +126,7 @@ uint8_t led_signal_togle_fsm(led_signal_t *led_signal)
 			break;
 		default:
 			state = LED_SIGNAL_STATE_IDDLE;
+			led_signal_turn_off(*led_signal);
 			break;
 
 	}

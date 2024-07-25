@@ -2,9 +2,9 @@
 ../Core/Src/led_indicator.c:20:9:led_signal_fsm	7
 ../Core/Src/led_indicator.c:48:9:led_signal_type_selector	1
 ../Core/Src/led_indicator.c:55:9:led_signal_solid_fsm	9
-../Core/Src/led_indicator.c:95:9:led_signal_togle_fsm	9
-../Core/Src/led_indicator.c:137:9:led_signal_start	1
-../Core/Src/led_indicator.c:143:9:led_signal_stop	1
-../Core/Src/led_indicator.c:150:9:led_signal_turn_on	1
-../Core/Src/led_indicator.c:156:9:led_signal_turn_off	1
-../Core/Src/led_indicator.c:163:9:led_signal_toggle	1
+../Core/Src/led_indicator.c:96:9:led_signal_togle_fsm	9
+../Core/Src/led_indicator.c:140:9:led_signal_start	1
+../Core/Src/led_indicator.c:146:9:led_signal_stop	1
+../Core/Src/led_indicator.c:153:9:led_signal_turn_on	1
+../Core/Src/led_indicator.c:159:9:led_signal_turn_off	1
+../Core/Src/led_indicator.c:166:9:led_signal_toggle	1

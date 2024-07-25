@@ -79,7 +79,9 @@ typedef enum action
 
 //CONFIGURE THE BASIC MOTION PARAMETERS HERE:<---------------------------------------------------------------------------|
 
-#define FACTORY_PARAMETERS
+//#define TEST_TIMEOUT
+
+//#define FACTORY_PARAMETERS
 
 #ifndef FACTORY_PARAMETERS
 #define 	FAST_TEST
@@ -93,48 +95,62 @@ typedef enum action
 #define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		10		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define OFFICE_LAMP1_ON_TIME_MS				5 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
-#define OFFICE_LAMP2_ON_TIME_MS				5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
-#define OFFICE_LAMP_UV_SAFETY_TIME_MS		5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
+#define OFFICE_LAMP1_ON_TIME_MS				10 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
+#define OFFICE_LAMP2_ON_TIME_MS				10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
+#define OFFICE_LAMP_UV_SAFETY_TIME_MS		900 	//!<Waiting period before turning on UV light in milisec
 #define OFFICE_LAMP_UV_ON_TIME_MS			20 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp UV illumination in milisec
-#define OFFICE_LAMP_UV_TIMEOUT_MS			30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
-
+#ifdef TEST_TIMEOUT
+#define OFFICE_LAMP_UV_TIMEOUT_MS			30000
+#else	//TEST_TIMEOUT
+#define OFFICE_LAMP_UV_TIMEOUT_MS			10000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#endif	//TEST_TIMEOUT
 
 //Residential mode:
 #define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	10		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define RESIDENTIAL_LAMP1_ON_TIME_MS		5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
-#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	5 * MINUTES_2_MILI_SECONDS 	//!<Waiting period before turning on UV light in milisec
+#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	900 	//!<Waiting period before turning on UV light in milisec
 #define RESIDENTIAL_LAMP_UV_ON_TIME_MS		3 * HOURS_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
-#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#ifdef TEST_TIMEOUT
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000
+#else	//TEST_TIMEOUT
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		10000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#endif	//TEST_TIMEOUT
 
 #endif //FAST_TEST
 
 
 #ifdef FAST_TEST
 
-#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		4		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+//Office Mode:
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		50		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define OFFICE_LAMP1_ON_TIME_MS				20000	//!<Waiting period of Lamp 1 illumination in milisec
-#define OFFICE_LAMP2_ON_TIME_MS				20000 	//!<Waiting period of Lamp 2 illumination in milisec
-#define OFFICE_LAMP_UV_SAFETY_TIME_MS		20000 	//!<Waiting period before turning on UV light in milisec
-#define OFFICE_LAMP_UV_ON_TIME_MS			15000	//!<Waiting period of Lamp UV illumination in milisec
-#define OFFICE_LAMP_UV_TIMEOUT_MS			30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
-
+#define OFFICE_LAMP1_ON_TIME_MS				1 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
+#define OFFICE_LAMP2_ON_TIME_MS				1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
+#define OFFICE_LAMP_UV_SAFETY_TIME_MS		900 	//!<Waiting period before turning on UV light in milisec
+#define OFFICE_LAMP_UV_ON_TIME_MS			2 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp UV illumination in milisec
+#ifdef TEST_TIMEOUT
+#define OFFICE_LAMP_UV_TIMEOUT_MS			30000
+#else	//TEST_TIMEOUT
+#define OFFICE_LAMP_UV_TIMEOUT_MS			10000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#endif	//TEST_TIMEOUT
 
 //Residential mode:
-#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	4		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	50		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define RESIDENTIAL_LAMP1_ON_TIME_MS		20000 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
-#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	20000 	//!<Waiting period before turning on UV light in milisec
-#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		15000 	//!<Waiting period of Lamp UV illumination in milisec
-#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
-
+#define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	900 	//!<Waiting period before turning on UV light in milisec
+#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
+#ifdef TEST_TIMEOUT
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000
+#else	//TEST_TIMEOUT
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		10000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#endif	//TEST_TIMEOUT
 
 #endif //FAST_TEST
 
@@ -372,9 +388,6 @@ int main(void)
 //  HAL_DIRECT_LINK_conf_as_interrupt_input();
 
 
-
-
-
   //DIP SWITCH SETUP
   switch_selector_t switch_selector;
   switch_selector_gpio_t switch_selector_gpio[2];//We can use malloc also
@@ -384,10 +397,6 @@ int main(void)
   switch_selector_gpio[1].pin = DIP_IN2_Pin;
 
   switch_selector_setup(&switch_selector, switch_selector_gpio, 2);
-
-
-
-
 
   //MOTION SENSOR SETUP
   //-------------------
@@ -447,7 +456,7 @@ int main(void)
   //LIGHTS SETUP
   //-----------
 
-  deadline.msec = 20;
+  deadline.msec = 100;
   deadline_timer_setup(&deadline_timer_light_1, deadline);
   deadline_timer_setup(&deadline_timer_light_2, deadline);
   deadline_timer_setup(&deadline_timer_uv, deadline);
@@ -1311,6 +1320,7 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 }
 
 
+
 void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 									button_t *button_uv,
 									pyd1598_sensor_t *motion_sensor,
@@ -1377,6 +1387,7 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			*fsm_state = MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT;
 
 			break;
+#ifndef TEST_TIMEOUT
 		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
 
 			if(*motion_sensed == MOTION_ISR_UNATTENDED)
@@ -1391,10 +1402,13 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			{
 				*motion_sensed = MOTION_ISR_ATTENDED;
 				*fsm_state = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+				signal->type = LED_SIGNAL_SOLID;
 			}
 
-			break;
 
+
+			break;
+#endif //TEST_TIMEOUT
 
 #ifdef TEST_TIMEOUT
 		case MOTION_LIGHT_UV_WAIT_MOTION_TIMEOUT:
@@ -1433,6 +1447,7 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 
 			break;
 #endif //TEST_TIMEOUT
+
 		case MOTION_LIGHT_UV_INIT_SAFE_TIMER:
 			//TODO: (high) add a timeout
 			deadline_timer_set_initial_time(deadline_safe_timer);
@@ -1469,7 +1484,7 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
 			//this is done in another fsm
 			light_ask_on_pulse_fsm(light_uv);
-			signal->type = LED_SIGNAL_SOLID;
+//			signal->type = LED_SIGNAL_SOLID;
 			*fsm_state = MOTION_LIGHT_UV_INIT_TIMER;
 
 			break;
@@ -1508,9 +1523,11 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			deadline_timer_force_expiration(deadline_wait_timeout);
 			button_uv->push_status = BUTTON_PUSH_OFF;
 
-			//Stop LED indicator
-			led_signal_stop(signal);
+
+			//Send signal to turn off UV lamp
 			light_ask_off_pulse_fsm(light_uv);
+			//Send signal stop LED indicator
+			led_signal_stop(signal);
 
 
 			*fsm_state = MOTION_LIGHT_UV_IDLE;
