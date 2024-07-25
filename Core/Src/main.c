@@ -81,7 +81,7 @@ typedef enum action
 
 //#define TEST_TIMEOUT
 
-//#define FACTORY_PARAMETERS
+#define FACTORY_PARAMETERS
 
 #ifndef FACTORY_PARAMETERS
 #define 	FAST_TEST
