@@ -92,7 +92,7 @@ typedef enum action
 
 #ifdef FACTORY_PARAMETERS
 //Office Mode:
-#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		5		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		6		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 #define OFFICE_LAMP1_ON_TIME_MS				10 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
@@ -106,7 +106,7 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 #endif	//TEST_TIMEOUT
 
 //Residential mode:
-#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	3		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	7		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 #define RESIDENTIAL_LAMP1_ON_TIME_MS		10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec

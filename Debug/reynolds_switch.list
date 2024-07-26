@@ -2270,7 +2270,7 @@ int main(void)
 	case MOTION_SWITCH_MODE_0:
 		motion_initial_conf.threshold = OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD;
  8001068:	4bbc      	ldr	r3, [pc, #752]	; (800135c <main+0x360>)
- 800106a:	2205      	movs	r2, #5
+ 800106a:	2206      	movs	r2, #6
  800106c:	701a      	strb	r2, [r3, #0]
 		motion_initial_conf.window_time = OFFICE_MOTION_SENSOR_WINDOW;
  800106e:	2203      	movs	r2, #3
@@ -2281,7 +2281,7 @@ int main(void)
 	case MOTION_SWITCH_MODE_1:
 		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
  8001076:	4bb9      	ldr	r3, [pc, #740]	; (800135c <main+0x360>)
- 8001078:	2203      	movs	r2, #3
+ 8001078:	2207      	movs	r2, #7
  800107a:	701a      	strb	r2, [r3, #0]
 		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
  800107c:	2203      	movs	r2, #3
