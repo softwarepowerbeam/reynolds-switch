@@ -12,6 +12,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum button_status
 {
 	BUTTON_OFF = 0,
@@ -102,6 +106,8 @@ uint8_t button_set_isr_attended(button_t *button);
 
 //Hardware Layer
 uint8_t button_get_status(button_t *button, button_status_t *status);
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INC_BUTTON_H_ */

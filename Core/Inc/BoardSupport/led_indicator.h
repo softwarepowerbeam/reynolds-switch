@@ -10,6 +10,10 @@
 #include "gpio.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum led_signal_type
 {
 	LED_SIGNAL_OFF = 0,
@@ -73,5 +77,9 @@ uint8_t led_signal_stop(led_signal_t *led_signal);
 uint8_t led_signal_turn_on(led_signal_t led_signal);
 uint8_t led_signal_turn_off(led_signal_t led_signal);
 uint8_t led_signal_toggle(led_signal_t led_signal);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INC_LED_INDICATOR_H_ */

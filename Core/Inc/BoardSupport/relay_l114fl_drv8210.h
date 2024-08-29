@@ -13,6 +13,10 @@
 #include "gpio.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum relay_status
 {
 	RELAY_OFF = 0,
@@ -91,6 +95,8 @@ uint8_t relay_on(relay_t *relay);
 uint8_t relay_deenergize(relay_t *relay);
 uint8_t relay_get_status(relay_t relay, relay_status_t *status);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INC_RELAY_L114FL_DRV8210_H_ */

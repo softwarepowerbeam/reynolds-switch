@@ -16,6 +16,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum switch_selector_status
 {
 	SWITCH_SELECTOR_OFF = 0,
@@ -51,5 +55,9 @@ uint8_t switch_selector_read_bit(switch_selector_t *switch_selector,
 
 uint8_t switch_selector_read(switch_selector_t *switch_selector,
 													uint32_t *value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INC_SWITCH_SELECTOR_H_ */

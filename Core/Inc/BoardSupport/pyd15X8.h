@@ -13,6 +13,10 @@
 #include "gpio.h"
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /****************************Data types declarations***************************/
 typedef enum pyd1598_blind_time
 {
@@ -425,4 +429,8 @@ uint8_t pyd1598_serin_add_hpf_cutoff(pyd1598_hpf_cutoff_t new_hpf_cutoff,
 														pyd1598_serin_t *serin);
 uint8_t pyd1598_serin_add_count_mode(pyd1598_count_mode_t new_count_mode,
 														pyd1598_serin_t *serin);
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* INC_PYD15X8_H_ */

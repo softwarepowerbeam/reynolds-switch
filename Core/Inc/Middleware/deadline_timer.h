@@ -9,6 +9,12 @@
 #define INC_DEADLINE_TIMER_H_
 
 #include <stdint.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Precondition: a task running every 1ms
 
 //maximum number of micro seconds is 1 sec
@@ -88,5 +94,9 @@ uint8_t deadline_timer_compare_check(uint32_t time_current,
 void deadline_timer_assign_current(timer_clock_t *time_current,
 											timer_clock_t *time_current_2);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INC_DEADLINE_TIMER_H_ */

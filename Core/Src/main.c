@@ -38,13 +38,15 @@
 #endif //DEBUG_UART_REYNOLDS
 
 #include "BoardSupport/pyd15X8.h"
-#include "Middleware/deadline_timer.h"
 #include "BoardSupport/button.h"
 #include "BoardSupport/lights.h"
-#include "motion_lights_driver.h"
 #include "BoardSupport/led_indicator.h"
 #include "BoardSupport/switch_selector.h"
 #include "BoardSupport/relay_l114fl_drv8210.h"
+
+
+#include "Middleware/deadline_timer.h"
+#include "motion_lights_driver.h"
 #include "app.h"
 
 /* USER CODE END Includes */

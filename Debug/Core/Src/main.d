@@ -28,15 +28,16 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim_ex.h \
  ../Core/Inc/tim.h ../Core/Inc/main.h ../Core/Inc/gpio.h \
- ../Core/Inc/BoardSupport/pyd15X8.h \
+ ../Core/Inc/BoardSupport/pyd15X8.h ../Core/Inc/BoardSupport/button.h \
+ ../Core/Inc/BoardSupport/lights.h \
+ ../Core/Inc/BoardSupport/led_indicator.h \
+ ../Core/Inc/BoardSupport/switch_selector.h \
+ ../Core/Inc/BoardSupport/relay_l114fl_drv8210.h \
  ../Core/Inc/Middleware/deadline_timer.h \
- ../Core/Inc/BoardSupport/button.h ../Core/Inc/BoardSupport/lights.h \
  ../Core/Inc/motion_lights_driver.h ../Core/Inc/BoardSupport/pyd15X8.h \
  ../Core/Inc/Middleware/deadline_timer.h \
  ../Core/Inc/BoardSupport/button.h ../Core/Inc/BoardSupport/lights.h \
- ../Core/Inc/BoardSupport/led_indicator.h \
- ../Core/Inc/BoardSupport/switch_selector.h \
- ../Core/Inc/BoardSupport/relay_l114fl_drv8210.h ../Core/Inc/app.h
+ ../Core/Inc/app.h
 ../Core/Inc/main.h:
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal.h:
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_ll_system.h:
@@ -70,15 +71,15 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/main.h:
 ../Core/Inc/gpio.h:
 ../Core/Inc/BoardSupport/pyd15X8.h:
-../Core/Inc/Middleware/deadline_timer.h:
-../Core/Inc/BoardSupport/button.h:
-../Core/Inc/BoardSupport/lights.h:
-../Core/Inc/motion_lights_driver.h:
-../Core/Inc/BoardSupport/pyd15X8.h:
-../Core/Inc/Middleware/deadline_timer.h:
 ../Core/Inc/BoardSupport/button.h:
 ../Core/Inc/BoardSupport/lights.h:
 ../Core/Inc/BoardSupport/led_indicator.h:
 ../Core/Inc/BoardSupport/switch_selector.h:
 ../Core/Inc/BoardSupport/relay_l114fl_drv8210.h:
+../Core/Inc/Middleware/deadline_timer.h:
+../Core/Inc/motion_lights_driver.h:
+../Core/Inc/BoardSupport/pyd15X8.h:
+../Core/Inc/Middleware/deadline_timer.h:
+../Core/Inc/BoardSupport/button.h:
+../Core/Inc/BoardSupport/lights.h:
 ../Core/Inc/app.h:

@@ -11,6 +11,9 @@
 #include "gpio.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef enum light_status
 {
 	LIGHT_OFF = 0,
@@ -89,4 +92,7 @@ uint8_t light_on(light_t *light);
 uint8_t light_deenergize(light_t *light);
 uint8_t light_get_status(light_t light, light_status_t *status);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* INC_LIGHTS_H_ */
