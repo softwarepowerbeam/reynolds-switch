@@ -37,14 +37,14 @@
 #include <stdio.h>
 #endif //DEBUG_UART_REYNOLDS
 
-#include "pyd15X8.h"
-#include "deadline_timer.h"
-#include "button.h"
-#include "lights.h"
+#include "BoardSupport/pyd15X8.h"
+#include "Middleware/deadline_timer.h"
+#include "BoardSupport/button.h"
+#include "BoardSupport/lights.h"
 #include "motion_lights_driver.h"
-#include "led_indicator.h"
-#include "switch_selector.h"
-#include "relay_l114fl_drv8210.h"
+#include "BoardSupport/led_indicator.h"
+#include "BoardSupport/switch_selector.h"
+#include "BoardSupport/relay_l114fl_drv8210.h"
 #include "app.h"
 
 /* USER CODE END Includes */

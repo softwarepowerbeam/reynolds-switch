@@ -9,10 +9,10 @@
 #define INC_MOTION_LIGHTS_DRIVER_H_
 
 
-#include "pyd15X8.h"
-#include "deadline_timer.h"
-#include "button.h"
-#include "lights.h"
+#include "BoardSupport/pyd15X8.h"
+#include "Middleware/deadline_timer.h"
+#include "BoardSupport/button.h"
+#include "BoardSupport/lights.h"
 
 
 typedef enum motion_switch_op_mode

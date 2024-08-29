@@ -1,4 +1,0 @@
-../Core/Src/switch_selector.c:11:9:switch_selector_setup	48	static
-../Core/Src/switch_selector.c:56:9:switch_selector_deinit	16	static
-../Core/Src/switch_selector.c:63:9:switch_selector_read	32	static
-../Core/Src/switch_selector.c:77:9:switch_selector_read_bit	48	static
