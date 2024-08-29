@@ -1,4 +1,5 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/relay_l114fl_drv8210.o: ../Core/Src/relay_l114fl_drv8210.c \
+ ../Core/Inc/relay_l114fl_drv8210.h ../Core/Inc/gpio.h ../Core/Inc/main.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_ll_system.h \
  ../Drivers/CMSIS/Device/ST/STM32C0xx/Include/stm32c0xx.h \
@@ -26,14 +27,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_pwr.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_pwr_ex.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim.h \
- ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim_ex.h \
- ../Core/Inc/tim.h ../Core/Inc/main.h ../Core/Inc/gpio.h \
- ../Core/Inc/pyd15X8.h ../Core/Inc/gpio.h ../Core/Inc/deadline_timer.h \
- ../Core/Inc/button.h ../Core/Inc/lights.h \
- ../Core/Inc/motion_lights_driver.h ../Core/Inc/pyd15X8.h \
- ../Core/Inc/deadline_timer.h ../Core/Inc/button.h ../Core/Inc/lights.h \
- ../Core/Inc/led_indicator.h ../Core/Inc/switch_selector.h \
- ../Core/Inc/relay_l114fl_drv8210.h ../Core/Inc/app.h
+ ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim_ex.h
+../Core/Inc/relay_l114fl_drv8210.h:
+../Core/Inc/gpio.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal.h:
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_ll_system.h:
@@ -63,20 +59,3 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_pwr_ex.h:
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim.h:
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim_ex.h:
-../Core/Inc/tim.h:
-../Core/Inc/main.h:
-../Core/Inc/gpio.h:
-../Core/Inc/pyd15X8.h:
-../Core/Inc/gpio.h:
-../Core/Inc/deadline_timer.h:
-../Core/Inc/button.h:
-../Core/Inc/lights.h:
-../Core/Inc/motion_lights_driver.h:
-../Core/Inc/pyd15X8.h:
-../Core/Inc/deadline_timer.h:
-../Core/Inc/button.h:
-../Core/Inc/lights.h:
-../Core/Inc/led_indicator.h:
-../Core/Inc/switch_selector.h:
-../Core/Inc/relay_l114fl_drv8210.h:
-../Core/Inc/app.h:

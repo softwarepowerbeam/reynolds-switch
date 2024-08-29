@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000abd  00000000  00000000  00030fb0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000144c4  00000000  00000000  00031a6d  2**0
+ 17 .debug_macro  00013a60  00000000  00000000  00031a6d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00010505  00000000  00000000  00045f31  2**0
+ 18 .debug_line   0001052a  00000000  00000000  000454cd  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0007c207  00000000  00000000  00056436  2**0
+ 19 .debug_str    0007c243  00000000  00000000  000559f7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00003594  00000000  00000000  000d2640  2**2
+ 20 .debug_frame  00003594  00000000  00000000  000d1c3c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000006f  00000000  00000000  000d5bd4  2**0
+ 21 .debug_line_str 0000006f  00000000  00000000  000d51d0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -230,6 +230,12 @@ Disassembly of section .text:
  800021e:	46c0      	nop			; (mov r8, r8)
 
 08000220 <button_setup>:
+
+#include "button.h"
+
+
+uint8_t button_setup(button_t *button, button_gpio_t hardware_input)
+{
  8000220:	b580      	push	{r7, lr}
  8000222:	b084      	sub	sp, #16
  8000224:	af00      	add	r7, sp, #0
@@ -237,59 +243,83 @@ Disassembly of section .text:
  8000228:	1d3b      	adds	r3, r7, #4
  800022a:	6019      	str	r1, [r3, #0]
  800022c:	605a      	str	r2, [r3, #4]
+
+	button->hardware_input = hardware_input;
  800022e:	68fb      	ldr	r3, [r7, #12]
  8000230:	1d3a      	adds	r2, r7, #4
  8000232:	3304      	adds	r3, #4
  8000234:	ca03      	ldmia	r2!, {r0, r1}
  8000236:	c303      	stmia	r3!, {r0, r1}
+	button->edge = BUTTON_EDGE_NOT_DETECTED;
  8000238:	68fb      	ldr	r3, [r7, #12]
  800023a:	2200      	movs	r2, #0
  800023c:	705a      	strb	r2, [r3, #1]
+	button->edge_attended = BUTTON_ISR_ATTENDED;
  800023e:	68fb      	ldr	r3, [r7, #12]
  8000240:	2200      	movs	r2, #0
  8000242:	70da      	strb	r2, [r3, #3]
+	button->debounce_fsm_state = BUTTON_DEBOUNCE_IDLE;
  8000244:	68fb      	ldr	r3, [r7, #12]
  8000246:	2200      	movs	r2, #0
  8000248:	731a      	strb	r2, [r3, #12]
+	button->debounce_lock = BUTTON_DEBOUNCE_LOCK_OFF;
  800024a:	68fb      	ldr	r3, [r7, #12]
  800024c:	2201      	movs	r2, #1
  800024e:	735a      	strb	r2, [r3, #13]
+	button->debounce_idx = 0;
  8000250:	68fb      	ldr	r3, [r7, #12]
  8000252:	2200      	movs	r2, #0
  8000254:	611a      	str	r2, [r3, #16]
+	button->debounce_count_limit = 1;
  8000256:	68fb      	ldr	r3, [r7, #12]
  8000258:	2201      	movs	r2, #1
  800025a:	615a      	str	r2, [r3, #20]
+	button->push_status = BUTTON_PUSH_OFF;//For push button only
  800025c:	68fb      	ldr	r3, [r7, #12]
  800025e:	2200      	movs	r2, #0
  8000260:	709a      	strb	r2, [r3, #2]
+
+	return 0;
  8000262:	2300      	movs	r3, #0
+
+}
  8000264:	0018      	movs	r0, r3
  8000266:	46bd      	mov	sp, r7
  8000268:	b004      	add	sp, #16
  800026a:	bd80      	pop	{r7, pc}
 
 0800026c <button_debounce_fsm>:
+
+
+uint8_t button_debounce_fsm(button_t *button)
+{
  800026c:	b580      	push	{r7, lr}
  800026e:	b088      	sub	sp, #32
  8000270:	af00      	add	r7, sp, #0
  8000272:	6078      	str	r0, [r7, #4]
+	button_debounce_state_fsm_t debounce_fsm_state = button->debounce_fsm_state;
  8000274:	211f      	movs	r1, #31
  8000276:	187b      	adds	r3, r7, r1
  8000278:	687a      	ldr	r2, [r7, #4]
  800027a:	7b12      	ldrb	r2, [r2, #12]
  800027c:	701a      	strb	r2, [r3, #0]
+	button_edge_t edge = button->edge;
  800027e:	2317      	movs	r3, #23
  8000280:	18fb      	adds	r3, r7, r3
  8000282:	687a      	ldr	r2, [r7, #4]
  8000284:	7852      	ldrb	r2, [r2, #1]
  8000286:	701a      	strb	r2, [r3, #0]
+	uint32_t debounce_idx = button->debounce_idx;
  8000288:	687b      	ldr	r3, [r7, #4]
  800028a:	691b      	ldr	r3, [r3, #16]
  800028c:	61bb      	str	r3, [r7, #24]
+	uint32_t debounce_count_limit = button->debounce_count_limit;
  800028e:	687b      	ldr	r3, [r7, #4]
  8000290:	695b      	ldr	r3, [r3, #20]
  8000292:	613b      	str	r3, [r7, #16]
+	button_status_t button_status;
+
+	switch(debounce_fsm_state)
  8000294:	187b      	adds	r3, r7, r1
  8000296:	781b      	ldrb	r3, [r3, #0]
  8000298:	2b02      	cmp	r3, #2
@@ -300,128 +330,207 @@ Disassembly of section .text:
  80002a2:	2b01      	cmp	r3, #1
  80002a4:	d011      	beq.n	80002ca <button_debounce_fsm+0x5e>
  80002a6:	e031      	b.n	800030c <button_debounce_fsm+0xa0>
+	{
+		case BUTTON_DEBOUNCE_IDLE:
+
+			if(button->debounce_lock == BUTTON_DEBOUNCE_LOCK_ON)
  80002a8:	687b      	ldr	r3, [r7, #4]
  80002aa:	7b5b      	ldrb	r3, [r3, #13]
  80002ac:	2b00      	cmp	r3, #0
  80002ae:	d132      	bne.n	8000316 <button_debounce_fsm+0xaa>
+			{
+				if(debounce_count_limit == 0)
  80002b0:	693b      	ldr	r3, [r7, #16]
  80002b2:	2b00      	cmp	r3, #0
  80002b4:	d104      	bne.n	80002c0 <button_debounce_fsm+0x54>
+				{
+					debounce_fsm_state = BUTTON_DEBOUNCE_CLEAR_LOCK;
  80002b6:	231f      	movs	r3, #31
  80002b8:	18fb      	adds	r3, r7, r3
  80002ba:	2202      	movs	r2, #2
  80002bc:	701a      	strb	r2, [r3, #0]
+				else
+				{
+					debounce_fsm_state = BUTTON_DEBOUNCE_WAIT;
+				}
+			}
+			break;
  80002be:	e02a      	b.n	8000316 <button_debounce_fsm+0xaa>
+					debounce_fsm_state = BUTTON_DEBOUNCE_WAIT;
  80002c0:	231f      	movs	r3, #31
  80002c2:	18fb      	adds	r3, r7, r3
  80002c4:	2201      	movs	r2, #1
  80002c6:	701a      	strb	r2, [r3, #0]
+			break;
  80002c8:	e025      	b.n	8000316 <button_debounce_fsm+0xaa>
+		case BUTTON_DEBOUNCE_WAIT:
+
+			if(debounce_idx >= debounce_count_limit)
  80002ca:	69ba      	ldr	r2, [r7, #24]
  80002cc:	693b      	ldr	r3, [r7, #16]
  80002ce:	429a      	cmp	r2, r3
  80002d0:	d303      	bcc.n	80002da <button_debounce_fsm+0x6e>
+			{
+				debounce_fsm_state = BUTTON_DEBOUNCE_CLEAR_LOCK;
  80002d2:	231f      	movs	r3, #31
  80002d4:	18fb      	adds	r3, r7, r3
  80002d6:	2202      	movs	r2, #2
  80002d8:	701a      	strb	r2, [r3, #0]
+			}
+			debounce_idx++;
  80002da:	69bb      	ldr	r3, [r7, #24]
  80002dc:	3301      	adds	r3, #1
  80002de:	61bb      	str	r3, [r7, #24]
+
+			break;
  80002e0:	e01a      	b.n	8000318 <button_debounce_fsm+0xac>
+		case BUTTON_DEBOUNCE_CLEAR_LOCK:
+
+			button->edge_attended = BUTTON_ISR_UNATTENDED;
  80002e2:	687b      	ldr	r3, [r7, #4]
  80002e4:	2202      	movs	r2, #2
  80002e6:	70da      	strb	r2, [r3, #3]
+			button->debounce_idx = 0;
  80002e8:	687b      	ldr	r3, [r7, #4]
  80002ea:	2200      	movs	r2, #0
  80002ec:	611a      	str	r2, [r3, #16]
+			button->debounce_lock = BUTTON_DEBOUNCE_LOCK_OFF;
  80002ee:	687b      	ldr	r3, [r7, #4]
  80002f0:	2201      	movs	r2, #1
  80002f2:	735a      	strb	r2, [r3, #13]
+			button_get_status(button, &button_status);
  80002f4:	230f      	movs	r3, #15
  80002f6:	18fa      	adds	r2, r7, r3
  80002f8:	687b      	ldr	r3, [r7, #4]
  80002fa:	0011      	movs	r1, r2
  80002fc:	0018      	movs	r0, r3
  80002fe:	f000 f843 	bl	8000388 <button_get_status>
+
+			debounce_fsm_state = BUTTON_DEBOUNCE_IDLE;
  8000302:	231f      	movs	r3, #31
  8000304:	18fb      	adds	r3, r7, r3
  8000306:	2200      	movs	r2, #0
  8000308:	701a      	strb	r2, [r3, #0]
+
+			break;
  800030a:	e005      	b.n	8000318 <button_debounce_fsm+0xac>
+		default:
+			debounce_fsm_state = BUTTON_DEBOUNCE_IDLE;
  800030c:	231f      	movs	r3, #31
  800030e:	18fb      	adds	r3, r7, r3
  8000310:	2200      	movs	r2, #0
  8000312:	701a      	strb	r2, [r3, #0]
+			break;
  8000314:	e000      	b.n	8000318 <button_debounce_fsm+0xac>
+			break;
  8000316:	46c0      	nop			; (mov r8, r8)
+	}
+
+	button->debounce_fsm_state = debounce_fsm_state;
  8000318:	687b      	ldr	r3, [r7, #4]
  800031a:	221f      	movs	r2, #31
  800031c:	18ba      	adds	r2, r7, r2
  800031e:	7812      	ldrb	r2, [r2, #0]
  8000320:	731a      	strb	r2, [r3, #12]
+	button->edge = edge;
  8000322:	687b      	ldr	r3, [r7, #4]
  8000324:	2217      	movs	r2, #23
  8000326:	18ba      	adds	r2, r7, r2
  8000328:	7812      	ldrb	r2, [r2, #0]
  800032a:	705a      	strb	r2, [r3, #1]
+	button->debounce_idx = debounce_idx;
  800032c:	687b      	ldr	r3, [r7, #4]
  800032e:	69ba      	ldr	r2, [r7, #24]
  8000330:	611a      	str	r2, [r3, #16]
+
+	return 0;
  8000332:	2300      	movs	r3, #0
+}
  8000334:	0018      	movs	r0, r3
  8000336:	46bd      	mov	sp, r7
  8000338:	b008      	add	sp, #32
  800033a:	bd80      	pop	{r7, pc}
 
 0800033c <button_positive_edge_detected>:
+
+}
+
+
+uint8_t button_positive_edge_detected(button_t *button)
+{
  800033c:	b580      	push	{r7, lr}
  800033e:	b082      	sub	sp, #8
  8000340:	af00      	add	r7, sp, #0
  8000342:	6078      	str	r0, [r7, #4]
+
+	if(button->debounce_lock == BUTTON_DEBOUNCE_LOCK_OFF)
  8000344:	687b      	ldr	r3, [r7, #4]
  8000346:	7b5b      	ldrb	r3, [r3, #13]
  8000348:	2b01      	cmp	r3, #1
  800034a:	d105      	bne.n	8000358 <button_positive_edge_detected+0x1c>
+	{
+		button->edge = BUTTON_EDGE_POSITIVE;
  800034c:	687b      	ldr	r3, [r7, #4]
  800034e:	2202      	movs	r2, #2
  8000350:	705a      	strb	r2, [r3, #1]
+		button->debounce_lock = BUTTON_DEBOUNCE_LOCK_ON;
  8000352:	687b      	ldr	r3, [r7, #4]
  8000354:	2200      	movs	r2, #0
  8000356:	735a      	strb	r2, [r3, #13]
+	}
+	return 0;
  8000358:	2300      	movs	r3, #0
+}
  800035a:	0018      	movs	r0, r3
  800035c:	46bd      	mov	sp, r7
  800035e:	b002      	add	sp, #8
  8000360:	bd80      	pop	{r7, pc}
 
 08000362 <button_negative_edge_detected>:
+
+uint8_t button_negative_edge_detected(button_t *button)
+{
  8000362:	b580      	push	{r7, lr}
  8000364:	b082      	sub	sp, #8
  8000366:	af00      	add	r7, sp, #0
  8000368:	6078      	str	r0, [r7, #4]
+	if(button->debounce_lock == BUTTON_DEBOUNCE_LOCK_OFF)
  800036a:	687b      	ldr	r3, [r7, #4]
  800036c:	7b5b      	ldrb	r3, [r3, #13]
  800036e:	2b01      	cmp	r3, #1
  8000370:	d105      	bne.n	800037e <button_negative_edge_detected+0x1c>
+	{
+		button->edge = BUTTON_EDGE_NEGATIVE;
  8000372:	687b      	ldr	r3, [r7, #4]
  8000374:	2201      	movs	r2, #1
  8000376:	705a      	strb	r2, [r3, #1]
+		button->debounce_lock = BUTTON_DEBOUNCE_LOCK_ON;
  8000378:	687b      	ldr	r3, [r7, #4]
  800037a:	2200      	movs	r2, #0
  800037c:	735a      	strb	r2, [r3, #13]
+	}
+	return 0;
  800037e:	2300      	movs	r3, #0
+}
  8000380:	0018      	movs	r0, r3
  8000382:	46bd      	mov	sp, r7
  8000384:	b002      	add	sp, #8
  8000386:	bd80      	pop	{r7, pc}
 
 08000388 <button_get_status>:
+	button->edge = BUTTON_EDGE_NOT_DETECTED;
+	return 0;
+}
+
+uint8_t button_get_status(button_t *button, button_status_t *status)
+{
  8000388:	b5b0      	push	{r4, r5, r7, lr}
  800038a:	b084      	sub	sp, #16
  800038c:	af00      	add	r7, sp, #0
  800038e:	6078      	str	r0, [r7, #4]
  8000390:	6039      	str	r1, [r7, #0]
+	GPIO_PinState pin_value;
+	pin_value = HAL_GPIO_ReadPin(button->hardware_input.port,
  8000392:	687b      	ldr	r3, [r7, #4]
  8000394:	685a      	ldr	r2, [r3, #4]
  8000396:	687b      	ldr	r3, [r7, #4]
@@ -433,28 +542,48 @@ Disassembly of section .text:
  80003a2:	f003 fc3d 	bl	8003c20 <HAL_GPIO_ReadPin>
  80003a6:	0003      	movs	r3, r0
  80003a8:	7023      	strb	r3, [r4, #0]
+												button->hardware_input.pin);
+	if(pin_value == GPIO_PIN_SET)
  80003aa:	197b      	adds	r3, r7, r5
  80003ac:	781b      	ldrb	r3, [r3, #0]
  80003ae:	2b01      	cmp	r3, #1
  80003b0:	d103      	bne.n	80003ba <button_get_status+0x32>
+	{
+		button->status = BUTTON_ON;
  80003b2:	687b      	ldr	r3, [r7, #4]
  80003b4:	2201      	movs	r2, #1
  80003b6:	701a      	strb	r2, [r3, #0]
  80003b8:	e002      	b.n	80003c0 <button_get_status+0x38>
+	}
+	else
+	{
+		button->status = BUTTON_OFF;
  80003ba:	687b      	ldr	r3, [r7, #4]
  80003bc:	2200      	movs	r2, #0
  80003be:	701a      	strb	r2, [r3, #0]
+	}
+
+	*status = button->status;
  80003c0:	687b      	ldr	r3, [r7, #4]
  80003c2:	781a      	ldrb	r2, [r3, #0]
  80003c4:	683b      	ldr	r3, [r7, #0]
  80003c6:	701a      	strb	r2, [r3, #0]
+
+	return 0;
  80003c8:	2300      	movs	r3, #0
+}
  80003ca:	0018      	movs	r0, r3
  80003cc:	46bd      	mov	sp, r7
  80003ce:	b004      	add	sp, #16
  80003d0:	bdb0      	pop	{r4, r5, r7, pc}
 
 080003d2 <button_check_isr_request>:
+
+
+uint8_t button_check_isr_request(button_t button,
+									button_isr_status_t *button_isr_status,
+									button_edge_t *edge)
+{
  80003d2:	b084      	sub	sp, #16
  80003d4:	b5b0      	push	{r4, r5, r7, lr}
  80003d6:	af00      	add	r7, sp, #0
@@ -465,18 +594,22 @@ Disassembly of section .text:
  80003e0:	6061      	str	r1, [r4, #4]
  80003e2:	60a2      	str	r2, [r4, #8]
  80003e4:	60e3      	str	r3, [r4, #12]
+	*button_isr_status = button.edge_attended;
  80003e6:	0029      	movs	r1, r5
  80003e8:	1d0b      	adds	r3, r1, #4
  80003ea:	19db      	adds	r3, r3, r7
  80003ec:	78da      	ldrb	r2, [r3, #3]
  80003ee:	6abb      	ldr	r3, [r7, #40]	; 0x28
  80003f0:	701a      	strb	r2, [r3, #0]
+	*edge = button.edge;
  80003f2:	1d0b      	adds	r3, r1, #4
  80003f4:	19db      	adds	r3, r3, r7
  80003f6:	785a      	ldrb	r2, [r3, #1]
  80003f8:	6afb      	ldr	r3, [r7, #44]	; 0x2c
  80003fa:	701a      	strb	r2, [r3, #0]
+	return 0;
  80003fc:	2300      	movs	r3, #0
+}
  80003fe:	0018      	movs	r0, r3
  8000400:	46bd      	mov	sp, r7
  8000402:	bcb0      	pop	{r4, r5, r7}
@@ -485,6 +618,12 @@ Disassembly of section .text:
  8000408:	4718      	bx	r3
 
 0800040a <deadline_timer_setup>:
+#include "deadline_timer.h"
+
+//TODO: (High) fix this to include seconds
+uint8_t deadline_timer_setup(deadline_timer_t *deadline_timer,
+												timer_clock_t deadline)
+{
  800040a:	b082      	sub	sp, #8
  800040c:	b5b0      	push	{r4, r5, r7, lr}
  800040e:	b086      	sub	sp, #24
@@ -494,21 +633,27 @@ Disassembly of section .text:
  8000416:	1939      	adds	r1, r7, r4
  8000418:	600a      	str	r2, [r1, #0]
  800041a:	604b      	str	r3, [r1, #4]
+	deadline_timer->deadline_expired = TIMER_EXPIRED_FALSE;
  800041c:	687b      	ldr	r3, [r7, #4]
  800041e:	2260      	movs	r2, #96	; 0x60
  8000420:	2100      	movs	r1, #0
  8000422:	5499      	strb	r1, [r3, r2]
+
+	timer_clock_clear(&deadline_timer->time_current);
  8000424:	687b      	ldr	r3, [r7, #4]
  8000426:	0018      	movs	r0, r3
  8000428:	f000 f87a 	bl	8000520 <timer_clock_clear>
+	timer_clock_clear(&deadline_timer->time_initial);
  800042c:	687b      	ldr	r3, [r7, #4]
  800042e:	3330      	adds	r3, #48	; 0x30
  8000430:	0018      	movs	r0, r3
  8000432:	f000 f875 	bl	8000520 <timer_clock_clear>
+	timer_clock_clear(&deadline_timer->time_goal);
  8000436:	687b      	ldr	r3, [r7, #4]
  8000438:	3348      	adds	r3, #72	; 0x48
  800043a:	0018      	movs	r0, r3
  800043c:	f000 f870 	bl	8000520 <timer_clock_clear>
+	timer_clock_set_time(&deadline_timer->deadline, deadline);
  8000440:	687b      	ldr	r3, [r7, #4]
  8000442:	3318      	adds	r3, #24
  8000444:	001d      	movs	r5, r3
@@ -524,7 +669,10 @@ Disassembly of section .text:
  800045a:	6863      	ldr	r3, [r4, #4]
  800045c:	0028      	movs	r0, r5
  800045e:	f000 f873 	bl	8000548 <timer_clock_set_time>
+	return 0;
  8000462:	2300      	movs	r3, #0
+
+}
  8000464:	0018      	movs	r0, r3
  8000466:	46bd      	mov	sp, r7
  8000468:	b002      	add	sp, #8
@@ -534,34 +682,57 @@ Disassembly of section .text:
  8000470:	4718      	bx	r3
 
 08000472 <deadline_timer_force_expiration>:
+	time_current = time_current_2;
+}
+
+
+uint8_t deadline_timer_force_expiration(deadline_timer_t *deadline_timer)
+{
  8000472:	b580      	push	{r7, lr}
  8000474:	b082      	sub	sp, #8
  8000476:	af00      	add	r7, sp, #0
  8000478:	6078      	str	r0, [r7, #4]
+	deadline_timer->deadline_expired = TIMER_EXPIRED_TRUE;
  800047a:	687b      	ldr	r3, [r7, #4]
  800047c:	2260      	movs	r2, #96	; 0x60
  800047e:	2101      	movs	r1, #1
  8000480:	5499      	strb	r1, [r3, r2]
+	return 0;
  8000482:	2300      	movs	r3, #0
+}
  8000484:	0018      	movs	r0, r3
  8000486:	46bd      	mov	sp, r7
  8000488:	b002      	add	sp, #8
  800048a:	bd80      	pop	{r7, pc}
 
 0800048c <deadline_timer_check>:
+uint8_t deadline_timer_check(deadline_timer_t *deadline_timer,
+								deadline_timer_expired_t *deadline_expired)
+{
  800048c:	b5f0      	push	{r4, r5, r6, r7, lr}
  800048e:	b087      	sub	sp, #28
  8000490:	af02      	add	r7, sp, #8
  8000492:	6078      	str	r0, [r7, #4]
  8000494:	6039      	str	r1, [r7, #0]
+	uint8_t status = 0;
  8000496:	260f      	movs	r6, #15
  8000498:	19bb      	adds	r3, r7, r6
  800049a:	2200      	movs	r2, #0
  800049c:	701a      	strb	r2, [r3, #0]
+	//TODO: (High) fix this to include seconds
+
+//	deadline_timer_expired_t deadline_expired_sec = TIMER_EXPIRED_FALSE;
+	deadline_timer_expired_t deadline_expired_msec = TIMER_EXPIRED_FALSE;
  800049e:	250e      	movs	r5, #14
  80004a0:	197b      	adds	r3, r7, r5
  80004a2:	2200      	movs	r2, #0
  80004a4:	701a      	strb	r2, [r3, #0]
+
+//	uint32_t time_current = deadline_timer->time_current.msec;
+//	uint32_t deadline = deadline_timer->deadline.msec;
+//	uint32_t time_initial = deadline_timer->time_initial.msec;
+
+	deadline_timer_compare_check(deadline_timer->time_current.msec,
  80004a6:	687b      	ldr	r3, [r7, #4]
  80004a8:	6898      	ldr	r0, [r3, #8]
  80004aa:	687b      	ldr	r3, [r7, #4]
@@ -573,17 +744,27 @@ Disassembly of section .text:
  80004b6:	9300      	str	r3, [sp, #0]
  80004b8:	0023      	movs	r3, r4
  80004ba:	f000 f881 	bl	80005c0 <deadline_timer_compare_check>
+											deadline_timer->deadline.msec,
+											deadline_timer->time_initial.msec,
+											DEADLINE_MAX_MSEC,
+											&deadline_expired_msec);
+
+	*deadline_expired = deadline_expired_msec;
  80004be:	197b      	adds	r3, r7, r5
  80004c0:	781a      	ldrb	r2, [r3, #0]
  80004c2:	683b      	ldr	r3, [r7, #0]
  80004c4:	701a      	strb	r2, [r3, #0]
+	deadline_timer->deadline_expired = deadline_expired_msec;
  80004c6:	197b      	adds	r3, r7, r5
  80004c8:	7819      	ldrb	r1, [r3, #0]
  80004ca:	687b      	ldr	r3, [r7, #4]
  80004cc:	2260      	movs	r2, #96	; 0x60
  80004ce:	5499      	strb	r1, [r3, r2]
+	return status;
  80004d0:	19bb      	adds	r3, r7, r6
  80004d2:	781b      	ldrb	r3, [r3, #0]
+
+}
  80004d4:	0018      	movs	r0, r3
  80004d6:	46bd      	mov	sp, r7
  80004d8:	b005      	add	sp, #20
@@ -591,63 +772,97 @@ Disassembly of section .text:
  80004dc:	3b9aca00 	.word	0x3b9aca00
 
 080004e0 <deadline_timer_count>:
+
+uint8_t deadline_timer_count(deadline_timer_t *deadline_timer)
+{
  80004e0:	b580      	push	{r7, lr}
  80004e2:	b082      	sub	sp, #8
  80004e4:	af00      	add	r7, sp, #0
  80004e6:	6078      	str	r0, [r7, #4]
+	deadline_timer_increment(&deadline_timer->time_current);
  80004e8:	687b      	ldr	r3, [r7, #4]
  80004ea:	0018      	movs	r0, r3
  80004ec:	f000 f846 	bl	800057c <deadline_timer_increment>
+	return 0;
  80004f0:	2300      	movs	r3, #0
+}
  80004f2:	0018      	movs	r0, r3
  80004f4:	46bd      	mov	sp, r7
  80004f6:	b002      	add	sp, #8
  80004f8:	bd80      	pop	{r7, pc}
 
 080004fa <deadline_timer_set_initial_time>:
+
+	return 0;
+}
+
+uint8_t deadline_timer_set_initial_time(deadline_timer_t *deadline_timer)
+{
  80004fa:	b580      	push	{r7, lr}
  80004fc:	b082      	sub	sp, #8
  80004fe:	af00      	add	r7, sp, #0
  8000500:	6078      	str	r0, [r7, #4]
+	//memcpy fails after several assignations.
+	//copy uint32_t variables directly to avoid a race condition
+	deadline_timer->time_initial.counts = deadline_timer->time_current.counts;
  8000502:	687b      	ldr	r3, [r7, #4]
  8000504:	681a      	ldr	r2, [r3, #0]
  8000506:	685b      	ldr	r3, [r3, #4]
  8000508:	6879      	ldr	r1, [r7, #4]
  800050a:	630a      	str	r2, [r1, #48]	; 0x30
  800050c:	634b      	str	r3, [r1, #52]	; 0x34
+	deadline_timer->time_initial.msec = deadline_timer->time_current.msec;
  800050e:	687b      	ldr	r3, [r7, #4]
  8000510:	689a      	ldr	r2, [r3, #8]
  8000512:	687b      	ldr	r3, [r7, #4]
  8000514:	639a      	str	r2, [r3, #56]	; 0x38
+
+
+	return 0;
  8000516:	2300      	movs	r3, #0
+}
  8000518:	0018      	movs	r0, r3
  800051a:	46bd      	mov	sp, r7
  800051c:	b002      	add	sp, #8
  800051e:	bd80      	pop	{r7, pc}
 
 08000520 <timer_clock_clear>:
+	return 0;
+}
+
+
+uint8_t timer_clock_clear(timer_clock_t *timer)
+{
  8000520:	b580      	push	{r7, lr}
  8000522:	b082      	sub	sp, #8
  8000524:	af00      	add	r7, sp, #0
  8000526:	6078      	str	r0, [r7, #4]
+	timer->counts = 0;
  8000528:	6879      	ldr	r1, [r7, #4]
  800052a:	2200      	movs	r2, #0
  800052c:	2300      	movs	r3, #0
  800052e:	600a      	str	r2, [r1, #0]
  8000530:	604b      	str	r3, [r1, #4]
+	timer->msec = 0;
  8000532:	687b      	ldr	r3, [r7, #4]
  8000534:	2200      	movs	r2, #0
  8000536:	609a      	str	r2, [r3, #8]
+	timer->sec = 0;
  8000538:	687b      	ldr	r3, [r7, #4]
  800053a:	2200      	movs	r2, #0
  800053c:	60da      	str	r2, [r3, #12]
+	return 0;
  800053e:	2300      	movs	r3, #0
+}
  8000540:	0018      	movs	r0, r3
  8000542:	46bd      	mov	sp, r7
  8000544:	b002      	add	sp, #8
  8000546:	bd80      	pop	{r7, pc}
 
 08000548 <timer_clock_set_time>:
+
+uint8_t timer_clock_set_time(timer_clock_t *timer, timer_clock_t new_time)
+{
  8000548:	b082      	sub	sp, #8
  800054a:	b580      	push	{r7, lr}
  800054c:	b082      	sub	sp, #8
@@ -657,16 +872,20 @@ Disassembly of section .text:
  8000554:	1839      	adds	r1, r7, r0
  8000556:	600a      	str	r2, [r1, #0]
  8000558:	604b      	str	r3, [r1, #4]
+	timer->msec = new_time.msec;
  800055a:	0001      	movs	r1, r0
  800055c:	187b      	adds	r3, r7, r1
  800055e:	689a      	ldr	r2, [r3, #8]
  8000560:	687b      	ldr	r3, [r7, #4]
  8000562:	609a      	str	r2, [r3, #8]
+	timer->sec = new_time.sec;
  8000564:	187b      	adds	r3, r7, r1
  8000566:	68da      	ldr	r2, [r3, #12]
  8000568:	687b      	ldr	r3, [r7, #4]
  800056a:	60da      	str	r2, [r3, #12]
+	return 0;
  800056c:	2300      	movs	r3, #0
+}
  800056e:	0018      	movs	r0, r3
  8000570:	46bd      	mov	sp, r7
  8000572:	b002      	add	sp, #8
@@ -676,15 +895,24 @@ Disassembly of section .text:
  800057a:	4718      	bx	r3
 
 0800057c <deadline_timer_increment>:
+	sec = timer.sec;
+	return 0;
+}
+
+uint8_t deadline_timer_increment(timer_clock_t *timer)
+{
  800057c:	b580      	push	{r7, lr}
  800057e:	b082      	sub	sp, #8
  8000580:	af00      	add	r7, sp, #0
  8000582:	6078      	str	r0, [r7, #4]
+
+	timer->msec++;
  8000584:	687b      	ldr	r3, [r7, #4]
  8000586:	689b      	ldr	r3, [r3, #8]
  8000588:	1c5a      	adds	r2, r3, #1
  800058a:	687b      	ldr	r3, [r7, #4]
  800058c:	609a      	str	r2, [r3, #8]
+	timer->counts++;
  800058e:	687b      	ldr	r3, [r7, #4]
  8000590:	681a      	ldr	r2, [r3, #0]
  8000592:	685b      	ldr	r3, [r3, #4]
@@ -695,15 +923,27 @@ Disassembly of section .text:
  800059c:	6879      	ldr	r1, [r7, #4]
  800059e:	600a      	str	r2, [r1, #0]
  80005a0:	604b      	str	r3, [r1, #4]
+
+	if(timer->msec >= DEADLINE_MAX_MSEC )
  80005a2:	687b      	ldr	r3, [r7, #4]
  80005a4:	689b      	ldr	r3, [r3, #8]
  80005a6:	4a05      	ldr	r2, [pc, #20]	; (80005bc <deadline_timer_increment+0x40>)
  80005a8:	4293      	cmp	r3, r2
  80005aa:	d902      	bls.n	80005b2 <deadline_timer_increment+0x36>
+	{
+//		timer->sec++;
+		timer->msec = 0;
  80005ac:	687b      	ldr	r3, [r7, #4]
  80005ae:	2200      	movs	r2, #0
  80005b0:	609a      	str	r2, [r3, #8]
+//	if(timer->counts >= (DEADLINE_MAX_COUNT) )
+//	{
+//		timer->counts = 0;
+//	}
+
+	return 0;
  80005b2:	2300      	movs	r3, #0
+}
  80005b4:	0018      	movs	r0, r3
  80005b6:	46bd      	mov	sp, r7
  80005b8:	b002      	add	sp, #8
@@ -711,6 +951,12 @@ Disassembly of section .text:
  80005bc:	3b9ac9ff 	.word	0x3b9ac9ff
 
 080005c0 <deadline_timer_compare_check>:
+uint8_t deadline_timer_compare_check(uint32_t time_current,
+								uint32_t deadline,
+								uint32_t time_initial,
+								uint32_t max_time,
+								deadline_timer_expired_t *deadline_expired)
+{
  80005c0:	b5b0      	push	{r4, r5, r7, lr}
  80005c2:	b08a      	sub	sp, #40	; 0x28
  80005c4:	af00      	add	r7, sp, #0
@@ -718,18 +964,23 @@ Disassembly of section .text:
  80005c8:	6139      	str	r1, [r7, #16]
  80005ca:	60fa      	str	r2, [r7, #12]
  80005cc:	60bb      	str	r3, [r7, #8]
+	uint8_t status = 0;
  80005ce:	2317      	movs	r3, #23
  80005d0:	2208      	movs	r2, #8
  80005d2:	189b      	adds	r3, r3, r2
  80005d4:	19db      	adds	r3, r3, r7
  80005d6:	2200      	movs	r2, #0
  80005d8:	701a      	strb	r2, [r3, #0]
+	int64_t remaining = 0;
  80005da:	2200      	movs	r2, #0
  80005dc:	2300      	movs	r3, #0
  80005de:	623a      	str	r2, [r7, #32]
  80005e0:	627b      	str	r3, [r7, #36]	; 0x24
+	int32_t deadline_difference = 0;
  80005e2:	2300      	movs	r3, #0
  80005e4:	61bb      	str	r3, [r7, #24]
+
+	remaining = ((int64_t) time_current) - ((int64_t) time_initial);
  80005e6:	697b      	ldr	r3, [r7, #20]
  80005e8:	603b      	str	r3, [r7, #0]
  80005ea:	2300      	movs	r3, #0
@@ -744,9 +995,13 @@ Disassembly of section .text:
  80005fc:	41ab      	sbcs	r3, r5
  80005fe:	623a      	str	r2, [r7, #32]
  8000600:	627b      	str	r3, [r7, #36]	; 0x24
+
+	if(remaining < 0)
  8000602:	6a7b      	ldr	r3, [r7, #36]	; 0x24
  8000604:	2b00      	cmp	r3, #0
  8000606:	da07      	bge.n	8000618 <deadline_timer_compare_check+0x58>
+	{
+		remaining = (max_time - time_initial) + time_current;
  8000608:	68ba      	ldr	r2, [r7, #8]
  800060a:	68fb      	ldr	r3, [r7, #12]
  800060c:	1ad2      	subs	r2, r2, r3
@@ -755,30 +1010,51 @@ Disassembly of section .text:
  8000612:	623b      	str	r3, [r7, #32]
  8000614:	2300      	movs	r3, #0
  8000616:	627b      	str	r3, [r7, #36]	; 0x24
+
+	}
+	deadline_difference = (uint32_t) remaining;
  8000618:	6a3b      	ldr	r3, [r7, #32]
  800061a:	61bb      	str	r3, [r7, #24]
+
+	if(deadline_difference >= deadline)
  800061c:	69bb      	ldr	r3, [r7, #24]
  800061e:	693a      	ldr	r2, [r7, #16]
  8000620:	429a      	cmp	r2, r3
  8000622:	d803      	bhi.n	800062c <deadline_timer_compare_check+0x6c>
+	{
+		*deadline_expired = TIMER_EXPIRED_TRUE;
  8000624:	6bbb      	ldr	r3, [r7, #56]	; 0x38
  8000626:	2201      	movs	r2, #1
  8000628:	701a      	strb	r2, [r3, #0]
  800062a:	e002      	b.n	8000632 <deadline_timer_compare_check+0x72>
+	}
+	else
+	{
+		*deadline_expired = TIMER_EXPIRED_FALSE;
  800062c:	6bbb      	ldr	r3, [r7, #56]	; 0x38
  800062e:	2200      	movs	r2, #0
  8000630:	701a      	strb	r2, [r3, #0]
+	}
+
+	return status;
  8000632:	2317      	movs	r3, #23
  8000634:	2208      	movs	r2, #8
  8000636:	189b      	adds	r3, r3, r2
  8000638:	19db      	adds	r3, r3, r7
  800063a:	781b      	ldrb	r3, [r3, #0]
+}
  800063c:	0018      	movs	r0, r3
  800063e:	46bd      	mov	sp, r7
  8000640:	b00a      	add	sp, #40	; 0x28
  8000642:	bdb0      	pop	{r4, r5, r7, pc}
 
 08000644 <HAL_DIRECT_LINK_conf_as_input>:
+
+/* USER CODE BEGIN 0 */
+
+void HAL_DIRECT_LINK_conf_as_input(GPIO_TypeDef *port, uint16_t pin,
+															IRQn_Type irq_type)
+{
  8000644:	b590      	push	{r4, r7, lr}
  8000646:	b089      	sub	sp, #36	; 0x24
  8000648:	af00      	add	r7, sp, #0
@@ -791,11 +1067,14 @@ Disassembly of section .text:
  8000656:	1c7b      	adds	r3, r7, #1
  8000658:	1c0a      	adds	r2, r1, #0
  800065a:	701a      	strb	r2, [r3, #0]
+	HAL_NVIC_DisableIRQ(irq_type);
  800065c:	1c7b      	adds	r3, r7, #1
  800065e:	781b      	ldrb	r3, [r3, #0]
  8000660:	b25b      	sxtb	r3, r3
  8000662:	0018      	movs	r0, r3
  8000664:	f003 f885 	bl	8003772 <HAL_NVIC_DisableIRQ>
+
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
  8000668:	240c      	movs	r4, #12
  800066a:	193b      	adds	r3, r7, r4
  800066c:	0018      	movs	r0, r3
@@ -803,27 +1082,39 @@ Disassembly of section .text:
  8000670:	001a      	movs	r2, r3
  8000672:	2100      	movs	r1, #0
  8000674:	f004 fff4 	bl	8005660 <memset>
+
+	HAL_GPIO_DeInit(port, pin);
  8000678:	1cbb      	adds	r3, r7, #2
  800067a:	881a      	ldrh	r2, [r3, #0]
  800067c:	687b      	ldr	r3, [r7, #4]
  800067e:	0011      	movs	r1, r2
  8000680:	0018      	movs	r0, r3
  8000682:	f003 f9fd 	bl	8003a80 <HAL_GPIO_DeInit>
+
+	/*Configure GPIO pin : PtPin */
+	GPIO_InitStruct.Pin = pin;
  8000686:	1cbb      	adds	r3, r7, #2
  8000688:	881a      	ldrh	r2, [r3, #0]
  800068a:	193b      	adds	r3, r7, r4
  800068c:	601a      	str	r2, [r3, #0]
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
  800068e:	193b      	adds	r3, r7, r4
  8000690:	2200      	movs	r2, #0
  8000692:	605a      	str	r2, [r3, #4]
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000694:	193b      	adds	r3, r7, r4
  8000696:	2200      	movs	r2, #0
  8000698:	609a      	str	r2, [r3, #8]
+	HAL_GPIO_Init(port, &GPIO_InitStruct);
  800069a:	193a      	adds	r2, r7, r4
  800069c:	687b      	ldr	r3, [r7, #4]
  800069e:	0011      	movs	r1, r2
  80006a0:	0018      	movs	r0, r3
  80006a2:	f003 f883 	bl	80037ac <HAL_GPIO_Init>
+
+//	HAL_NVIC_DisableIRQ(EXTI4_15_IRQn);
+
+}
  80006a6:	46c0      	nop			; (mov r8, r8)
  80006a8:	46bd      	mov	sp, r7
  80006aa:	b009      	add	sp, #36	; 0x24
@@ -831,6 +1122,10 @@ Disassembly of section .text:
 	...
 
 080006b0 <HAL_DIRECT_LINK_conf_as_interrupt_input>:
+
+void HAL_DIRECT_LINK_conf_as_interrupt_input(GPIO_TypeDef *port, uint16_t pin,
+															IRQn_Type irq_type)
+{
  80006b0:	b590      	push	{r4, r7, lr}
  80006b2:	b089      	sub	sp, #36	; 0x24
  80006b4:	af00      	add	r7, sp, #0
@@ -843,6 +1138,7 @@ Disassembly of section .text:
  80006c2:	1c7b      	adds	r3, r7, #1
  80006c4:	1c0a      	adds	r2, r1, #0
  80006c6:	701a      	strb	r2, [r3, #0]
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
  80006c8:	240c      	movs	r4, #12
  80006ca:	193b      	adds	r3, r7, r4
  80006cc:	0018      	movs	r0, r3
@@ -850,27 +1146,37 @@ Disassembly of section .text:
  80006d0:	001a      	movs	r2, r3
  80006d2:	2100      	movs	r1, #0
  80006d4:	f004 ffc4 	bl	8005660 <memset>
+	HAL_GPIO_DeInit(port, pin);
  80006d8:	1cbb      	adds	r3, r7, #2
  80006da:	881a      	ldrh	r2, [r3, #0]
  80006dc:	687b      	ldr	r3, [r7, #4]
  80006de:	0011      	movs	r1, r2
  80006e0:	0018      	movs	r0, r3
  80006e2:	f003 f9cd 	bl	8003a80 <HAL_GPIO_DeInit>
+
+	/*Configure GPIO pin : PtPin */
+	GPIO_InitStruct.Pin = pin;
  80006e6:	1cbb      	adds	r3, r7, #2
  80006e8:	881a      	ldrh	r2, [r3, #0]
  80006ea:	193b      	adds	r3, r7, r4
  80006ec:	601a      	str	r2, [r3, #0]
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
  80006ee:	193b      	adds	r3, r7, r4
  80006f0:	4a0e      	ldr	r2, [pc, #56]	; (800072c <HAL_DIRECT_LINK_conf_as_interrupt_input+0x7c>)
  80006f2:	605a      	str	r2, [r3, #4]
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
  80006f4:	193b      	adds	r3, r7, r4
  80006f6:	2200      	movs	r2, #0
  80006f8:	609a      	str	r2, [r3, #8]
+	HAL_GPIO_Init(port, &GPIO_InitStruct);
  80006fa:	193a      	adds	r2, r7, r4
  80006fc:	687b      	ldr	r3, [r7, #4]
  80006fe:	0011      	movs	r1, r2
  8000700:	0018      	movs	r0, r3
  8000702:	f003 f853 	bl	80037ac <HAL_GPIO_Init>
+
+	/* EXTI interrupt init*/
+	HAL_NVIC_SetPriority(irq_type, 0, 3);
  8000706:	1c7b      	adds	r3, r7, #1
  8000708:	781b      	ldrb	r3, [r3, #0]
  800070a:	b25b      	sxtb	r3, r3
@@ -878,11 +1184,15 @@ Disassembly of section .text:
  800070e:	2100      	movs	r1, #0
  8000710:	0018      	movs	r0, r3
  8000712:	f003 f809 	bl	8003728 <HAL_NVIC_SetPriority>
+	HAL_NVIC_EnableIRQ(irq_type);
  8000716:	1c7b      	adds	r3, r7, #1
  8000718:	781b      	ldrb	r3, [r3, #0]
  800071a:	b25b      	sxtb	r3, r3
  800071c:	0018      	movs	r0, r3
  800071e:	f003 f818 	bl	8003752 <HAL_NVIC_EnableIRQ>
+
+
+}
  8000722:	46c0      	nop			; (mov r8, r8)
  8000724:	46bd      	mov	sp, r7
  8000726:	b009      	add	sp, #36	; 0x24
@@ -891,6 +1201,12 @@ Disassembly of section .text:
  800072c:	10110000 	.word	0x10110000
 
 08000730 <HAL_DIRECT_LINK_conf_as_output>:
+
+
+
+void HAL_DIRECT_LINK_conf_as_output(GPIO_TypeDef *port, uint16_t pin,
+															IRQn_Type irq_type)
+{
  8000730:	b590      	push	{r4, r7, lr}
  8000732:	b089      	sub	sp, #36	; 0x24
  8000734:	af00      	add	r7, sp, #0
@@ -903,6 +1219,7 @@ Disassembly of section .text:
  8000742:	1c7b      	adds	r3, r7, #1
  8000744:	1c0a      	adds	r2, r1, #0
  8000746:	701a      	strb	r2, [r3, #0]
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
  8000748:	240c      	movs	r4, #12
  800074a:	193b      	adds	r3, r7, r4
  800074c:	0018      	movs	r0, r3
@@ -910,36 +1227,50 @@ Disassembly of section .text:
  8000750:	001a      	movs	r2, r3
  8000752:	2100      	movs	r1, #0
  8000754:	f004 ff84 	bl	8005660 <memset>
+
+	HAL_NVIC_DisableIRQ(irq_type);
  8000758:	1c7b      	adds	r3, r7, #1
  800075a:	781b      	ldrb	r3, [r3, #0]
  800075c:	b25b      	sxtb	r3, r3
  800075e:	0018      	movs	r0, r3
  8000760:	f003 f807 	bl	8003772 <HAL_NVIC_DisableIRQ>
+	HAL_GPIO_DeInit(port, pin);
  8000764:	1cbb      	adds	r3, r7, #2
  8000766:	881a      	ldrh	r2, [r3, #0]
  8000768:	687b      	ldr	r3, [r7, #4]
  800076a:	0011      	movs	r1, r2
  800076c:	0018      	movs	r0, r3
  800076e:	f003 f987 	bl	8003a80 <HAL_GPIO_DeInit>
+
+
+	/*Configure GPIO pin : PtPin */
+	GPIO_InitStruct.Pin = pin;
  8000772:	1cbb      	adds	r3, r7, #2
  8000774:	881a      	ldrh	r2, [r3, #0]
  8000776:	0021      	movs	r1, r4
  8000778:	187b      	adds	r3, r7, r1
  800077a:	601a      	str	r2, [r3, #0]
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  800077c:	187b      	adds	r3, r7, r1
  800077e:	2201      	movs	r2, #1
  8000780:	605a      	str	r2, [r3, #4]
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000782:	187b      	adds	r3, r7, r1
  8000784:	2200      	movs	r2, #0
  8000786:	609a      	str	r2, [r3, #8]
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
  8000788:	187b      	adds	r3, r7, r1
  800078a:	2203      	movs	r2, #3
  800078c:	60da      	str	r2, [r3, #12]
+	HAL_GPIO_Init(port, &GPIO_InitStruct);
  800078e:	187a      	adds	r2, r7, r1
  8000790:	687b      	ldr	r3, [r7, #4]
  8000792:	0011      	movs	r1, r2
  8000794:	0018      	movs	r0, r3
  8000796:	f003 f809 	bl	80037ac <HAL_GPIO_Init>
+
+
+	__HAL_SYSCFG_FASTMODEPLUS_ENABLE(SYSCFG_FASTMODEPLUS_PB7);
  800079a:	4b05      	ldr	r3, [pc, #20]	; (80007b0 <HAL_DIRECT_LINK_conf_as_output+0x80>)
  800079c:	681a      	ldr	r2, [r3, #0]
  800079e:	4b04      	ldr	r3, [pc, #16]	; (80007b0 <HAL_DIRECT_LINK_conf_as_output+0x80>)
@@ -947,6 +1278,8 @@ Disassembly of section .text:
  80007a2:	0289      	lsls	r1, r1, #10
  80007a4:	430a      	orrs	r2, r1
  80007a6:	601a      	str	r2, [r3, #0]
+
+}
  80007a8:	46c0      	nop			; (mov r8, r8)
  80007aa:	46bd      	mov	sp, r7
  80007ac:	b009      	add	sp, #36	; 0x24
@@ -954,9 +1287,17 @@ Disassembly of section .text:
  80007b0:	40010000 	.word	0x40010000
 
 080007b4 <MX_GPIO_Init>:
+        * Output
+        * EVENT_OUT
+        * EXTI
+*/
+void MX_GPIO_Init(void)
+{
  80007b4:	b590      	push	{r4, r7, lr}
  80007b6:	b08b      	sub	sp, #44	; 0x2c
  80007b8:	af00      	add	r7, sp, #0
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
  80007ba:	2414      	movs	r4, #20
  80007bc:	193b      	adds	r3, r7, r4
  80007be:	0018      	movs	r0, r3
@@ -964,6 +1305,9 @@ Disassembly of section .text:
  80007c2:	001a      	movs	r2, r3
  80007c4:	2100      	movs	r1, #0
  80007c6:	f004 ff4b 	bl	8005660 <memset>
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
  80007ca:	4b73      	ldr	r3, [pc, #460]	; (8000998 <MX_GPIO_Init+0x1e4>)
  80007cc:	6b5a      	ldr	r2, [r3, #52]	; 0x34
  80007ce:	4b72      	ldr	r3, [pc, #456]	; (8000998 <MX_GPIO_Init+0x1e4>)
@@ -976,6 +1320,7 @@ Disassembly of section .text:
  80007dc:	4013      	ands	r3, r2
  80007de:	613b      	str	r3, [r7, #16]
  80007e0:	693b      	ldr	r3, [r7, #16]
+  __HAL_RCC_GPIOF_CLK_ENABLE();
  80007e2:	4b6d      	ldr	r3, [pc, #436]	; (8000998 <MX_GPIO_Init+0x1e4>)
  80007e4:	6b5a      	ldr	r2, [r3, #52]	; 0x34
  80007e6:	4b6c      	ldr	r3, [pc, #432]	; (8000998 <MX_GPIO_Init+0x1e4>)
@@ -988,6 +1333,7 @@ Disassembly of section .text:
  80007f4:	4013      	ands	r3, r2
  80007f6:	60fb      	str	r3, [r7, #12]
  80007f8:	68fb      	ldr	r3, [r7, #12]
+  __HAL_RCC_GPIOA_CLK_ENABLE();
  80007fa:	4b67      	ldr	r3, [pc, #412]	; (8000998 <MX_GPIO_Init+0x1e4>)
  80007fc:	6b5a      	ldr	r2, [r3, #52]	; 0x34
  80007fe:	4b66      	ldr	r3, [pc, #408]	; (8000998 <MX_GPIO_Init+0x1e4>)
@@ -1000,6 +1346,7 @@ Disassembly of section .text:
  800080c:	4013      	ands	r3, r2
  800080e:	60bb      	str	r3, [r7, #8]
  8000810:	68bb      	ldr	r3, [r7, #8]
+  __HAL_RCC_GPIOB_CLK_ENABLE();
  8000812:	4b61      	ldr	r3, [pc, #388]	; (8000998 <MX_GPIO_Init+0x1e4>)
  8000814:	6b5a      	ldr	r2, [r3, #52]	; 0x34
  8000816:	4b60      	ldr	r3, [pc, #384]	; (8000998 <MX_GPIO_Init+0x1e4>)
@@ -1012,151 +1359,217 @@ Disassembly of section .text:
  8000824:	4013      	ands	r3, r2
  8000826:	607b      	str	r3, [r7, #4]
  8000828:	687b      	ldr	r3, [r7, #4]
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, UV_OUTB_Pin|SERIN_Pin, GPIO_PIN_RESET);
  800082a:	23c0      	movs	r3, #192	; 0xc0
  800082c:	021b      	lsls	r3, r3, #8
  800082e:	485b      	ldr	r0, [pc, #364]	; (800099c <MX_GPIO_Init+0x1e8>)
  8000830:	2200      	movs	r2, #0
  8000832:	0019      	movs	r1, r3
  8000834:	f003 fa11 	bl	8003c5a <HAL_GPIO_WritePin>
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, UV_OUTA_Pin|LED_Pin|LAMP2_OUTB_Pin|LAMP2_OUTA_Pin
  8000838:	4959      	ldr	r1, [pc, #356]	; (80009a0 <MX_GPIO_Init+0x1ec>)
  800083a:	23a0      	movs	r3, #160	; 0xa0
  800083c:	05db      	lsls	r3, r3, #23
  800083e:	2200      	movs	r2, #0
  8000840:	0018      	movs	r0, r3
  8000842:	f003 fa0a 	bl	8003c5a <HAL_GPIO_WritePin>
+                          |LAMP1_OUTB_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LAMP1_OUTA_GPIO_Port, LAMP1_OUTA_Pin, GPIO_PIN_RESET);
  8000846:	4b57      	ldr	r3, [pc, #348]	; (80009a4 <MX_GPIO_Init+0x1f0>)
  8000848:	2200      	movs	r2, #0
  800084a:	2140      	movs	r1, #64	; 0x40
  800084c:	0018      	movs	r0, r3
  800084e:	f003 fa04 	bl	8003c5a <HAL_GPIO_WritePin>
+
+  /*Configure GPIO pins : PCPin PCPin */
+  GPIO_InitStruct.Pin = UV_OUTB_Pin|SERIN_Pin;
  8000852:	193b      	adds	r3, r7, r4
  8000854:	22c0      	movs	r2, #192	; 0xc0
  8000856:	0212      	lsls	r2, r2, #8
  8000858:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  800085a:	193b      	adds	r3, r7, r4
  800085c:	2201      	movs	r2, #1
  800085e:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000860:	193b      	adds	r3, r7, r4
  8000862:	2200      	movs	r2, #0
  8000864:	609a      	str	r2, [r3, #8]
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  8000866:	193b      	adds	r3, r7, r4
  8000868:	2200      	movs	r2, #0
  800086a:	60da      	str	r2, [r3, #12]
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
  800086c:	193b      	adds	r3, r7, r4
  800086e:	4a4b      	ldr	r2, [pc, #300]	; (800099c <MX_GPIO_Init+0x1e8>)
  8000870:	0019      	movs	r1, r3
  8000872:	0010      	movs	r0, r2
  8000874:	f002 ff9a 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = Button_Pin;
  8000878:	193b      	adds	r3, r7, r4
  800087a:	2204      	movs	r2, #4
  800087c:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
  800087e:	193b      	adds	r3, r7, r4
  8000880:	2200      	movs	r2, #0
  8000882:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000884:	193b      	adds	r3, r7, r4
  8000886:	2200      	movs	r2, #0
  8000888:	609a      	str	r2, [r3, #8]
+  HAL_GPIO_Init(Button_GPIO_Port, &GPIO_InitStruct);
  800088a:	193b      	adds	r3, r7, r4
  800088c:	4a46      	ldr	r2, [pc, #280]	; (80009a8 <MX_GPIO_Init+0x1f4>)
  800088e:	0019      	movs	r1, r3
  8000890:	0010      	movs	r0, r2
  8000892:	f002 ff8b 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pins : PAPin PAPin PAPin PAPin
+                           PAPin */
+  GPIO_InitStruct.Pin = UV_OUTA_Pin|LED_Pin|LAMP2_OUTB_Pin|LAMP2_OUTA_Pin
  8000896:	193b      	adds	r3, r7, r4
  8000898:	4a41      	ldr	r2, [pc, #260]	; (80009a0 <MX_GPIO_Init+0x1ec>)
  800089a:	601a      	str	r2, [r3, #0]
+                          |LAMP1_OUTB_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  800089c:	193b      	adds	r3, r7, r4
  800089e:	2201      	movs	r2, #1
  80008a0:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  80008a2:	193b      	adds	r3, r7, r4
  80008a4:	2200      	movs	r2, #0
  80008a6:	609a      	str	r2, [r3, #8]
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  80008a8:	193b      	adds	r3, r7, r4
  80008aa:	2200      	movs	r2, #0
  80008ac:	60da      	str	r2, [r3, #12]
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
  80008ae:	193a      	adds	r2, r7, r4
  80008b0:	23a0      	movs	r3, #160	; 0xa0
  80008b2:	05db      	lsls	r3, r3, #23
  80008b4:	0011      	movs	r1, r2
  80008b6:	0018      	movs	r0, r3
  80008b8:	f002 ff78 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = UV_IN_Pin;
  80008bc:	193b      	adds	r3, r7, r4
  80008be:	2204      	movs	r2, #4
  80008c0:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
  80008c2:	193b      	adds	r3, r7, r4
  80008c4:	4a39      	ldr	r2, [pc, #228]	; (80009ac <MX_GPIO_Init+0x1f8>)
  80008c6:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  80008c8:	193b      	adds	r3, r7, r4
  80008ca:	2200      	movs	r2, #0
  80008cc:	609a      	str	r2, [r3, #8]
+  HAL_GPIO_Init(UV_IN_GPIO_Port, &GPIO_InitStruct);
  80008ce:	193a      	adds	r2, r7, r4
  80008d0:	23a0      	movs	r3, #160	; 0xa0
  80008d2:	05db      	lsls	r3, r3, #23
  80008d4:	0011      	movs	r1, r2
  80008d6:	0018      	movs	r0, r3
  80008d8:	f002 ff68 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pins : PAPin PAPin */
+  GPIO_InitStruct.Pin = LAMP2_IN_Pin|LAMP1_IN_Pin;
  80008dc:	193b      	adds	r3, r7, r4
  80008de:	2282      	movs	r2, #130	; 0x82
  80008e0:	0092      	lsls	r2, r2, #2
  80008e2:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
  80008e4:	193b      	adds	r3, r7, r4
  80008e6:	4a32      	ldr	r2, [pc, #200]	; (80009b0 <MX_GPIO_Init+0x1fc>)
  80008e8:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  80008ea:	193b      	adds	r3, r7, r4
  80008ec:	2200      	movs	r2, #0
  80008ee:	609a      	str	r2, [r3, #8]
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
  80008f0:	193a      	adds	r2, r7, r4
  80008f2:	23a0      	movs	r3, #160	; 0xa0
  80008f4:	05db      	lsls	r3, r3, #23
  80008f6:	0011      	movs	r1, r2
  80008f8:	0018      	movs	r0, r3
  80008fa:	f002 ff57 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pins : PAPin PAPin */
+  GPIO_InitStruct.Pin = DIP_IN1_Pin|DIP_IN2_Pin;
  80008fe:	193b      	adds	r3, r7, r4
  8000900:	2260      	movs	r2, #96	; 0x60
  8000902:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
  8000904:	193b      	adds	r3, r7, r4
  8000906:	2200      	movs	r2, #0
  8000908:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  800090a:	193b      	adds	r3, r7, r4
  800090c:	2200      	movs	r2, #0
  800090e:	609a      	str	r2, [r3, #8]
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
  8000910:	193a      	adds	r2, r7, r4
  8000912:	23a0      	movs	r3, #160	; 0xa0
  8000914:	05db      	lsls	r3, r3, #23
  8000916:	0011      	movs	r1, r2
  8000918:	0018      	movs	r0, r3
  800091a:	f002 ff47 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = LAMP1_OUTA_Pin;
  800091e:	193b      	adds	r3, r7, r4
  8000920:	2240      	movs	r2, #64	; 0x40
  8000922:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  8000924:	193b      	adds	r3, r7, r4
  8000926:	2201      	movs	r2, #1
  8000928:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  800092a:	193b      	adds	r3, r7, r4
  800092c:	2200      	movs	r2, #0
  800092e:	609a      	str	r2, [r3, #8]
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  8000930:	193b      	adds	r3, r7, r4
  8000932:	2200      	movs	r2, #0
  8000934:	60da      	str	r2, [r3, #12]
+  HAL_GPIO_Init(LAMP1_OUTA_GPIO_Port, &GPIO_InitStruct);
  8000936:	193b      	adds	r3, r7, r4
  8000938:	4a1a      	ldr	r2, [pc, #104]	; (80009a4 <MX_GPIO_Init+0x1f0>)
  800093a:	0019      	movs	r1, r3
  800093c:	0010      	movs	r0, r2
  800093e:	f002 ff35 	bl	80037ac <HAL_GPIO_Init>
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = DIRLINK_Pin;
  8000942:	0021      	movs	r1, r4
  8000944:	187b      	adds	r3, r7, r1
  8000946:	2280      	movs	r2, #128	; 0x80
  8000948:	601a      	str	r2, [r3, #0]
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
  800094a:	187b      	adds	r3, r7, r1
  800094c:	4a19      	ldr	r2, [pc, #100]	; (80009b4 <MX_GPIO_Init+0x200>)
  800094e:	605a      	str	r2, [r3, #4]
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000950:	187b      	adds	r3, r7, r1
  8000952:	2200      	movs	r2, #0
  8000954:	609a      	str	r2, [r3, #8]
+  HAL_GPIO_Init(DIRLINK_GPIO_Port, &GPIO_InitStruct);
  8000956:	187b      	adds	r3, r7, r1
  8000958:	4a12      	ldr	r2, [pc, #72]	; (80009a4 <MX_GPIO_Init+0x1f0>)
  800095a:	0019      	movs	r1, r3
  800095c:	0010      	movs	r0, r2
  800095e:	f002 ff25 	bl	80037ac <HAL_GPIO_Init>
+
+  /**/
+  __HAL_SYSCFG_FASTMODEPLUS_ENABLE(SYSCFG_FASTMODEPLUS_PC14);
  8000962:	4b15      	ldr	r3, [pc, #84]	; (80009b8 <MX_GPIO_Init+0x204>)
  8000964:	681a      	ldr	r2, [r3, #0]
  8000966:	4b14      	ldr	r3, [pc, #80]	; (80009b8 <MX_GPIO_Init+0x204>)
@@ -1164,18 +1577,27 @@ Disassembly of section .text:
  800096a:	0449      	lsls	r1, r1, #17
  800096c:	430a      	orrs	r2, r1
  800096e:	601a      	str	r2, [r3, #0]
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);
  8000970:	2200      	movs	r2, #0
  8000972:	2100      	movs	r1, #0
  8000974:	2006      	movs	r0, #6
  8000976:	f002 fed7 	bl	8003728 <HAL_NVIC_SetPriority>
+  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
  800097a:	2006      	movs	r0, #6
  800097c:	f002 fee9 	bl	8003752 <HAL_NVIC_EnableIRQ>
+
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
  8000980:	2200      	movs	r2, #0
  8000982:	2100      	movs	r1, #0
  8000984:	2007      	movs	r0, #7
  8000986:	f002 fecf 	bl	8003728 <HAL_NVIC_SetPriority>
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
  800098a:	2007      	movs	r0, #7
  800098c:	f002 fee1 	bl	8003752 <HAL_NVIC_EnableIRQ>
+
+}
  8000990:	46c0      	nop			; (mov r8, r8)
  8000992:	46bd      	mov	sp, r7
  8000994:	b00b      	add	sp, #44	; 0x2c
@@ -1727,6 +2149,12 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000c8c:	bd80      	pop	{r7, pc}
 
 08000c8e <light_setup>:
+#include "lights.h"
+
+
+uint8_t light_setup(light_t *light, light_gpio_t hardware_output_1,
+												light_gpio_t hardware_output_2)
+{
  8000c8e:	b082      	sub	sp, #8
  8000c90:	b590      	push	{r4, r7, lr}
  8000c92:	b085      	sub	sp, #20
@@ -1743,11 +2171,14 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000ca8:	44bc      	add	ip, r7
  8000caa:	4462      	add	r2, ip
  8000cac:	6013      	str	r3, [r2, #0]
+
+	light->hardware_output_1 = hardware_output_1;
  8000cae:	68fb      	ldr	r3, [r7, #12]
  8000cb0:	1d3a      	adds	r2, r7, #4
  8000cb2:	3304      	adds	r3, #4
  8000cb4:	ca03      	ldmia	r2!, {r0, r1}
  8000cb6:	c303      	stmia	r3!, {r0, r1}
+	light->hardware_output_2 = hardware_output_2;
  8000cb8:	68fb      	ldr	r3, [r7, #12]
  8000cba:	2204      	movs	r2, #4
  8000cbc:	1912      	adds	r2, r2, r4
@@ -1758,24 +2189,32 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000cc6:	330c      	adds	r3, #12
  8000cc8:	ca03      	ldmia	r2!, {r0, r1}
  8000cca:	c303      	stmia	r3!, {r0, r1}
+	light_deenergize(light);
  8000ccc:	68fb      	ldr	r3, [r7, #12]
  8000cce:	0018      	movs	r0, r3
  8000cd0:	f000 f978 	bl	8000fc4 <light_deenergize>
+	light->light_status = LIGHT_OFF;
  8000cd4:	68fb      	ldr	r3, [r7, #12]
  8000cd6:	2200      	movs	r2, #0
  8000cd8:	701a      	strb	r2, [r3, #0]
+	light->fsm_run_on = LIGHT_RUN_FALSE;
  8000cda:	68fb      	ldr	r3, [r7, #12]
  8000cdc:	2221      	movs	r2, #33	; 0x21
  8000cde:	2101      	movs	r1, #1
  8000ce0:	5499      	strb	r1, [r3, r2]
+	light->fsm_run_off = LIGHT_RUN_FALSE;
  8000ce2:	68fb      	ldr	r3, [r7, #12]
  8000ce4:	2222      	movs	r2, #34	; 0x22
  8000ce6:	2101      	movs	r1, #1
  8000ce8:	5499      	strb	r1, [r3, r2]
+	light->fsm_pulse_counts = 1;
  8000cea:	68fb      	ldr	r3, [r7, #12]
  8000cec:	2201      	movs	r2, #1
  8000cee:	619a      	str	r2, [r3, #24]
+	return 0;
  8000cf0:	2300      	movs	r3, #0
+
+}
  8000cf2:	0018      	movs	r0, r3
  8000cf4:	46bd      	mov	sp, r7
  8000cf6:	b005      	add	sp, #20
@@ -1785,139 +2224,206 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000cfe:	4718      	bx	r3
 
 08000d00 <light_on_pulse_fsm>:
+uint8_t light_on_pulse_fsm(light_t *light)
+{
  8000d00:	b580      	push	{r7, lr}
  8000d02:	b082      	sub	sp, #8
  8000d04:	af00      	add	r7, sp, #0
  8000d06:	6078      	str	r0, [r7, #4]
+	if( (light->fsm_run_on == LIGHT_RUN_TRUE) &&
  8000d08:	687b      	ldr	r3, [r7, #4]
  8000d0a:	2221      	movs	r2, #33	; 0x21
  8000d0c:	5c9b      	ldrb	r3, [r3, r2]
  8000d0e:	2b00      	cmp	r3, #0
  8000d10:	d111      	bne.n	8000d36 <light_on_pulse_fsm+0x36>
+		(light->fsm_run_off != LIGHT_RUN_TRUE) )
  8000d12:	687b      	ldr	r3, [r7, #4]
  8000d14:	2222      	movs	r2, #34	; 0x22
  8000d16:	5c9b      	ldrb	r3, [r3, r2]
+	if( (light->fsm_run_on == LIGHT_RUN_TRUE) &&
  8000d18:	2b00      	cmp	r3, #0
  8000d1a:	d00c      	beq.n	8000d36 <light_on_pulse_fsm+0x36>
+	{
+		light_pulse_fsm(light, LIGHT_ON);
  8000d1c:	687b      	ldr	r3, [r7, #4]
  8000d1e:	2101      	movs	r1, #1
  8000d20:	0018      	movs	r0, r3
  8000d22:	f000 f890 	bl	8000e46 <light_pulse_fsm>
+
+		if(light->fsm_status == LIGHT_STATE_STATUS_READY)
  8000d26:	687b      	ldr	r3, [r7, #4]
  8000d28:	7d1b      	ldrb	r3, [r3, #20]
  8000d2a:	2b00      	cmp	r3, #0
  8000d2c:	d103      	bne.n	8000d36 <light_on_pulse_fsm+0x36>
+		{
+			light->fsm_run_on = LIGHT_RUN_FALSE;
  8000d2e:	687b      	ldr	r3, [r7, #4]
  8000d30:	2221      	movs	r2, #33	; 0x21
  8000d32:	2101      	movs	r1, #1
  8000d34:	5499      	strb	r1, [r3, r2]
+		}
+	}
+	return 0;
  8000d36:	2300      	movs	r3, #0
+}
  8000d38:	0018      	movs	r0, r3
  8000d3a:	46bd      	mov	sp, r7
  8000d3c:	b002      	add	sp, #8
  8000d3e:	bd80      	pop	{r7, pc}
 
 08000d40 <light_off_pulse_fsm>:
+
+uint8_t light_off_pulse_fsm(light_t *light)
+{
  8000d40:	b580      	push	{r7, lr}
  8000d42:	b082      	sub	sp, #8
  8000d44:	af00      	add	r7, sp, #0
  8000d46:	6078      	str	r0, [r7, #4]
+	if( (light->fsm_run_off == LIGHT_RUN_TRUE) &&
  8000d48:	687b      	ldr	r3, [r7, #4]
  8000d4a:	2222      	movs	r2, #34	; 0x22
  8000d4c:	5c9b      	ldrb	r3, [r3, r2]
  8000d4e:	2b00      	cmp	r3, #0
  8000d50:	d111      	bne.n	8000d76 <light_off_pulse_fsm+0x36>
+			(light->fsm_run_on != LIGHT_RUN_TRUE) )
  8000d52:	687b      	ldr	r3, [r7, #4]
  8000d54:	2221      	movs	r2, #33	; 0x21
  8000d56:	5c9b      	ldrb	r3, [r3, r2]
+	if( (light->fsm_run_off == LIGHT_RUN_TRUE) &&
  8000d58:	2b00      	cmp	r3, #0
  8000d5a:	d00c      	beq.n	8000d76 <light_off_pulse_fsm+0x36>
+	{
+		light_pulse_fsm(light, LIGHT_OFF);
  8000d5c:	687b      	ldr	r3, [r7, #4]
  8000d5e:	2100      	movs	r1, #0
  8000d60:	0018      	movs	r0, r3
  8000d62:	f000 f870 	bl	8000e46 <light_pulse_fsm>
+
+		if(light->fsm_status == LIGHT_STATE_STATUS_READY)
  8000d66:	687b      	ldr	r3, [r7, #4]
  8000d68:	7d1b      	ldrb	r3, [r3, #20]
  8000d6a:	2b00      	cmp	r3, #0
  8000d6c:	d103      	bne.n	8000d76 <light_off_pulse_fsm+0x36>
+		{
+			light->fsm_run_off = LIGHT_RUN_FALSE;
  8000d6e:	687b      	ldr	r3, [r7, #4]
  8000d70:	2222      	movs	r2, #34	; 0x22
  8000d72:	2101      	movs	r1, #1
  8000d74:	5499      	strb	r1, [r3, r2]
+		}
+	}
+
+	return 0;
  8000d76:	2300      	movs	r3, #0
+}
  8000d78:	0018      	movs	r0, r3
  8000d7a:	46bd      	mov	sp, r7
  8000d7c:	b002      	add	sp, #8
  8000d7e:	bd80      	pop	{r7, pc}
 
 08000d80 <light_ask_off_pulse_fsm>:
+
+
+uint8_t light_ask_off_pulse_fsm(light_t *light)
+{
  8000d80:	b580      	push	{r7, lr}
  8000d82:	b084      	sub	sp, #16
  8000d84:	af00      	add	r7, sp, #0
  8000d86:	6078      	str	r0, [r7, #4]
+	uint8_t status = 0;
  8000d88:	200f      	movs	r0, #15
  8000d8a:	183b      	adds	r3, r7, r0
  8000d8c:	2200      	movs	r2, #0
  8000d8e:	701a      	strb	r2, [r3, #0]
+//	else
+//	{
+//		status = 1;
+//	}
+
+	light->fsm_run_on = LIGHT_RUN_FALSE;
  8000d90:	687b      	ldr	r3, [r7, #4]
  8000d92:	2221      	movs	r2, #33	; 0x21
  8000d94:	2101      	movs	r1, #1
  8000d96:	5499      	strb	r1, [r3, r2]
+	light->fsm_run_off = LIGHT_RUN_TRUE;
  8000d98:	687b      	ldr	r3, [r7, #4]
  8000d9a:	2222      	movs	r2, #34	; 0x22
  8000d9c:	2100      	movs	r1, #0
  8000d9e:	5499      	strb	r1, [r3, r2]
+	light->fsm_init = LIGHT_INIT_TRUE;
  8000da0:	687b      	ldr	r3, [r7, #4]
  8000da2:	2223      	movs	r2, #35	; 0x23
  8000da4:	2100      	movs	r1, #0
  8000da6:	5499      	strb	r1, [r3, r2]
+	light->fsm_state = LIGHT_STATE_IDLE;
  8000da8:	687b      	ldr	r3, [r7, #4]
  8000daa:	2220      	movs	r2, #32
  8000dac:	2100      	movs	r1, #0
  8000dae:	5499      	strb	r1, [r3, r2]
+	status = 0;
  8000db0:	183b      	adds	r3, r7, r0
  8000db2:	2200      	movs	r2, #0
  8000db4:	701a      	strb	r2, [r3, #0]
+
+	return status;
  8000db6:	183b      	adds	r3, r7, r0
  8000db8:	781b      	ldrb	r3, [r3, #0]
+}
  8000dba:	0018      	movs	r0, r3
  8000dbc:	46bd      	mov	sp, r7
  8000dbe:	b004      	add	sp, #16
  8000dc0:	bd80      	pop	{r7, pc}
 
 08000dc2 <light_ask_on_pulse_fsm>:
+uint8_t light_ask_on_pulse_fsm(light_t *light)
+{
  8000dc2:	b580      	push	{r7, lr}
  8000dc4:	b084      	sub	sp, #16
  8000dc6:	af00      	add	r7, sp, #0
  8000dc8:	6078      	str	r0, [r7, #4]
+	uint8_t status = 0;
  8000dca:	200f      	movs	r0, #15
  8000dcc:	183b      	adds	r3, r7, r0
  8000dce:	2200      	movs	r2, #0
  8000dd0:	701a      	strb	r2, [r3, #0]
+//	else
+//	{
+//		status = 1;
+//	}
+
+	light->fsm_run_on = LIGHT_RUN_TRUE;
  8000dd2:	687b      	ldr	r3, [r7, #4]
  8000dd4:	2221      	movs	r2, #33	; 0x21
  8000dd6:	2100      	movs	r1, #0
  8000dd8:	5499      	strb	r1, [r3, r2]
+	light->fsm_run_off = LIGHT_RUN_FALSE;
  8000dda:	687b      	ldr	r3, [r7, #4]
  8000ddc:	2222      	movs	r2, #34	; 0x22
  8000dde:	2101      	movs	r1, #1
  8000de0:	5499      	strb	r1, [r3, r2]
+	light->fsm_init = LIGHT_INIT_TRUE;
  8000de2:	687b      	ldr	r3, [r7, #4]
  8000de4:	2223      	movs	r2, #35	; 0x23
  8000de6:	2100      	movs	r1, #0
  8000de8:	5499      	strb	r1, [r3, r2]
+	light->fsm_state = LIGHT_STATE_IDLE;
  8000dea:	687b      	ldr	r3, [r7, #4]
  8000dec:	2220      	movs	r2, #32
  8000dee:	2100      	movs	r1, #0
  8000df0:	5499      	strb	r1, [r3, r2]
+
+	return status;
  8000df2:	183b      	adds	r3, r7, r0
  8000df4:	781b      	ldrb	r3, [r3, #0]
+}
  8000df6:	0018      	movs	r0, r3
  8000df8:	46bd      	mov	sp, r7
  8000dfa:	b004      	add	sp, #16
  8000dfc:	bd80      	pop	{r7, pc}
 
 08000dfe <light_check_init_fsm>:
+uint8_t light_check_init_fsm(light_t light, light_fsm_init_t *init)
+{
  8000dfe:	b084      	sub	sp, #16
  8000e00:	b5b0      	push	{r4, r5, r7, lr}
  8000e02:	af00      	add	r7, sp, #0
@@ -1928,13 +2434,16 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000e0c:	6061      	str	r1, [r4, #4]
  8000e0e:	60a2      	str	r2, [r4, #8]
  8000e10:	60e3      	str	r3, [r4, #12]
+	*init = light.fsm_init;
  8000e12:	1d2b      	adds	r3, r5, #4
  8000e14:	19db      	adds	r3, r3, r7
  8000e16:	2223      	movs	r2, #35	; 0x23
  8000e18:	5c9a      	ldrb	r2, [r3, r2]
  8000e1a:	6b7b      	ldr	r3, [r7, #52]	; 0x34
  8000e1c:	701a      	strb	r2, [r3, #0]
+	return 0;
  8000e1e:	2300      	movs	r3, #0
+}
  8000e20:	0018      	movs	r0, r3
  8000e22:	46bd      	mov	sp, r7
  8000e24:	bcb0      	pop	{r4, r5, r7}
@@ -1943,21 +2452,32 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000e2a:	4718      	bx	r3
 
 08000e2c <light_acknowledge_init_fsm>:
+
+uint8_t light_acknowledge_init_fsm(light_t *light)
+{
  8000e2c:	b580      	push	{r7, lr}
  8000e2e:	b082      	sub	sp, #8
  8000e30:	af00      	add	r7, sp, #0
  8000e32:	6078      	str	r0, [r7, #4]
+	light->fsm_init = LIGHT_INIT_FALSE;
  8000e34:	687b      	ldr	r3, [r7, #4]
  8000e36:	2223      	movs	r2, #35	; 0x23
  8000e38:	2101      	movs	r1, #1
  8000e3a:	5499      	strb	r1, [r3, r2]
+	return 0;
  8000e3c:	2300      	movs	r3, #0
+}
  8000e3e:	0018      	movs	r0, r3
  8000e40:	46bd      	mov	sp, r7
  8000e42:	b002      	add	sp, #8
  8000e44:	bd80      	pop	{r7, pc}
 
 08000e46 <light_pulse_fsm>:
+
+
+
+uint8_t light_pulse_fsm(light_t *light, light_status_t new_status)
+{
  8000e46:	b580      	push	{r7, lr}
  8000e48:	b088      	sub	sp, #32
  8000e4a:	af00      	add	r7, sp, #0
@@ -1965,29 +2485,42 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000e4e:	000a      	movs	r2, r1
  8000e50:	1cfb      	adds	r3, r7, #3
  8000e52:	701a      	strb	r2, [r3, #0]
+	//TODO: (high) check if the implementation of this FSM is necessary
+
+	light_fsm_state_t state = light->fsm_state;
  8000e54:	201f      	movs	r0, #31
  8000e56:	183b      	adds	r3, r7, r0
  8000e58:	687a      	ldr	r2, [r7, #4]
  8000e5a:	2120      	movs	r1, #32
  8000e5c:	5c52      	ldrb	r2, [r2, r1]
  8000e5e:	701a      	strb	r2, [r3, #0]
+//	light_fsm_init_t fsm_init = light->fsm_init;
+	uint32_t fsm_pulse_counts = light->fsm_pulse_counts;
  8000e60:	687b      	ldr	r3, [r7, #4]
  8000e62:	699b      	ldr	r3, [r3, #24]
  8000e64:	613b      	str	r3, [r7, #16]
+	uint32_t fsm_pulse_idx = light->fsm_pulse_idx;
  8000e66:	687b      	ldr	r3, [r7, #4]
  8000e68:	69db      	ldr	r3, [r3, #28]
  8000e6a:	61bb      	str	r3, [r7, #24]
+	light_fsm_status_t fsm_status = light->fsm_status;
  8000e6c:	2317      	movs	r3, #23
  8000e6e:	18fb      	adds	r3, r7, r3
  8000e70:	687a      	ldr	r2, [r7, #4]
  8000e72:	7d12      	ldrb	r2, [r2, #20]
  8000e74:	701a      	strb	r2, [r3, #0]
+	light_fsm_init_t fsm_init = light->fsm_init;
  8000e76:	230f      	movs	r3, #15
  8000e78:	18fb      	adds	r3, r7, r3
  8000e7a:	687a      	ldr	r2, [r7, #4]
  8000e7c:	2123      	movs	r1, #35	; 0x23
  8000e7e:	5c52      	ldrb	r2, [r2, r1]
  8000e80:	701a      	strb	r2, [r3, #0]
+//	light_status_t light_status = light->light_status;
+//	light_status_t new_light_status = light->new_light_status;
+
+
+	switch(state)
  8000e82:	183b      	adds	r3, r7, r0
  8000e84:	781b      	ldrb	r3, [r3, #0]
  8000e86:	2b03      	cmp	r3, #3
@@ -1997,99 +2530,139 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000e8e:	d002      	beq.n	8000e96 <light_pulse_fsm+0x50>
  8000e90:	2b02      	cmp	r3, #2
  8000e92:	d01e      	beq.n	8000ed2 <light_pulse_fsm+0x8c>
+			fsm_status = LIGHT_STATE_STATUS_READY;
+			state = LIGHT_STATE_IDLE;
+			break;
+		default:
+
+			break;
  8000e94:	e03c      	b.n	8000f10 <light_pulse_fsm+0xca>
+				fsm_status = LIGHT_STATE_STATUS_BUSY;
  8000e96:	2317      	movs	r3, #23
  8000e98:	18fb      	adds	r3, r7, r3
  8000e9a:	2201      	movs	r2, #1
  8000e9c:	701a      	strb	r2, [r3, #0]
+				if(new_status == LIGHT_ON)
  8000e9e:	1cfb      	adds	r3, r7, #3
  8000ea0:	781b      	ldrb	r3, [r3, #0]
  8000ea2:	2b01      	cmp	r3, #1
  8000ea4:	d104      	bne.n	8000eb0 <light_pulse_fsm+0x6a>
+					light_on(light);
  8000ea6:	687b      	ldr	r3, [r7, #4]
  8000ea8:	0018      	movs	r0, r3
  8000eaa:	f000 f84d 	bl	8000f48 <light_on>
  8000eae:	e003      	b.n	8000eb8 <light_pulse_fsm+0x72>
+					light_off(light);
  8000eb0:	687b      	ldr	r3, [r7, #4]
  8000eb2:	0018      	movs	r0, r3
  8000eb4:	f000 f867 	bl	8000f86 <light_off>
+				if(fsm_pulse_counts == 0)
  8000eb8:	693b      	ldr	r3, [r7, #16]
  8000eba:	2b00      	cmp	r3, #0
  8000ebc:	d104      	bne.n	8000ec8 <light_pulse_fsm+0x82>
+					state = LIGHT_STATE_DEENERGIZING;
  8000ebe:	231f      	movs	r3, #31
  8000ec0:	18fb      	adds	r3, r7, r3
  8000ec2:	2203      	movs	r2, #3
  8000ec4:	701a      	strb	r2, [r3, #0]
+			break;
  8000ec6:	e026      	b.n	8000f16 <light_pulse_fsm+0xd0>
+					state = LIGHT_STATE_WAIT;
  8000ec8:	231f      	movs	r3, #31
  8000eca:	18fb      	adds	r3, r7, r3
  8000ecc:	2202      	movs	r2, #2
  8000ece:	701a      	strb	r2, [r3, #0]
+			break;
  8000ed0:	e021      	b.n	8000f16 <light_pulse_fsm+0xd0>
+			fsm_status = LIGHT_STATE_STATUS_BUSY;
  8000ed2:	2317      	movs	r3, #23
  8000ed4:	18fb      	adds	r3, r7, r3
  8000ed6:	2201      	movs	r2, #1
  8000ed8:	701a      	strb	r2, [r3, #0]
+			fsm_pulse_idx++;
  8000eda:	69bb      	ldr	r3, [r7, #24]
  8000edc:	3301      	adds	r3, #1
  8000ede:	61bb      	str	r3, [r7, #24]
+			if(fsm_pulse_idx > fsm_pulse_counts)
  8000ee0:	69ba      	ldr	r2, [r7, #24]
  8000ee2:	693b      	ldr	r3, [r7, #16]
  8000ee4:	429a      	cmp	r2, r3
  8000ee6:	d915      	bls.n	8000f14 <light_pulse_fsm+0xce>
+				state = LIGHT_STATE_DEENERGIZING;
  8000ee8:	231f      	movs	r3, #31
  8000eea:	18fb      	adds	r3, r7, r3
  8000eec:	2203      	movs	r2, #3
  8000eee:	701a      	strb	r2, [r3, #0]
+				fsm_pulse_idx = 0;
  8000ef0:	2300      	movs	r3, #0
  8000ef2:	61bb      	str	r3, [r7, #24]
+			break;
  8000ef4:	e00e      	b.n	8000f14 <light_pulse_fsm+0xce>
+			light_deenergize(light);
  8000ef6:	687b      	ldr	r3, [r7, #4]
  8000ef8:	0018      	movs	r0, r3
  8000efa:	f000 f863 	bl	8000fc4 <light_deenergize>
+			fsm_status = LIGHT_STATE_STATUS_READY;
  8000efe:	2317      	movs	r3, #23
  8000f00:	18fb      	adds	r3, r7, r3
  8000f02:	2200      	movs	r2, #0
  8000f04:	701a      	strb	r2, [r3, #0]
+			state = LIGHT_STATE_IDLE;
  8000f06:	231f      	movs	r3, #31
  8000f08:	18fb      	adds	r3, r7, r3
  8000f0a:	2200      	movs	r2, #0
  8000f0c:	701a      	strb	r2, [r3, #0]
+			break;
  8000f0e:	e002      	b.n	8000f16 <light_pulse_fsm+0xd0>
+			break;
  8000f10:	46c0      	nop			; (mov r8, r8)
  8000f12:	e000      	b.n	8000f16 <light_pulse_fsm+0xd0>
+			break;
  8000f14:	46c0      	nop			; (mov r8, r8)
+	}
+
+	light->fsm_state = state;
  8000f16:	687b      	ldr	r3, [r7, #4]
  8000f18:	221f      	movs	r2, #31
  8000f1a:	18ba      	adds	r2, r7, r2
  8000f1c:	2120      	movs	r1, #32
  8000f1e:	7812      	ldrb	r2, [r2, #0]
  8000f20:	545a      	strb	r2, [r3, r1]
+	light->fsm_init = fsm_init;
  8000f22:	687b      	ldr	r3, [r7, #4]
  8000f24:	220f      	movs	r2, #15
  8000f26:	18ba      	adds	r2, r7, r2
  8000f28:	2123      	movs	r1, #35	; 0x23
  8000f2a:	7812      	ldrb	r2, [r2, #0]
  8000f2c:	545a      	strb	r2, [r3, r1]
+	light->fsm_pulse_idx = fsm_pulse_idx;
  8000f2e:	687b      	ldr	r3, [r7, #4]
  8000f30:	69ba      	ldr	r2, [r7, #24]
  8000f32:	61da      	str	r2, [r3, #28]
+	light->fsm_status = fsm_status;
  8000f34:	687b      	ldr	r3, [r7, #4]
  8000f36:	2217      	movs	r2, #23
  8000f38:	18ba      	adds	r2, r7, r2
  8000f3a:	7812      	ldrb	r2, [r2, #0]
  8000f3c:	751a      	strb	r2, [r3, #20]
+
+	return 0;
  8000f3e:	2300      	movs	r3, #0
+}
  8000f40:	0018      	movs	r0, r3
  8000f42:	46bd      	mov	sp, r7
  8000f44:	b008      	add	sp, #32
  8000f46:	bd80      	pop	{r7, pc}
 
 08000f48 <light_on>:
+
+uint8_t light_on(light_t *light)
+{
  8000f48:	b580      	push	{r7, lr}
  8000f4a:	b082      	sub	sp, #8
  8000f4c:	af00      	add	r7, sp, #0
  8000f4e:	6078      	str	r0, [r7, #4]
+	HAL_GPIO_WritePin(light->hardware_output_1.port,
  8000f50:	687b      	ldr	r3, [r7, #4]
  8000f52:	6858      	ldr	r0, [r3, #4]
  8000f54:	687b      	ldr	r3, [r7, #4]
@@ -2097,6 +2670,10 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000f58:	2200      	movs	r2, #0
  8000f5a:	0019      	movs	r1, r3
  8000f5c:	f002 fe7d 	bl	8003c5a <HAL_GPIO_WritePin>
+						light->hardware_output_1.pin,
+						GPIO_PIN_RESET);
+
+	HAL_GPIO_WritePin(light->hardware_output_2.port,
  8000f60:	687b      	ldr	r3, [r7, #4]
  8000f62:	68d8      	ldr	r0, [r3, #12]
  8000f64:	687b      	ldr	r3, [r7, #4]
@@ -2104,23 +2681,34 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000f68:	2201      	movs	r2, #1
  8000f6a:	0019      	movs	r1, r3
  8000f6c:	f002 fe75 	bl	8003c5a <HAL_GPIO_WritePin>
+						light->hardware_output_2.pin,
+						GPIO_PIN_SET);
+
+	light->light_status = LIGHT_ON;
  8000f70:	687b      	ldr	r3, [r7, #4]
  8000f72:	2201      	movs	r2, #1
  8000f74:	701a      	strb	r2, [r3, #0]
+	light->power_status = LIGHT_POWER_STATUS_ENERGIZED_ON;
  8000f76:	687b      	ldr	r3, [r7, #4]
  8000f78:	2201      	movs	r2, #1
  8000f7a:	705a      	strb	r2, [r3, #1]
+	return 0;
  8000f7c:	2300      	movs	r3, #0
+}
  8000f7e:	0018      	movs	r0, r3
  8000f80:	46bd      	mov	sp, r7
  8000f82:	b002      	add	sp, #8
  8000f84:	bd80      	pop	{r7, pc}
 
 08000f86 <light_off>:
+
+uint8_t light_off(light_t *light)
+{
  8000f86:	b580      	push	{r7, lr}
  8000f88:	b082      	sub	sp, #8
  8000f8a:	af00      	add	r7, sp, #0
  8000f8c:	6078      	str	r0, [r7, #4]
+	HAL_GPIO_WritePin(light->hardware_output_1.port,
  8000f8e:	687b      	ldr	r3, [r7, #4]
  8000f90:	6858      	ldr	r0, [r3, #4]
  8000f92:	687b      	ldr	r3, [r7, #4]
@@ -2128,6 +2716,10 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000f96:	2201      	movs	r2, #1
  8000f98:	0019      	movs	r1, r3
  8000f9a:	f002 fe5e 	bl	8003c5a <HAL_GPIO_WritePin>
+						light->hardware_output_1.pin,
+						GPIO_PIN_SET);
+
+	HAL_GPIO_WritePin(light->hardware_output_2.port,
  8000f9e:	687b      	ldr	r3, [r7, #4]
  8000fa0:	68d8      	ldr	r0, [r3, #12]
  8000fa2:	687b      	ldr	r3, [r7, #4]
@@ -2135,23 +2727,35 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000fa6:	2200      	movs	r2, #0
  8000fa8:	0019      	movs	r1, r3
  8000faa:	f002 fe56 	bl	8003c5a <HAL_GPIO_WritePin>
+						light->hardware_output_2.pin,
+						GPIO_PIN_RESET);
+
+	light->light_status = LIGHT_OFF;
  8000fae:	687b      	ldr	r3, [r7, #4]
  8000fb0:	2200      	movs	r2, #0
  8000fb2:	701a      	strb	r2, [r3, #0]
+	light->power_status = LIGHT_POWER_STATUS_ENERGIZED_OFF;
  8000fb4:	687b      	ldr	r3, [r7, #4]
  8000fb6:	2200      	movs	r2, #0
  8000fb8:	705a      	strb	r2, [r3, #1]
+	return 0;
  8000fba:	2300      	movs	r3, #0
+}
  8000fbc:	0018      	movs	r0, r3
  8000fbe:	46bd      	mov	sp, r7
  8000fc0:	b002      	add	sp, #8
  8000fc2:	bd80      	pop	{r7, pc}
 
 08000fc4 <light_deenergize>:
+
+
+uint8_t light_deenergize(light_t *light)
+{
  8000fc4:	b580      	push	{r7, lr}
  8000fc6:	b082      	sub	sp, #8
  8000fc8:	af00      	add	r7, sp, #0
  8000fca:	6078      	str	r0, [r7, #4]
+	HAL_GPIO_WritePin(light->hardware_output_1.port,
  8000fcc:	687b      	ldr	r3, [r7, #4]
  8000fce:	6858      	ldr	r0, [r3, #4]
  8000fd0:	687b      	ldr	r3, [r7, #4]
@@ -2159,6 +2763,10 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000fd4:	2200      	movs	r2, #0
  8000fd6:	0019      	movs	r1, r3
  8000fd8:	f002 fe3f 	bl	8003c5a <HAL_GPIO_WritePin>
+						light->hardware_output_1.pin,
+						GPIO_PIN_RESET);
+
+	HAL_GPIO_WritePin(light->hardware_output_2.port,
  8000fdc:	687b      	ldr	r3, [r7, #4]
  8000fde:	68d8      	ldr	r0, [r3, #12]
  8000fe0:	687b      	ldr	r3, [r7, #4]
@@ -2166,10 +2774,16 @@ uint8_t led_signal_toggle(led_signal_t led_signal)
  8000fe4:	2200      	movs	r2, #0
  8000fe6:	0019      	movs	r1, r3
  8000fe8:	f002 fe37 	bl	8003c5a <HAL_GPIO_WritePin>
+						light->hardware_output_2.pin,
+						GPIO_PIN_RESET);
+
+	light->power_status = LIGHT_POWER_STATUS_DEENERGIZED;
  8000fec:	687b      	ldr	r3, [r7, #4]
  8000fee:	2202      	movs	r2, #2
  8000ff0:	705a      	strb	r2, [r3, #1]
+	return 0;
  8000ff2:	2300      	movs	r3, #0
+}
  8000ff4:	0018      	movs	r0, r3
  8000ff6:	46bd      	mov	sp, r7
  8000ff8:	b002      	add	sp, #8
@@ -5063,6 +5677,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002080:	e7fe      	b.n	8002080 <Error_Handler+0x8>
 
 08002082 <pyd1598_setup>:
+
+/**********************************High Level**********************************/
+void pyd1598_setup(pyd1598_sensor_t *sensor, pyd1598_config_t initial_config,
+							pyd1598_hardware_interface_t serin_inteface,
+							pyd1598_hardware_interface_t direct_link_inteface)
+{
  8002082:	b082      	sub	sp, #8
  8002084:	b5b0      	push	{r4, r5, r7, lr}
  8002086:	b086      	sub	sp, #24
@@ -5076,6 +5696,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002096:	1952      	adds	r2, r2, r5
  8002098:	19d2      	adds	r2, r2, r7
  800209a:	6013      	str	r3, [r2, #0]
+	pyd1598_serin_setup(&(sensor->serin), initial_config, serin_inteface);
  800209c:	68fc      	ldr	r4, [r7, #12]
  800209e:	2304      	movs	r3, #4
  80020a0:	195b      	adds	r3, r3, r5
@@ -5089,6 +5710,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80020b0:	6852      	ldr	r2, [r2, #4]
  80020b2:	0020      	movs	r0, r4
  80020b4:	f000 f831 	bl	800211a <pyd1598_serin_setup>
+	pyd1598_direct_link_setup(&(sensor->direct_link), direct_link_inteface);
  80020b8:	68fb      	ldr	r3, [r7, #12]
  80020ba:	3320      	adds	r3, #32
  80020bc:	0018      	movs	r0, r3
@@ -5098,38 +5720,55 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80020c4:	6819      	ldr	r1, [r3, #0]
  80020c6:	685a      	ldr	r2, [r3, #4]
  80020c8:	f000 f85f 	bl	800218a <pyd1598_direct_link_setup>
+
+
+
+	sensor->current_config.blind_time = 0;
  80020cc:	68fb      	ldr	r3, [r7, #12]
  80020ce:	2251      	movs	r2, #81	; 0x51
  80020d0:	2100      	movs	r1, #0
  80020d2:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.count_mode = 0;
  80020d4:	68fb      	ldr	r3, [r7, #12]
  80020d6:	2257      	movs	r2, #87	; 0x57
  80020d8:	2100      	movs	r1, #0
  80020da:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.hpf_cutoff = 0;
  80020dc:	68fb      	ldr	r3, [r7, #12]
  80020de:	2256      	movs	r2, #86	; 0x56
  80020e0:	2100      	movs	r1, #0
  80020e2:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.op_mode = 0;
  80020e4:	68fb      	ldr	r3, [r7, #12]
  80020e6:	2254      	movs	r2, #84	; 0x54
  80020e8:	2100      	movs	r1, #0
  80020ea:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.pulse_counter = 0;
  80020ec:	68fb      	ldr	r3, [r7, #12]
  80020ee:	2252      	movs	r2, #82	; 0x52
  80020f0:	2100      	movs	r1, #0
  80020f2:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.signal_source = 0;
  80020f4:	68fb      	ldr	r3, [r7, #12]
  80020f6:	2255      	movs	r2, #85	; 0x55
  80020f8:	2100      	movs	r1, #0
  80020fa:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.threshold = 0;
  80020fc:	68fb      	ldr	r3, [r7, #12]
  80020fe:	2250      	movs	r2, #80	; 0x50
  8002100:	2100      	movs	r1, #0
  8002102:	5499      	strb	r1, [r3, r2]
+	sensor->current_config.window_time = 0;
  8002104:	68fb      	ldr	r3, [r7, #12]
  8002106:	2253      	movs	r2, #83	; 0x53
  8002108:	2100      	movs	r1, #0
  800210a:	5499      	strb	r1, [r3, r2]
+
+
+
+
+
+}
  800210c:	46c0      	nop			; (mov r8, r8)
  800210e:	46bd      	mov	sp, r7
  8002110:	b004      	add	sp, #16
@@ -5139,6 +5778,11 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002118:	4718      	bx	r3
 
 0800211a <pyd1598_serin_setup>:
+
+void pyd1598_serin_setup(pyd1598_serin_t *serin,
+							pyd1598_config_t initial_config,
+							pyd1598_hardware_interface_t hardware_inteface)
+{
  800211a:	b082      	sub	sp, #8
  800211c:	b590      	push	{r4, r7, lr}
  800211e:	b085      	sub	sp, #20
@@ -5155,15 +5799,21 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002134:	44bc      	add	ip, r7
  8002136:	4462      	add	r2, ip
  8002138:	6013      	str	r3, [r2, #0]
+	serin->config = initial_config;
  800213a:	68fb      	ldr	r3, [r7, #12]
  800213c:	1d3a      	adds	r2, r7, #4
  800213e:	ca03      	ldmia	r2!, {r0, r1}
  8002140:	c303      	stmia	r3!, {r0, r1}
+
+
+	pyd1598_serin_add_all_conf(serin->config, serin);
  8002142:	68fa      	ldr	r2, [r7, #12]
  8002144:	68fb      	ldr	r3, [r7, #12]
  8002146:	6818      	ldr	r0, [r3, #0]
  8002148:	6859      	ldr	r1, [r3, #4]
  800214a:	f000 fac6 	bl	80026da <pyd1598_serin_add_all_conf>
+
+	serin->hardware_inteface = hardware_inteface;
  800214e:	68fb      	ldr	r3, [r7, #12]
  8002150:	2204      	movs	r2, #4
  8002152:	1912      	adds	r2, r2, r4
@@ -5174,19 +5824,30 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800215c:	3318      	adds	r3, #24
  800215e:	ca03      	ldmia	r2!, {r0, r1}
  8002160:	c303      	stmia	r3!, {r0, r1}
+	//This is incremented when data is send to SERIN pin
+	serin->data_idx = 0;
  8002162:	68fb      	ldr	r3, [r7, #12]
  8002164:	2200      	movs	r2, #0
  8002166:	611a      	str	r2, [r3, #16]
+	//This mask is shifted when data is send to SERIN pin.
+	serin->mask = PYD1598_SERIN_BIT_24_MASK;
  8002168:	68fb      	ldr	r3, [r7, #12]
  800216a:	2280      	movs	r2, #128	; 0x80
  800216c:	0452      	lsls	r2, r2, #17
  800216e:	60da      	str	r2, [r3, #12]
+	serin->state = PYD1598_SERIN_IDLE;
  8002170:	68fb      	ldr	r3, [r7, #12]
  8002172:	2200      	movs	r2, #0
  8002174:	751a      	strb	r2, [r3, #20]
+	serin->start_fsm = false;
  8002176:	68fb      	ldr	r3, [r7, #12]
  8002178:	2200      	movs	r2, #0
  800217a:	755a      	strb	r2, [r3, #21]
+
+
+
+
+}
  800217c:	46c0      	nop			; (mov r8, r8)
  800217e:	46bd      	mov	sp, r7
  8002180:	b005      	add	sp, #20
@@ -5196,6 +5857,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002188:	4718      	bx	r3
 
 0800218a <pyd1598_direct_link_setup>:
+
+void pyd1598_direct_link_setup(pyd1598_direct_link_t *direct_link,
+							pyd1598_hardware_interface_t hardware_inteface)
+{
  800218a:	b580      	push	{r7, lr}
  800218c:	b084      	sub	sp, #16
  800218e:	af00      	add	r7, sp, #0
@@ -5203,63 +5868,93 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002192:	1d3b      	adds	r3, r7, #4
  8002194:	6019      	str	r1, [r3, #0]
  8002196:	605a      	str	r2, [r3, #4]
+	//Hardware initializations
+	direct_link->hardware_inteface = hardware_inteface;
  8002198:	68fb      	ldr	r3, [r7, #12]
  800219a:	1d3a      	adds	r2, r7, #4
  800219c:	3324      	adds	r3, #36	; 0x24
  800219e:	ca03      	ldmia	r2!, {r0, r1}
  80021a0:	c303      	stmia	r3!, {r0, r1}
+
+	//Sensor variables initializations
+	//This will be updated after the first comm
+	direct_link->config.blind_time = 0;
  80021a2:	68fb      	ldr	r3, [r7, #12]
  80021a4:	2200      	movs	r2, #0
  80021a6:	705a      	strb	r2, [r3, #1]
+	direct_link->config.count_mode = 0;
  80021a8:	68fb      	ldr	r3, [r7, #12]
  80021aa:	2200      	movs	r2, #0
  80021ac:	71da      	strb	r2, [r3, #7]
+	direct_link->config.hpf_cutoff = 0;
  80021ae:	68fb      	ldr	r3, [r7, #12]
  80021b0:	2200      	movs	r2, #0
  80021b2:	719a      	strb	r2, [r3, #6]
+	direct_link->config.op_mode = 0;
  80021b4:	68fb      	ldr	r3, [r7, #12]
  80021b6:	2200      	movs	r2, #0
  80021b8:	711a      	strb	r2, [r3, #4]
+	direct_link->config.pulse_counter = 0;
  80021ba:	68fb      	ldr	r3, [r7, #12]
  80021bc:	2200      	movs	r2, #0
  80021be:	709a      	strb	r2, [r3, #2]
+	direct_link->config.signal_source = 0;
  80021c0:	68fb      	ldr	r3, [r7, #12]
  80021c2:	2200      	movs	r2, #0
  80021c4:	715a      	strb	r2, [r3, #5]
+	direct_link->config.threshold = 0;
  80021c6:	68fb      	ldr	r3, [r7, #12]
  80021c8:	2200      	movs	r2, #0
  80021ca:	701a      	strb	r2, [r3, #0]
+	direct_link->config.window_time = 0;
  80021cc:	68fb      	ldr	r3, [r7, #12]
  80021ce:	2200      	movs	r2, #0
  80021d0:	70da      	strb	r2, [r3, #3]
+
+	direct_link->status = PYD1598_OUT_OF_RANGE_NORMAL;
  80021d2:	68fb      	ldr	r3, [r7, #12]
  80021d4:	2200      	movs	r2, #0
  80021d6:	739a      	strb	r2, [r3, #14]
+	direct_link->source_value.pir_bpf = 0;
  80021d8:	68fb      	ldr	r3, [r7, #12]
  80021da:	2200      	movs	r2, #0
  80021dc:	811a      	strh	r2, [r3, #8]
+	direct_link->source_value.pir_lpf = 0;
  80021de:	68fb      	ldr	r3, [r7, #12]
  80021e0:	2200      	movs	r2, #0
  80021e2:	815a      	strh	r2, [r3, #10]
+	direct_link->source_value.temperature = 0;
  80021e4:	68fb      	ldr	r3, [r7, #12]
  80021e6:	2200      	movs	r2, #0
  80021e8:	819a      	strh	r2, [r3, #12]
+
+	//Finite State Machine initializations
+	direct_link->forced_state = PYD_STATE_FORCED_DRIVE_ONE;
  80021ea:	68fb      	ldr	r3, [r7, #12]
  80021ec:	2200      	movs	r2, #0
  80021ee:	771a      	strb	r2, [r3, #28]
+	direct_link->datagram_bufffer = 0;
  80021f0:	68f9      	ldr	r1, [r7, #12]
  80021f2:	2200      	movs	r2, #0
  80021f4:	2300      	movs	r3, #0
  80021f6:	610a      	str	r2, [r1, #16]
  80021f8:	614b      	str	r3, [r1, #20]
+	direct_link->start_fsm = 0;
  80021fa:	68fb      	ldr	r3, [r7, #12]
  80021fc:	2221      	movs	r2, #33	; 0x21
  80021fe:	2100      	movs	r1, #0
  8002200:	5499      	strb	r1, [r3, r2]
+	direct_link->time_update_idx = 0;
  8002202:	68fb      	ldr	r3, [r7, #12]
  8002204:	2222      	movs	r2, #34	; 0x22
  8002206:	2100      	movs	r1, #0
  8002208:	5499      	strb	r1, [r3, r2]
+//	else
+//	{
+//		pyd1598_direct_link_set_as_interrupt_input(direct_link->hardware_inteface);
+//	}
+
+}
  800220a:	46c0      	nop			; (mov r8, r8)
  800220c:	46bd      	mov	sp, r7
  800220e:	b004      	add	sp, #16
@@ -5267,6 +5962,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
 	...
 
 08002214 <pyd1598_dl_readout_fsm>:
+/*_________________________________Direct link FSM____________________________*/
+
+
+void pyd1598_dl_readout_fsm(pyd1598_direct_link_t *direct_link,
+													pyd1598_op_mode_t op_mode)
+{
  8002214:	b580      	push	{r7, lr}
  8002216:	b088      	sub	sp, #32
  8002218:	af00      	add	r7, sp, #0
@@ -5274,47 +5975,66 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800221c:	000a      	movs	r2, r1
  800221e:	1cfb      	adds	r3, r7, #3
  8002220:	701a      	strb	r2, [r3, #0]
+
+	//Information variables
+	uint64_t datagram_bufffer = direct_link->datagram_bufffer;
  8002222:	687b      	ldr	r3, [r7, #4]
  8002224:	691a      	ldr	r2, [r3, #16]
  8002226:	695b      	ldr	r3, [r3, #20]
  8002228:	60ba      	str	r2, [r7, #8]
  800222a:	60fb      	str	r3, [r7, #12]
+
+	//FSM variables
+	pyd1598_wakeup_conf_t wakeup_mode = direct_link->wakeup_mode;
  800222c:	2313      	movs	r3, #19
  800222e:	18fb      	adds	r3, r7, r3
  8002230:	687a      	ldr	r2, [r7, #4]
  8002232:	7f52      	ldrb	r2, [r2, #29]
  8002234:	701a      	strb	r2, [r3, #0]
+	pyd1598_readout_status_t readout_status = direct_link->readout_status;
  8002236:	231f      	movs	r3, #31
  8002238:	18fb      	adds	r3, r7, r3
  800223a:	687a      	ldr	r2, [r7, #4]
  800223c:	7fd2      	ldrb	r2, [r2, #31]
  800223e:	701a      	strb	r2, [r3, #0]
+	pyd1598_readout_state_t readout_state = direct_link->readout_state;
  8002240:	201e      	movs	r0, #30
  8002242:	183b      	adds	r3, r7, r0
  8002244:	687a      	ldr	r2, [r7, #4]
  8002246:	2120      	movs	r1, #32
  8002248:	5c52      	ldrb	r2, [r2, r1]
  800224a:	701a      	strb	r2, [r3, #0]
+	uint8_t time_update_idx = direct_link->time_update_idx;
  800224c:	231d      	movs	r3, #29
  800224e:	18fb      	adds	r3, r7, r3
  8002250:	687a      	ldr	r2, [r7, #4]
  8002252:	2122      	movs	r1, #34	; 0x22
  8002254:	5c52      	ldrb	r2, [r2, r1]
  8002256:	701a      	strb	r2, [r3, #0]
+	bool start_fsm = direct_link->start_fsm;
  8002258:	231c      	movs	r3, #28
  800225a:	18fb      	adds	r3, r7, r3
  800225c:	687a      	ldr	r2, [r7, #4]
  800225e:	2121      	movs	r1, #33	; 0x21
  8002260:	5c52      	ldrb	r2, [r2, r1]
  8002262:	701a      	strb	r2, [r3, #0]
+	pyd1598_wakeup_isr_status_t wakeup_isr_status = direct_link->wakeup_isr_status;
  8002264:	231b      	movs	r3, #27
  8002266:	18fb      	adds	r3, r7, r3
  8002268:	687a      	ldr	r2, [r7, #4]
  800226a:	2123      	movs	r1, #35	; 0x23
  800226c:	5c52      	ldrb	r2, [r2, r1]
  800226e:	701a      	strb	r2, [r3, #0]
+
+	//Local variable
+	uint32_t idx = 0;
  8002270:	2300      	movs	r3, #0
  8002272:	617b      	str	r3, [r7, #20]
+
+
+	//TODO: (low) implement readout abort state
+
+	switch(readout_state)
  8002274:	183b      	adds	r3, r7, r0
  8002276:	781b      	ldrb	r3, [r3, #0]
  8002278:	2b04      	cmp	r3, #4
@@ -5325,29 +6045,46 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002282:	18d3      	adds	r3, r2, r3
  8002284:	681b      	ldr	r3, [r3, #0]
  8002286:	469f      	mov	pc, r3
+	{
+		case PYD1598_READOUT_IDLE:
+
+			//This state do nothing until start_fsm is activated outside the FSM
+			if(start_fsm == true)
  8002288:	231c      	movs	r3, #28
  800228a:	18fb      	adds	r3, r7, r3
  800228c:	781b      	ldrb	r3, [r3, #0]
  800228e:	2b00      	cmp	r3, #0
  8002290:	d100      	bne.n	8002294 <pyd1598_dl_readout_fsm+0x80>
  8002292:	e0ef      	b.n	8002474 <pyd1598_dl_readout_fsm+0x260>
+			{
+				//From Table 5 and section 2.7 of the datasheet we know that the
+				//time difference from this state and the next ones should be
+				// 					120μs < t_{DS} < 150μs
+				if(op_mode == PYD1598_FORCE_READOUT)
  8002294:	1cfb      	adds	r3, r7, #3
  8002296:	781b      	ldrb	r3, [r3, #0]
  8002298:	2b00      	cmp	r3, #0
  800229a:	d10e      	bne.n	80022ba <pyd1598_dl_readout_fsm+0xa6>
+				{
+					pyd1598_direct_link_set_as_output(direct_link->hardware_inteface);
  800229c:	687b      	ldr	r3, [r7, #4]
  800229e:	6a58      	ldr	r0, [r3, #36]	; 0x24
  80022a0:	6a99      	ldr	r1, [r3, #40]	; 0x28
  80022a2:	f000 fc13 	bl	8002acc <pyd1598_direct_link_set_as_output>
+					pyd1598_direct_link_set_one_pulse(direct_link->hardware_inteface);
  80022a6:	687b      	ldr	r3, [r7, #4]
  80022a8:	6a58      	ldr	r0, [r3, #36]	; 0x24
  80022aa:	6a99      	ldr	r1, [r3, #40]	; 0x28
  80022ac:	f000 fc4a 	bl	8002b44 <pyd1598_direct_link_set_one_pulse>
+					readout_state = PYD1598_READOUT_GET_MSG;
  80022b0:	231e      	movs	r3, #30
  80022b2:	18fb      	adds	r3, r7, r3
  80022b4:	2201      	movs	r2, #1
  80022b6:	701a      	strb	r2, [r3, #0]
  80022b8:	e023      	b.n	8002302 <pyd1598_dl_readout_fsm+0xee>
+
+				}
+				else if((op_mode == PYD1598_INTERRUPT_READOUT) ||
  80022ba:	1cfb      	adds	r3, r7, #3
  80022bc:	781b      	ldrb	r3, [r3, #0]
  80022be:	2b01      	cmp	r3, #1
@@ -5356,14 +6093,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80022c4:	781b      	ldrb	r3, [r3, #0]
  80022c6:	2b02      	cmp	r3, #2
  80022c8:	d11b      	bne.n	8002302 <pyd1598_dl_readout_fsm+0xee>
+						(op_mode == PYD1598_WAKE_UP))
+				{
+					//TODO: (high) is it possible to set another flag if it
+					//comes from an interrupt
+
+					pyd1598_direct_link_set_as_output(direct_link->hardware_inteface);
  80022ca:	687b      	ldr	r3, [r7, #4]
  80022cc:	6a58      	ldr	r0, [r3, #36]	; 0x24
  80022ce:	6a99      	ldr	r1, [r3, #40]	; 0x28
  80022d0:	f000 fbfc 	bl	8002acc <pyd1598_direct_link_set_as_output>
+					pyd1598_direct_link_set_negative_edge(direct_link->hardware_inteface);
  80022d4:	687b      	ldr	r3, [r7, #4]
  80022d6:	6a58      	ldr	r0, [r3, #36]	; 0x24
  80022d8:	6a99      	ldr	r1, [r3, #40]	; 0x28
  80022da:	f000 fc4d 	bl	8002b78 <pyd1598_direct_link_set_negative_edge>
+
+					if((op_mode != PYD1598_INTERRUPT_READOUT) &&
  80022de:	1cfb      	adds	r3, r7, #3
  80022e0:	781b      	ldrb	r3, [r3, #0]
  80022e2:	2b01      	cmp	r3, #1
@@ -5373,39 +6119,73 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80022ea:	781b      	ldrb	r3, [r3, #0]
  80022ec:	2b01      	cmp	r3, #1
  80022ee:	d104      	bne.n	80022fa <pyd1598_dl_readout_fsm+0xe6>
+						(wakeup_mode == READOUT_WAKEUP_NO_READ))
+					{
+						//since in Wake-up mode read is optional:
+						readout_state = PYD1598_READOUT_END_COM;
  80022f0:	231e      	movs	r3, #30
  80022f2:	18fb      	adds	r3, r7, r3
  80022f4:	2204      	movs	r2, #4
  80022f6:	701a      	strb	r2, [r3, #0]
  80022f8:	e003      	b.n	8002302 <pyd1598_dl_readout_fsm+0xee>
+					}
+					else
+					{
+						readout_state = PYD1598_READOUT_GET_MSG;
  80022fa:	231e      	movs	r3, #30
  80022fc:	18fb      	adds	r3, r7, r3
  80022fe:	2201      	movs	r2, #1
  8002300:	701a      	strb	r2, [r3, #0]
+				else
+				{
+					//TODO: (low) define an error handler
+				}
+
+				start_fsm = false;
  8002302:	231c      	movs	r3, #28
  8002304:	18fb      	adds	r3, r7, r3
  8002306:	2200      	movs	r2, #0
  8002308:	701a      	strb	r2, [r3, #0]
+				readout_status = READOUT_BUSY;
  800230a:	231f      	movs	r3, #31
  800230c:	18fb      	adds	r3, r7, r3
  800230e:	2201      	movs	r2, #1
  8002310:	701a      	strb	r2, [r3, #0]
+
+			}
+
+			break;
  8002312:	e0af      	b.n	8002474 <pyd1598_dl_readout_fsm+0x260>
+		case PYD1598_READOUT_GET_MSG:
+
+			//TODO: (HIGH) remember to protect from interrupts!!!!!!!!!!!!!
+
+			datagram_bufffer = 0;
  8002314:	2200      	movs	r2, #0
  8002316:	2300      	movs	r3, #0
  8002318:	60ba      	str	r2, [r7, #8]
  800231a:	60fb      	str	r3, [r7, #12]
+
+			//Proceeding with the Readout:
+			for(idx = 0; idx < 40; idx++)
  800231c:	2300      	movs	r3, #0
  800231e:	617b      	str	r3, [r7, #20]
  8002320:	e01e      	b.n	8002360 <pyd1598_dl_readout_fsm+0x14c>
+			{
+				pyd1598_direct_link_set_one_pulse(direct_link->hardware_inteface);
  8002322:	687b      	ldr	r3, [r7, #4]
  8002324:	6a58      	ldr	r0, [r3, #36]	; 0x24
  8002326:	6a99      	ldr	r1, [r3, #40]	; 0x28
  8002328:	f000 fc0c 	bl	8002b44 <pyd1598_direct_link_set_one_pulse>
+				pyd1598_direct_link_set_as_input(direct_link->hardware_inteface);
  800232c:	687b      	ldr	r3, [r7, #4]
  800232e:	6a58      	ldr	r0, [r3, #36]	; 0x24
  8002330:	6a99      	ldr	r1, [r3, #40]	; 0x28
  8002332:	f000 fbdf 	bl	8002af4 <pyd1598_direct_link_set_as_input>
+
+				//TODO: (low) Test without using a function call so the pin bit
+				// can be faster.
+				pyd1598_direct_link_read_pin(direct_link->hardware_inteface,
  8002336:	697b      	ldr	r3, [r7, #20]
  8002338:	2208      	movs	r2, #8
  800233a:	18ba      	adds	r2, r7, r2
@@ -5413,41 +6193,62 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800233e:	6a48      	ldr	r0, [r1, #36]	; 0x24
  8002340:	6a89      	ldr	r1, [r1, #40]	; 0x28
  8002342:	f000 fc2b 	bl	8002b9c <pyd1598_direct_link_read_pin>
+													&datagram_bufffer, idx);
+
+				pyd1598_direct_link_set_negative_edge(direct_link->hardware_inteface);
  8002346:	687b      	ldr	r3, [r7, #4]
  8002348:	6a58      	ldr	r0, [r3, #36]	; 0x24
  800234a:	6a99      	ldr	r1, [r3, #40]	; 0x28
  800234c:	f000 fc14 	bl	8002b78 <pyd1598_direct_link_set_negative_edge>
+				pyd1598_direct_link_set_as_output(direct_link->hardware_inteface);
  8002350:	687b      	ldr	r3, [r7, #4]
  8002352:	6a58      	ldr	r0, [r3, #36]	; 0x24
  8002354:	6a99      	ldr	r1, [r3, #40]	; 0x28
  8002356:	f000 fbb9 	bl	8002acc <pyd1598_direct_link_set_as_output>
+			for(idx = 0; idx < 40; idx++)
  800235a:	697b      	ldr	r3, [r7, #20]
  800235c:	3301      	adds	r3, #1
  800235e:	617b      	str	r3, [r7, #20]
  8002360:	697b      	ldr	r3, [r7, #20]
  8002362:	2b27      	cmp	r3, #39	; 0x27
  8002364:	d9dd      	bls.n	8002322 <pyd1598_dl_readout_fsm+0x10e>
+
+			//host controller must force DIRECT LINK pin to LOW for at least
+			//t_{UP} >  1250μs and subsequently release DIRECT LINK (High Z)
+
+
+			time_update_idx = 0;
  8002366:	231d      	movs	r3, #29
  8002368:	18fb      	adds	r3, r7, r3
  800236a:	2200      	movs	r2, #0
  800236c:	701a      	strb	r2, [r3, #0]
+
+			readout_status = READOUT_BUSY;
  800236e:	231f      	movs	r3, #31
  8002370:	18fb      	adds	r3, r7, r3
  8002372:	2201      	movs	r2, #1
  8002374:	701a      	strb	r2, [r3, #0]
+			readout_state = PYD1598_READOUT_SIGNAL_DOWN;
  8002376:	231e      	movs	r3, #30
  8002378:	18fb      	adds	r3, r7, r3
  800237a:	2203      	movs	r2, #3
  800237c:	701a      	strb	r2, [r3, #0]
+
+			break;
  800237e:	e07c      	b.n	800247a <pyd1598_dl_readout_fsm+0x266>
+		case PYD1598_READOUT_SIGNAL_DOWN:
+			pyd1598_direct_link_set_as_output(direct_link->hardware_inteface);
  8002380:	687b      	ldr	r3, [r7, #4]
  8002382:	6a58      	ldr	r0, [r3, #36]	; 0x24
  8002384:	6a99      	ldr	r1, [r3, #40]	; 0x28
  8002386:	f000 fba1 	bl	8002acc <pyd1598_direct_link_set_as_output>
+			pyd1598_direct_link_set_negative_edge(direct_link->hardware_inteface);
  800238a:	687b      	ldr	r3, [r7, #4]
  800238c:	6a58      	ldr	r0, [r3, #36]	; 0x24
  800238e:	6a99      	ldr	r1, [r3, #40]	; 0x28
  8002390:	f000 fbf2 	bl	8002b78 <pyd1598_direct_link_set_negative_edge>
+
+			if( (op_mode == PYD1598_INTERRUPT_READOUT) ||
  8002394:	1cfb      	adds	r3, r7, #3
  8002396:	781b      	ldrb	r3, [r3, #0]
  8002398:	2b01      	cmp	r3, #1
@@ -5456,70 +6257,115 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800239e:	781b      	ldrb	r3, [r3, #0]
  80023a0:	2b02      	cmp	r3, #2
  80023a2:	d119      	bne.n	80023d8 <pyd1598_dl_readout_fsm+0x1c4>
+				(op_mode == PYD1598_WAKE_UP))
+			{
+				//since these op modes require an external interrupt
+				pyd1598_direct_link_set_as_interrupt_input(direct_link->hardware_inteface);
  80023a4:	687b      	ldr	r3, [r7, #4]
  80023a6:	6a58      	ldr	r0, [r3, #36]	; 0x24
  80023a8:	6a99      	ldr	r1, [r3, #40]	; 0x28
  80023aa:	f000 fbb7 	bl	8002b1c <pyd1598_direct_link_set_as_interrupt_input>
+				readout_status = READOUT_READY;
  80023ae:	231f      	movs	r3, #31
  80023b0:	18fb      	adds	r3, r7, r3
  80023b2:	2200      	movs	r2, #0
  80023b4:	701a      	strb	r2, [r3, #0]
+				readout_state = PYD1598_READOUT_IDLE;
  80023b6:	231e      	movs	r3, #30
  80023b8:	18fb      	adds	r3, r7, r3
  80023ba:	2200      	movs	r2, #0
  80023bc:	701a      	strb	r2, [r3, #0]
+				time_update_idx = 0;
  80023be:	231d      	movs	r3, #29
  80023c0:	18fb      	adds	r3, r7, r3
  80023c2:	2200      	movs	r2, #0
  80023c4:	701a      	strb	r2, [r3, #0]
+
+				if(op_mode == PYD1598_WAKE_UP)
  80023c6:	1cfb      	adds	r3, r7, #3
  80023c8:	781b      	ldrb	r3, [r3, #0]
  80023ca:	2b02      	cmp	r3, #2
  80023cc:	d10c      	bne.n	80023e8 <pyd1598_dl_readout_fsm+0x1d4>
+				{
+					wakeup_isr_status = PYD1598_WAKEUP_ISR_UNATTENDED;
  80023ce:	231b      	movs	r3, #27
  80023d0:	18fb      	adds	r3, r7, r3
  80023d2:	2202      	movs	r2, #2
  80023d4:	701a      	strb	r2, [r3, #0]
+				if(op_mode == PYD1598_WAKE_UP)
  80023d6:	e007      	b.n	80023e8 <pyd1598_dl_readout_fsm+0x1d4>
+
+
+			}
+			else
+			{
+				readout_status = READOUT_BUSY;
  80023d8:	231f      	movs	r3, #31
  80023da:	18fb      	adds	r3, r7, r3
  80023dc:	2201      	movs	r2, #1
  80023de:	701a      	strb	r2, [r3, #0]
+				readout_state = PYD1598_READOUT_UPDATE;
  80023e0:	231e      	movs	r3, #30
  80023e2:	18fb      	adds	r3, r7, r3
  80023e4:	2202      	movs	r2, #2
  80023e6:	701a      	strb	r2, [r3, #0]
+			// 					120μs < t_{DS} < 150μs,
+			//and since
+			//					t_{UP} >  1250μs
+			//this state should remain at least 1250/120 = 10.42 -> 11 cycles.
+
+			time_update_idx++;
  80023e8:	211d      	movs	r1, #29
  80023ea:	187b      	adds	r3, r7, r1
  80023ec:	781a      	ldrb	r2, [r3, #0]
  80023ee:	187b      	adds	r3, r7, r1
  80023f0:	3201      	adds	r2, #1
  80023f2:	701a      	strb	r2, [r3, #0]
+
+			//TODO: (low) create a mechanism to configure the number of cycles
+			if(time_update_idx >= 11)
  80023f4:	187b      	adds	r3, r7, r1
  80023f6:	781b      	ldrb	r3, [r3, #0]
  80023f8:	2b0a      	cmp	r3, #10
  80023fa:	d93d      	bls.n	8002478 <pyd1598_dl_readout_fsm+0x264>
+			{
+				time_update_idx = 0;
  80023fc:	187b      	adds	r3, r7, r1
  80023fe:	2200      	movs	r2, #0
  8002400:	701a      	strb	r2, [r3, #0]
+				readout_status = READOUT_BUSY;
  8002402:	231f      	movs	r3, #31
  8002404:	18fb      	adds	r3, r7, r3
  8002406:	2201      	movs	r2, #1
  8002408:	701a      	strb	r2, [r3, #0]
+				readout_state = PYD1598_READOUT_END_COM;
  800240a:	231e      	movs	r3, #30
  800240c:	18fb      	adds	r3, r7, r3
  800240e:	2204      	movs	r2, #4
  8002410:	701a      	strb	r2, [r3, #0]
+			}
+
+			break;
  8002412:	e031      	b.n	8002478 <pyd1598_dl_readout_fsm+0x264>
+		case PYD1598_READOUT_END_COM:
+			//TODO: (low) check if this conditional is required since it is done
+			//in PYD1598_READOUT_SIGNAL_DOWN.
+
+			//release DIRECT LINK (High Z)
+			if(op_mode == PYD1598_FORCE_READOUT)
  8002414:	1cfb      	adds	r3, r7, #3
  8002416:	781b      	ldrb	r3, [r3, #0]
  8002418:	2b00      	cmp	r3, #0
  800241a:	d105      	bne.n	8002428 <pyd1598_dl_readout_fsm+0x214>
+			{
+				pyd1598_direct_link_set_as_input(direct_link->hardware_inteface);
  800241c:	687b      	ldr	r3, [r7, #4]
  800241e:	6a58      	ldr	r0, [r3, #36]	; 0x24
  8002420:	6a99      	ldr	r1, [r3, #40]	; 0x28
  8002422:	f000 fb67 	bl	8002af4 <pyd1598_direct_link_set_as_input>
  8002426:	e014      	b.n	8002452 <pyd1598_dl_readout_fsm+0x23e>
+			}
+			else if((op_mode == PYD1598_INTERRUPT_READOUT) ||
  8002428:	1cfb      	adds	r3, r7, #3
  800242a:	781b      	ldrb	r3, [r3, #0]
  800242c:	2b01      	cmp	r3, #1
@@ -5528,72 +6374,104 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002432:	781b      	ldrb	r3, [r3, #0]
  8002434:	2b02      	cmp	r3, #2
  8002436:	d10c      	bne.n	8002452 <pyd1598_dl_readout_fsm+0x23e>
+					(op_mode == PYD1598_WAKE_UP))
+			{
+				//since this op modes require an external interrupt
+				pyd1598_direct_link_set_as_interrupt_input(direct_link->hardware_inteface);
  8002438:	687b      	ldr	r3, [r7, #4]
  800243a:	6a58      	ldr	r0, [r3, #36]	; 0x24
  800243c:	6a99      	ldr	r1, [r3, #40]	; 0x28
  800243e:	f000 fb6d 	bl	8002b1c <pyd1598_direct_link_set_as_interrupt_input>
+
+				if(op_mode == PYD1598_WAKE_UP)
  8002442:	1cfb      	adds	r3, r7, #3
  8002444:	781b      	ldrb	r3, [r3, #0]
  8002446:	2b02      	cmp	r3, #2
  8002448:	d103      	bne.n	8002452 <pyd1598_dl_readout_fsm+0x23e>
+				{
+					wakeup_isr_status = PYD1598_WAKEUP_ISR_UNATTENDED;
  800244a:	231b      	movs	r3, #27
  800244c:	18fb      	adds	r3, r7, r3
  800244e:	2202      	movs	r2, #2
  8002450:	701a      	strb	r2, [r3, #0]
+				}
+
+			}
+			readout_status = READOUT_READY;
  8002452:	231f      	movs	r3, #31
  8002454:	18fb      	adds	r3, r7, r3
  8002456:	2200      	movs	r2, #0
  8002458:	701a      	strb	r2, [r3, #0]
+			readout_state = PYD1598_READOUT_IDLE;
  800245a:	231e      	movs	r3, #30
  800245c:	18fb      	adds	r3, r7, r3
  800245e:	2200      	movs	r2, #0
  8002460:	701a      	strb	r2, [r3, #0]
+
+		default:
+			readout_state = PYD1598_READOUT_IDLE;
  8002462:	231e      	movs	r3, #30
  8002464:	18fb      	adds	r3, r7, r3
  8002466:	2200      	movs	r2, #0
  8002468:	701a      	strb	r2, [r3, #0]
+			readout_status = READOUT_READY;
  800246a:	231f      	movs	r3, #31
  800246c:	18fb      	adds	r3, r7, r3
  800246e:	2200      	movs	r2, #0
  8002470:	701a      	strb	r2, [r3, #0]
+			break;
  8002472:	e002      	b.n	800247a <pyd1598_dl_readout_fsm+0x266>
+			break;
  8002474:	46c0      	nop			; (mov r8, r8)
  8002476:	e000      	b.n	800247a <pyd1598_dl_readout_fsm+0x266>
+			break;
  8002478:	46c0      	nop			; (mov r8, r8)
+	}
+
+	direct_link->readout_state = readout_state;
  800247a:	687b      	ldr	r3, [r7, #4]
  800247c:	221e      	movs	r2, #30
  800247e:	18ba      	adds	r2, r7, r2
  8002480:	2120      	movs	r1, #32
  8002482:	7812      	ldrb	r2, [r2, #0]
  8002484:	545a      	strb	r2, [r3, r1]
+	direct_link->readout_status = readout_status;
  8002486:	687b      	ldr	r3, [r7, #4]
  8002488:	221f      	movs	r2, #31
  800248a:	18ba      	adds	r2, r7, r2
  800248c:	7812      	ldrb	r2, [r2, #0]
  800248e:	77da      	strb	r2, [r3, #31]
+	direct_link->time_update_idx = time_update_idx;
  8002490:	687b      	ldr	r3, [r7, #4]
  8002492:	221d      	movs	r2, #29
  8002494:	18ba      	adds	r2, r7, r2
  8002496:	2122      	movs	r1, #34	; 0x22
  8002498:	7812      	ldrb	r2, [r2, #0]
  800249a:	545a      	strb	r2, [r3, r1]
+	direct_link->start_fsm = start_fsm;
  800249c:	687b      	ldr	r3, [r7, #4]
  800249e:	221c      	movs	r2, #28
  80024a0:	18ba      	adds	r2, r7, r2
  80024a2:	2121      	movs	r1, #33	; 0x21
  80024a4:	7812      	ldrb	r2, [r2, #0]
  80024a6:	545a      	strb	r2, [r3, r1]
+	//Saving datagram to be read outside the ISR:
+	direct_link->datagram_bufffer = datagram_bufffer;
  80024a8:	68ba      	ldr	r2, [r7, #8]
  80024aa:	68fb      	ldr	r3, [r7, #12]
  80024ac:	6879      	ldr	r1, [r7, #4]
  80024ae:	610a      	str	r2, [r1, #16]
  80024b0:	614b      	str	r3, [r1, #20]
+	direct_link->wakeup_isr_status = wakeup_isr_status;
  80024b2:	687b      	ldr	r3, [r7, #4]
  80024b4:	221b      	movs	r2, #27
  80024b6:	18ba      	adds	r2, r7, r2
  80024b8:	2123      	movs	r1, #35	; 0x23
  80024ba:	7812      	ldrb	r2, [r2, #0]
  80024bc:	545a      	strb	r2, [r3, r1]
+
+
+}
  80024be:	46c0      	nop			; (mov r8, r8)
  80024c0:	46bd      	mov	sp, r7
  80024c2:	b008      	add	sp, #32
@@ -5602,13 +6480,21 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80024c8:	0800575c 	.word	0x0800575c
 
 080024cc <pyd1598_request_write>:
+
+
+/*____________________________________SERIN FSM_______________________________*/
+
+void pyd1598_request_write(pyd1598_sensor_t *sensor)
+{
  80024cc:	b580      	push	{r7, lr}
  80024ce:	b082      	sub	sp, #8
  80024d0:	af00      	add	r7, sp, #0
  80024d2:	6078      	str	r0, [r7, #4]
+	sensor->serin.start_fsm = true;
  80024d4:	687b      	ldr	r3, [r7, #4]
  80024d6:	2201      	movs	r2, #1
  80024d8:	755a      	strb	r2, [r3, #21]
+}
  80024da:	46c0      	nop			; (mov r8, r8)
  80024dc:	46bd      	mov	sp, r7
  80024de:	b002      	add	sp, #8
@@ -5616,6 +6502,11 @@ __STATIC_FORCEINLINE void __disable_irq(void)
 	...
 
 080024e4 <pyd1598_serin_send_datagram_fsm>:
+
+
+void pyd1598_serin_send_datagram_fsm(pyd1598_serin_t *serin,
+									pyd1598_hardware_interface_t data_link_pin)
+{
  80024e4:	b590      	push	{r4, r7, lr}
  80024e6:	b08f      	sub	sp, #60	; 0x3c
  80024e8:	af00      	add	r7, sp, #0
@@ -5623,36 +6514,49 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80024ec:	1d3b      	adds	r3, r7, #4
  80024ee:	6019      	str	r1, [r3, #0]
  80024f0:	605a      	str	r2, [r3, #4]
+	//Declaring the FSM variables and define them to protect the serin variables
+	//from any outside change
+
+	pyd1598_serin_state_t state = serin->state;//Define if it requires to be static
  80024f2:	2437      	movs	r4, #55	; 0x37
  80024f4:	193b      	adds	r3, r7, r4
  80024f6:	68fa      	ldr	r2, [r7, #12]
  80024f8:	7d12      	ldrb	r2, [r2, #20]
  80024fa:	701a      	strb	r2, [r3, #0]
+	uint32_t data_idx = serin->data_idx;
  80024fc:	68fb      	ldr	r3, [r7, #12]
  80024fe:	691b      	ldr	r3, [r3, #16]
  8002500:	633b      	str	r3, [r7, #48]	; 0x30
+	bool start_fsm = serin->start_fsm;
  8002502:	232f      	movs	r3, #47	; 0x2f
  8002504:	18fb      	adds	r3, r7, r3
  8002506:	68fa      	ldr	r2, [r7, #12]
  8002508:	7d52      	ldrb	r2, [r2, #21]
  800250a:	701a      	strb	r2, [r3, #0]
+	pyd1598_config_t config = serin->config;
  800250c:	231c      	movs	r3, #28
  800250e:	18fb      	adds	r3, r7, r3
  8002510:	68fa      	ldr	r2, [r7, #12]
  8002512:	ca03      	ldmia	r2!, {r0, r1}
  8002514:	c303      	stmia	r3!, {r0, r1}
+	uint32_t mask = serin->mask;
  8002516:	68fb      	ldr	r3, [r7, #12]
  8002518:	68db      	ldr	r3, [r3, #12]
  800251a:	62bb      	str	r3, [r7, #40]	; 0x28
+	uint32_t conf_datagram = serin->conf_datagram;
  800251c:	68fb      	ldr	r3, [r7, #12]
  800251e:	689b      	ldr	r3, [r3, #8]
  8002520:	627b      	str	r3, [r7, #36]	; 0x24
+
+	pyd1598_hardware_interface_t output = serin->hardware_inteface;
  8002522:	2314      	movs	r3, #20
  8002524:	18fa      	adds	r2, r7, r3
  8002526:	68fb      	ldr	r3, [r7, #12]
  8002528:	3318      	adds	r3, #24
  800252a:	cb03      	ldmia	r3!, {r0, r1}
  800252c:	c203      	stmia	r2!, {r0, r1}
+
+	switch(state)
  800252e:	193b      	adds	r3, r7, r4
  8002530:	781b      	ldrb	r3, [r3, #0]
  8002532:	2b05      	cmp	r3, #5
@@ -5663,146 +6567,241 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800253c:	18d3      	adds	r3, r2, r3
  800253e:	681b      	ldr	r3, [r3, #0]
  8002540:	469f      	mov	pc, r3
+	{
+		case PYD1598_SERIN_IDLE:
+			if(start_fsm == true)
  8002542:	242f      	movs	r4, #47	; 0x2f
  8002544:	193b      	adds	r3, r7, r4
  8002546:	781b      	ldrb	r3, [r3, #0]
  8002548:	2b00      	cmp	r3, #0
  800254a:	d100      	bne.n	800254e <pyd1598_serin_send_datagram_fsm+0x6a>
  800254c:	e079      	b.n	8002642 <pyd1598_serin_send_datagram_fsm+0x15e>
+			{
+				pyd1598_direct_link_set_as_output(data_link_pin);
  800254e:	1d3b      	adds	r3, r7, #4
  8002550:	6818      	ldr	r0, [r3, #0]
  8002552:	6859      	ldr	r1, [r3, #4]
  8002554:	f000 faba 	bl	8002acc <pyd1598_direct_link_set_as_output>
+				pyd1598_direct_link_set_negative_edge(data_link_pin);
  8002558:	1d3b      	adds	r3, r7, #4
  800255a:	6818      	ldr	r0, [r3, #0]
  800255c:	6859      	ldr	r1, [r3, #4]
  800255e:	f000 fb0b 	bl	8002b78 <pyd1598_direct_link_set_negative_edge>
+				state = PYD1598_SERIN_SETUP_FOR_MESSAGE;
  8002562:	2337      	movs	r3, #55	; 0x37
  8002564:	18fb      	adds	r3, r7, r3
  8002566:	2201      	movs	r2, #1
  8002568:	701a      	strb	r2, [r3, #0]
+				start_fsm = false;
  800256a:	193b      	adds	r3, r7, r4
  800256c:	2200      	movs	r2, #0
  800256e:	701a      	strb	r2, [r3, #0]
+			}
+			break;
  8002570:	e067      	b.n	8002642 <pyd1598_serin_send_datagram_fsm+0x15e>
+		case PYD1598_SERIN_SETUP_FOR_MESSAGE:
+
+			data_idx = 0;
  8002572:	2300      	movs	r3, #0
  8002574:	633b      	str	r3, [r7, #48]	; 0x30
+//			pyd1598_direct_link_set_as_output();
+//			pyd1598_direct_link_set_negative_edge();
+
+			mask = PYD1598_SERIN_BIT_24_MASK;
  8002576:	2380      	movs	r3, #128	; 0x80
  8002578:	045b      	lsls	r3, r3, #17
  800257a:	62bb      	str	r3, [r7, #40]	; 0x28
+			state = PYD1598_SERIN_SEND_MSG;
  800257c:	2337      	movs	r3, #55	; 0x37
  800257e:	18fb      	adds	r3, r7, r3
  8002580:	2202      	movs	r2, #2
  8002582:	701a      	strb	r2, [r3, #0]
+
+			break;
  8002584:	e05e      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+		case PYD1598_SERIN_SEND_MSG:
+			// program the timer interrupt considering: t_{SHD} = 80-150μs
+			if((conf_datagram & mask) == 0)
  8002586:	6a7b      	ldr	r3, [r7, #36]	; 0x24
  8002588:	6aba      	ldr	r2, [r7, #40]	; 0x28
  800258a:	4013      	ands	r3, r2
  800258c:	d106      	bne.n	800259c <pyd1598_serin_send_datagram_fsm+0xb8>
+			{
+				pyd1598_serin_set_zero_pulse(output);
  800258e:	2314      	movs	r3, #20
  8002590:	18fb      	adds	r3, r7, r3
  8002592:	6818      	ldr	r0, [r3, #0]
  8002594:	6859      	ldr	r1, [r3, #4]
  8002596:	f000 fa5d 	bl	8002a54 <pyd1598_serin_set_zero_pulse>
  800259a:	e005      	b.n	80025a8 <pyd1598_serin_send_datagram_fsm+0xc4>
+			}
+			else
+			{
+				pyd1598_serin_set_one_pulse(output);
  800259c:	2314      	movs	r3, #20
  800259e:	18fb      	adds	r3, r7, r3
  80025a0:	6818      	ldr	r0, [r3, #0]
  80025a2:	6859      	ldr	r1, [r3, #4]
  80025a4:	f000 fa78 	bl	8002a98 <pyd1598_serin_set_one_pulse>
+			}
+
+			mask >>= 1;
  80025a8:	6abb      	ldr	r3, [r7, #40]	; 0x28
  80025aa:	085b      	lsrs	r3, r3, #1
  80025ac:	62bb      	str	r3, [r7, #40]	; 0x28
+
+//			if(data_idx >= (PYD1598_SERIN_MSG_LONG+1))
+			if(mask == 0)
  80025ae:	6abb      	ldr	r3, [r7, #40]	; 0x28
  80025b0:	2b00      	cmp	r3, #0
  80025b2:	d104      	bne.n	80025be <pyd1598_serin_send_datagram_fsm+0xda>
+			{
+				state = PYD1598_SERIN_SEND_DOWN;
  80025b4:	2337      	movs	r3, #55	; 0x37
  80025b6:	18fb      	adds	r3, r7, r3
  80025b8:	2203      	movs	r2, #3
  80025ba:	701a      	strb	r2, [r3, #0]
+			else
+			{
+				data_idx++;
+			}
+
+			break;
  80025bc:	e042      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+				data_idx++;
  80025be:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  80025c0:	3301      	adds	r3, #1
  80025c2:	633b      	str	r3, [r7, #48]	; 0x30
+			break;
  80025c4:	e03e      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+		case PYD1598_SERIN_SEND_DOWN:
+			pyd1598_direct_link_set_as_output(data_link_pin);
  80025c6:	1d3b      	adds	r3, r7, #4
  80025c8:	6818      	ldr	r0, [r3, #0]
  80025ca:	6859      	ldr	r1, [r3, #4]
  80025cc:	f000 fa7e 	bl	8002acc <pyd1598_direct_link_set_as_output>
+			pyd1598_direct_link_set_negative_edge(data_link_pin);
  80025d0:	1d3b      	adds	r3, r7, #4
  80025d2:	6818      	ldr	r0, [r3, #0]
  80025d4:	6859      	ldr	r1, [r3, #4]
  80025d6:	f000 facf 	bl	8002b78 <pyd1598_direct_link_set_negative_edge>
+			state = PYD1598_SERIN_WAIT_LOAD_TIME;
  80025da:	2337      	movs	r3, #55	; 0x37
  80025dc:	18fb      	adds	r3, r7, r3
  80025de:	2204      	movs	r2, #4
  80025e0:	701a      	strb	r2, [r3, #0]
+
+			break;
  80025e2:	e02f      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+
+		case PYD1598_SERIN_WAIT_LOAD_TIME:
+			//Data Load Time t_{SLT} > 650μs. i.e. 8.125 to 4.333 times
+			//(9 times for a 80μs interrupt or 4 times for a 150μs interrupt)
+			if(data_idx >= PYD1598_SERIN_COUNT_TSLT)
  80025e4:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  80025e6:	2b22      	cmp	r3, #34	; 0x22
  80025e8:	d904      	bls.n	80025f4 <pyd1598_serin_send_datagram_fsm+0x110>
+			{
+				state = PYD1598_SERIN_END_COM;
  80025ea:	2337      	movs	r3, #55	; 0x37
  80025ec:	18fb      	adds	r3, r7, r3
  80025ee:	2205      	movs	r2, #5
  80025f0:	701a      	strb	r2, [r3, #0]
+			}
+			else
+			{
+				data_idx++;
+			}
+			break;
  80025f2:	e027      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+				data_idx++;
  80025f4:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  80025f6:	3301      	adds	r3, #1
  80025f8:	633b      	str	r3, [r7, #48]	; 0x30
+			break;
  80025fa:	e023      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+		case PYD1598_SERIN_END_COM:
+
+			if(config.op_mode == PYD1598_FORCE_READOUT)
  80025fc:	231c      	movs	r3, #28
  80025fe:	18fb      	adds	r3, r7, r3
  8002600:	791b      	ldrb	r3, [r3, #4]
  8002602:	2b00      	cmp	r3, #0
  8002604:	d105      	bne.n	8002612 <pyd1598_serin_send_datagram_fsm+0x12e>
+			{
+				pyd1598_direct_link_set_as_input(data_link_pin);
  8002606:	1d3b      	adds	r3, r7, #4
  8002608:	6818      	ldr	r0, [r3, #0]
  800260a:	6859      	ldr	r1, [r3, #4]
  800260c:	f000 fa72 	bl	8002af4 <pyd1598_direct_link_set_as_input>
  8002610:	e00d      	b.n	800262e <pyd1598_serin_send_datagram_fsm+0x14a>
+			}
+			else if((config.op_mode == PYD1598_INTERRUPT_READOUT) ||
  8002612:	221c      	movs	r2, #28
  8002614:	18bb      	adds	r3, r7, r2
  8002616:	791b      	ldrb	r3, [r3, #4]
  8002618:	2b01      	cmp	r3, #1
  800261a:	d003      	beq.n	8002624 <pyd1598_serin_send_datagram_fsm+0x140>
+					(config.op_mode == PYD1598_WAKE_UP) )
  800261c:	18bb      	adds	r3, r7, r2
  800261e:	791b      	ldrb	r3, [r3, #4]
+			else if((config.op_mode == PYD1598_INTERRUPT_READOUT) ||
  8002620:	2b02      	cmp	r3, #2
  8002622:	d104      	bne.n	800262e <pyd1598_serin_send_datagram_fsm+0x14a>
+			{
+				pyd1598_direct_link_set_as_interrupt_input(data_link_pin);
  8002624:	1d3b      	adds	r3, r7, #4
  8002626:	6818      	ldr	r0, [r3, #0]
  8002628:	6859      	ldr	r1, [r3, #4]
  800262a:	f000 fa77 	bl	8002b1c <pyd1598_direct_link_set_as_interrupt_input>
+			}
+			state = PYD1598_SERIN_IDLE;
  800262e:	2337      	movs	r3, #55	; 0x37
  8002630:	18fb      	adds	r3, r7, r3
  8002632:	2200      	movs	r2, #0
  8002634:	701a      	strb	r2, [r3, #0]
+			break;
  8002636:	e005      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+		default:
+			state = PYD1598_SERIN_IDLE;
  8002638:	2337      	movs	r3, #55	; 0x37
  800263a:	18fb      	adds	r3, r7, r3
  800263c:	2200      	movs	r2, #0
  800263e:	701a      	strb	r2, [r3, #0]
+			break;
  8002640:	e000      	b.n	8002644 <pyd1598_serin_send_datagram_fsm+0x160>
+			break;
  8002642:	46c0      	nop			; (mov r8, r8)
+
+	}
+
+	//This are the FSM variables that are changed in this function.
+	serin->state = state;
  8002644:	68fb      	ldr	r3, [r7, #12]
  8002646:	2237      	movs	r2, #55	; 0x37
  8002648:	18ba      	adds	r2, r7, r2
  800264a:	7812      	ldrb	r2, [r2, #0]
  800264c:	751a      	strb	r2, [r3, #20]
+	serin->data_idx = data_idx;
  800264e:	68fb      	ldr	r3, [r7, #12]
  8002650:	6b3a      	ldr	r2, [r7, #48]	; 0x30
  8002652:	611a      	str	r2, [r3, #16]
+	serin->start_fsm = false;
  8002654:	68fb      	ldr	r3, [r7, #12]
  8002656:	2200      	movs	r2, #0
  8002658:	755a      	strb	r2, [r3, #21]
+	serin->mask = mask;
  800265a:	68fb      	ldr	r3, [r7, #12]
  800265c:	6aba      	ldr	r2, [r7, #40]	; 0x28
  800265e:	60da      	str	r2, [r3, #12]
+	serin->start_fsm = start_fsm;
  8002660:	68fb      	ldr	r3, [r7, #12]
  8002662:	222f      	movs	r2, #47	; 0x2f
  8002664:	18ba      	adds	r2, r7, r2
  8002666:	7812      	ldrb	r2, [r2, #0]
  8002668:	755a      	strb	r2, [r3, #21]
+
+}
  800266a:	46c0      	nop			; (mov r8, r8)
  800266c:	46bd      	mov	sp, r7
  800266e:	b00f      	add	sp, #60	; 0x3c
@@ -5811,6 +6810,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002674:	08005770 	.word	0x08005770
 
 08002678 <pyd1598_check_isr_request>:
+/*---------------------------Middleware Level functions-----------------------*/
+/*____________________________Direct link functions___________________________*/
+
+uint8_t pyd1598_check_isr_request(pyd1598_sensor_t sensor,
+								pyd1598_motion_isr_status_t *motion_isr_status)
+{
  8002678:	b084      	sub	sp, #16
  800267a:	b5b0      	push	{r4, r5, r7, lr}
  800267c:	af00      	add	r7, sp, #0
@@ -5821,13 +6826,16 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002686:	6061      	str	r1, [r4, #4]
  8002688:	60a2      	str	r2, [r4, #8]
  800268a:	60e3      	str	r3, [r4, #12]
+	*motion_isr_status = sensor.motion_sensed;
  800268c:	1d2b      	adds	r3, r5, #4
  800268e:	19db      	adds	r3, r3, r7
  8002690:	2258      	movs	r2, #88	; 0x58
  8002692:	5c9a      	ldrb	r2, [r3, r2]
  8002694:	6f3b      	ldr	r3, [r7, #112]	; 0x70
  8002696:	701a      	strb	r2, [r3, #0]
+	return 0;
  8002698:	2300      	movs	r3, #0
+}
  800269a:	0018      	movs	r0, r3
  800269c:	46bd      	mov	sp, r7
  800269e:	bcb0      	pop	{r4, r5, r7}
@@ -5836,34 +6844,55 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80026a4:	4718      	bx	r3
 
 080026a6 <pyd1598_read_wakeup_signal>:
+
+//Use this in the main loop
+uint8_t pyd1598_read_wakeup_signal(pyd1598_sensor_t *sensor,
+								pyd1598_motion_isr_status_t *motion_isr_status)
+{
  80026a6:	b580      	push	{r7, lr}
  80026a8:	b082      	sub	sp, #8
  80026aa:	af00      	add	r7, sp, #0
  80026ac:	6078      	str	r0, [r7, #4]
  80026ae:	6039      	str	r1, [r7, #0]
+
+	if( sensor->direct_link.wakeup_isr_status == PYD1598_WAKEUP_ISR_UNATTENDED)
  80026b0:	687b      	ldr	r3, [r7, #4]
  80026b2:	2243      	movs	r2, #67	; 0x43
  80026b4:	5c9b      	ldrb	r3, [r3, r2]
  80026b6:	2b02      	cmp	r3, #2
  80026b8:	d10a      	bne.n	80026d0 <pyd1598_read_wakeup_signal+0x2a>
+	{
+		sensor->direct_link.wakeup_isr_status = PYD1598_WAKEUP_ISR_ATTENDED;
  80026ba:	687b      	ldr	r3, [r7, #4]
  80026bc:	2243      	movs	r2, #67	; 0x43
  80026be:	2100      	movs	r1, #0
  80026c0:	5499      	strb	r1, [r3, r2]
+		*motion_isr_status = PYD1598_MOTION_ISR_UNATTENDED;
  80026c2:	683b      	ldr	r3, [r7, #0]
  80026c4:	2202      	movs	r2, #2
  80026c6:	701a      	strb	r2, [r3, #0]
+		sensor->motion_sensed = PYD1598_MOTION_ISR_UNATTENDED;
  80026c8:	687b      	ldr	r3, [r7, #4]
  80026ca:	2258      	movs	r2, #88	; 0x58
  80026cc:	2102      	movs	r1, #2
  80026ce:	5499      	strb	r1, [r3, r2]
+	}
+
+	return 0;
  80026d0:	2300      	movs	r3, #0
+}
  80026d2:	0018      	movs	r0, r3
  80026d4:	46bd      	mov	sp, r7
  80026d6:	b002      	add	sp, #8
  80026d8:	bd80      	pop	{r7, pc}
 
 080026da <pyd1598_serin_add_all_conf>:
+/*______________________________SERIN functions_______________________________*/
+
+
+uint8_t pyd1598_serin_add_all_conf(pyd1598_config_t config,
+													pyd1598_serin_t *serin)
+{
  80026da:	b5b0      	push	{r4, r5, r7, lr}
  80026dc:	b086      	sub	sp, #24
  80026de:	af00      	add	r7, sp, #0
@@ -5872,60 +6901,72 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80026e4:	6018      	str	r0, [r3, #0]
  80026e6:	6059      	str	r1, [r3, #4]
  80026e8:	607a      	str	r2, [r7, #4]
+	uint8_t status = 0;
  80026ea:	2517      	movs	r5, #23
  80026ec:	197b      	adds	r3, r7, r5
  80026ee:	2200      	movs	r2, #0
  80026f0:	701a      	strb	r2, [r3, #0]
+	//TODO: (low) set error handler
+	pyd1598_serin_add_threshold(config.threshold, serin);
  80026f2:	193b      	adds	r3, r7, r4
  80026f4:	781b      	ldrb	r3, [r3, #0]
  80026f6:	687a      	ldr	r2, [r7, #4]
  80026f8:	0011      	movs	r1, r2
  80026fa:	0018      	movs	r0, r3
  80026fc:	f000 f838 	bl	8002770 <pyd1598_serin_add_threshold>
+	pyd1598_serin_add_blind_time(config.blind_time, serin);
  8002700:	193b      	adds	r3, r7, r4
  8002702:	785b      	ldrb	r3, [r3, #1]
  8002704:	687a      	ldr	r2, [r7, #4]
  8002706:	0011      	movs	r1, r2
  8002708:	0018      	movs	r0, r3
  800270a:	f000 f855 	bl	80027b8 <pyd1598_serin_add_blind_time>
+	pyd1598_serin_add_pulse_counter(config.pulse_counter, serin);
  800270e:	193b      	adds	r3, r7, r4
  8002710:	789b      	ldrb	r3, [r3, #2]
  8002712:	687a      	ldr	r2, [r7, #4]
  8002714:	0011      	movs	r1, r2
  8002716:	0018      	movs	r0, r3
  8002718:	f000 f878 	bl	800280c <pyd1598_serin_add_pulse_counter>
+	pyd1598_serin_add_window_time(config.window_time, serin);
  800271c:	193b      	adds	r3, r7, r4
  800271e:	78db      	ldrb	r3, [r3, #3]
  8002720:	687a      	ldr	r2, [r7, #4]
  8002722:	0011      	movs	r1, r2
  8002724:	0018      	movs	r0, r3
  8002726:	f000 f89b 	bl	8002860 <pyd1598_serin_add_window_time>
+	pyd1598_serin_add_operation_mode(config.op_mode, serin);
  800272a:	193b      	adds	r3, r7, r4
  800272c:	791b      	ldrb	r3, [r3, #4]
  800272e:	687a      	ldr	r2, [r7, #4]
  8002730:	0011      	movs	r1, r2
  8002732:	0018      	movs	r0, r3
  8002734:	f000 f8be 	bl	80028b4 <pyd1598_serin_add_operation_mode>
+	pyd1598_serin_add_signal_source(config.signal_source, serin);
  8002738:	193b      	adds	r3, r7, r4
  800273a:	795b      	ldrb	r3, [r3, #5]
  800273c:	687a      	ldr	r2, [r7, #4]
  800273e:	0011      	movs	r1, r2
  8002740:	0018      	movs	r0, r3
  8002742:	f000 f8db 	bl	80028fc <pyd1598_serin_add_signal_source>
+	pyd1598_serin_add_hpf_cutoff(config.hpf_cutoff, serin);
  8002746:	193b      	adds	r3, r7, r4
  8002748:	799b      	ldrb	r3, [r3, #6]
  800274a:	687a      	ldr	r2, [r7, #4]
  800274c:	0011      	movs	r1, r2
  800274e:	0018      	movs	r0, r3
  8002750:	f000 f8fe 	bl	8002950 <pyd1598_serin_add_hpf_cutoff>
+	pyd1598_serin_add_count_mode(config.count_mode, serin);
  8002754:	193b      	adds	r3, r7, r4
  8002756:	79db      	ldrb	r3, [r3, #7]
  8002758:	687a      	ldr	r2, [r7, #4]
  800275a:	0011      	movs	r1, r2
  800275c:	0018      	movs	r0, r3
  800275e:	f000 f921 	bl	80029a4 <pyd1598_serin_add_count_mode>
+	return status;
  8002762:	197b      	adds	r3, r7, r5
  8002764:	781b      	ldrb	r3, [r3, #0]
+}
  8002766:	0018      	movs	r0, r3
  8002768:	46bd      	mov	sp, r7
  800276a:	b006      	add	sp, #24
@@ -5933,6 +6974,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
 	...
 
 08002770 <pyd1598_serin_add_threshold>:
+
+
+//uint8_t pyd1598_serin_add_threshold(uint8_t new_threshold, uint32_t *datagram)
+uint8_t pyd1598_serin_add_threshold(uint8_t new_threshold,
+														pyd1598_serin_t *serin)
+{
  8002770:	b5b0      	push	{r4, r5, r7, lr}
  8002772:	b084      	sub	sp, #16
  8002774:	af00      	add	r7, sp, #0
@@ -5940,14 +6987,18 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002778:	6039      	str	r1, [r7, #0]
  800277a:	1dfb      	adds	r3, r7, #7
  800277c:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  800277e:	200f      	movs	r0, #15
  8002780:	183b      	adds	r3, r7, r0
  8002782:	2200      	movs	r2, #0
  8002784:	701a      	strb	r2, [r3, #0]
+
+	serin->config.threshold = new_threshold;
  8002786:	683b      	ldr	r3, [r7, #0]
  8002788:	1dfa      	adds	r2, r7, #7
  800278a:	7812      	ldrb	r2, [r2, #0]
  800278c:	701a      	strb	r2, [r3, #0]
+	status = pyd1598_serin_add_to_datagram(new_threshold, &serin->conf_datagram,
  800278e:	683b      	ldr	r3, [r7, #0]
  8002790:	3308      	adds	r3, #8
  8002792:	0019      	movs	r1, r3
@@ -5960,8 +7011,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80027a0:	f000 f92a 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  80027a4:	0003      	movs	r3, r0
  80027a6:	7023      	strb	r3, [r4, #0]
+											PYD1598_MASK_THRESHOLD,
+											PYD1598_SHIFT_THRESHOLD);
+	return status;
  80027a8:	197b      	adds	r3, r7, r5
  80027aa:	781b      	ldrb	r3, [r3, #0]
+}
  80027ac:	0018      	movs	r0, r3
  80027ae:	46bd      	mov	sp, r7
  80027b0:	b004      	add	sp, #16
@@ -5969,6 +7024,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80027b4:	0001ffff 	.word	0x0001ffff
 
 080027b8 <pyd1598_serin_add_blind_time>:
+//Reg Val is 4 bits ...
+//max_value 8sec =8000ms
+//min value 0.5sec =500ms
+uint8_t pyd1598_serin_add_blind_time(pyd1598_blind_time_t new_blind_time,
+														pyd1598_serin_t *serin)
+{
  80027b8:	b5b0      	push	{r4, r5, r7, lr}
  80027ba:	b084      	sub	sp, #16
  80027bc:	af00      	add	r7, sp, #0
@@ -5976,20 +7037,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80027c0:	6039      	str	r1, [r7, #0]
  80027c2:	1dfb      	adds	r3, r7, #7
  80027c4:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  80027c6:	200f      	movs	r0, #15
  80027c8:	183b      	adds	r3, r7, r0
  80027ca:	2200      	movs	r2, #0
  80027cc:	701a      	strb	r2, [r3, #0]
+
+	new_blind_time &= 0x0F;
  80027ce:	1dfb      	adds	r3, r7, #7
  80027d0:	1dfa      	adds	r2, r7, #7
  80027d2:	7812      	ldrb	r2, [r2, #0]
  80027d4:	210f      	movs	r1, #15
  80027d6:	400a      	ands	r2, r1
  80027d8:	701a      	strb	r2, [r3, #0]
+	serin->config.blind_time = new_blind_time;
  80027da:	683b      	ldr	r3, [r7, #0]
  80027dc:	1dfa      	adds	r2, r7, #7
  80027de:	7812      	ldrb	r2, [r2, #0]
  80027e0:	705a      	strb	r2, [r3, #1]
+	status = pyd1598_serin_add_to_datagram(new_blind_time,
  80027e2:	683b      	ldr	r3, [r7, #0]
  80027e4:	3308      	adds	r3, #8
  80027e6:	0019      	movs	r1, r3
@@ -6002,8 +7068,13 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80027f4:	f000 f900 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  80027f8:	0003      	movs	r3, r0
  80027fa:	7023      	strb	r3, [r4, #0]
+											&serin->conf_datagram,
+											PYD1598_MASK_BLIND_TIME,
+											PYD1598_SHIFT_BLIND_TIME);
+	return status;
  80027fc:	197b      	adds	r3, r7, r5
  80027fe:	781b      	ldrb	r3, [r3, #0]
+}
  8002800:	0018      	movs	r0, r3
  8002802:	46bd      	mov	sp, r7
  8002804:	b004      	add	sp, #16
@@ -6011,6 +7082,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002808:	01fe1fff 	.word	0x01fe1fff
 
 0800280c <pyd1598_serin_add_pulse_counter>:
+
+uint8_t pyd1598_serin_add_pulse_counter(pyd1598_pulse_counter_t pulse_counter,
+														pyd1598_serin_t *serin)
+{
  800280c:	b5b0      	push	{r4, r5, r7, lr}
  800280e:	b084      	sub	sp, #16
  8002810:	af00      	add	r7, sp, #0
@@ -6018,20 +7093,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002814:	6039      	str	r1, [r7, #0]
  8002816:	1dfb      	adds	r3, r7, #7
  8002818:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  800281a:	200f      	movs	r0, #15
  800281c:	183b      	adds	r3, r7, r0
  800281e:	2200      	movs	r2, #0
  8002820:	701a      	strb	r2, [r3, #0]
+
+	pulse_counter &= 0x03;
  8002822:	1dfb      	adds	r3, r7, #7
  8002824:	1dfa      	adds	r2, r7, #7
  8002826:	7812      	ldrb	r2, [r2, #0]
  8002828:	2103      	movs	r1, #3
  800282a:	400a      	ands	r2, r1
  800282c:	701a      	strb	r2, [r3, #0]
+	serin->config.pulse_counter = pulse_counter;
  800282e:	683b      	ldr	r3, [r7, #0]
  8002830:	1dfa      	adds	r2, r7, #7
  8002832:	7812      	ldrb	r2, [r2, #0]
  8002834:	709a      	strb	r2, [r3, #2]
+	status = pyd1598_serin_add_to_datagram(pulse_counter, &serin->conf_datagram,
  8002836:	683b      	ldr	r3, [r7, #0]
  8002838:	3308      	adds	r3, #8
  800283a:	0019      	movs	r1, r3
@@ -6044,8 +7124,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002848:	f000 f8d6 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  800284c:	0003      	movs	r3, r0
  800284e:	7023      	strb	r3, [r4, #0]
+											PYD1598_MASK_PULSE_COUNTER,
+											PYD1598_SHIFT_PULSE_COUNTER);
+	return status;
  8002850:	197b      	adds	r3, r7, r5
  8002852:	781b      	ldrb	r3, [r3, #0]
+}
  8002854:	0018      	movs	r0, r3
  8002856:	46bd      	mov	sp, r7
  8002858:	b004      	add	sp, #16
@@ -6053,6 +7137,9 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800285c:	01ffe7ff 	.word	0x01ffe7ff
 
 08002860 <pyd1598_serin_add_window_time>:
+uint8_t pyd1598_serin_add_window_time(pyd1598_window_time_t window_time,
+														pyd1598_serin_t *serin)
+{
  8002860:	b5b0      	push	{r4, r5, r7, lr}
  8002862:	b084      	sub	sp, #16
  8002864:	af00      	add	r7, sp, #0
@@ -6060,20 +7147,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002868:	6039      	str	r1, [r7, #0]
  800286a:	1dfb      	adds	r3, r7, #7
  800286c:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  800286e:	200f      	movs	r0, #15
  8002870:	183b      	adds	r3, r7, r0
  8002872:	2200      	movs	r2, #0
  8002874:	701a      	strb	r2, [r3, #0]
+
+	window_time &= 0x03;
  8002876:	1dfb      	adds	r3, r7, #7
  8002878:	1dfa      	adds	r2, r7, #7
  800287a:	7812      	ldrb	r2, [r2, #0]
  800287c:	2103      	movs	r1, #3
  800287e:	400a      	ands	r2, r1
  8002880:	701a      	strb	r2, [r3, #0]
+	serin->config.window_time = window_time;
  8002882:	683b      	ldr	r3, [r7, #0]
  8002884:	1dfa      	adds	r2, r7, #7
  8002886:	7812      	ldrb	r2, [r2, #0]
  8002888:	70da      	strb	r2, [r3, #3]
+	status = pyd1598_serin_add_to_datagram(window_time, &serin->conf_datagram,
  800288a:	683b      	ldr	r3, [r7, #0]
  800288c:	3308      	adds	r3, #8
  800288e:	0019      	movs	r1, r3
@@ -6086,8 +7178,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800289c:	f000 f8ac 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  80028a0:	0003      	movs	r3, r0
  80028a2:	7023      	strb	r3, [r4, #0]
+										PYD1598_MASK_WINDOW_TIME,
+										PYD1598_SHIFT_WINDOW_TIME);
+	return status;
  80028a4:	197b      	adds	r3, r7, r5
  80028a6:	781b      	ldrb	r3, [r3, #0]
+}
  80028a8:	0018      	movs	r0, r3
  80028aa:	46bd      	mov	sp, r7
  80028ac:	b004      	add	sp, #16
@@ -6095,6 +7191,9 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80028b0:	01fff9ff 	.word	0x01fff9ff
 
 080028b4 <pyd1598_serin_add_operation_mode>:
+uint8_t pyd1598_serin_add_operation_mode(pyd1598_op_mode_t new_op_mode,
+														pyd1598_serin_t *serin)
+{
  80028b4:	b5b0      	push	{r4, r5, r7, lr}
  80028b6:	b084      	sub	sp, #16
  80028b8:	af00      	add	r7, sp, #0
@@ -6102,14 +7201,17 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80028bc:	6039      	str	r1, [r7, #0]
  80028be:	1dfb      	adds	r3, r7, #7
  80028c0:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  80028c2:	200f      	movs	r0, #15
  80028c4:	183b      	adds	r3, r7, r0
  80028c6:	2200      	movs	r2, #0
  80028c8:	701a      	strb	r2, [r3, #0]
+	serin->config.op_mode = new_op_mode;
  80028ca:	683b      	ldr	r3, [r7, #0]
  80028cc:	1dfa      	adds	r2, r7, #7
  80028ce:	7812      	ldrb	r2, [r2, #0]
  80028d0:	711a      	strb	r2, [r3, #4]
+	status = pyd1598_serin_add_to_datagram((uint8_t) new_op_mode,
  80028d2:	683b      	ldr	r3, [r7, #0]
  80028d4:	3308      	adds	r3, #8
  80028d6:	0019      	movs	r1, r3
@@ -6122,8 +7224,13 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80028e4:	f000 f888 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  80028e8:	0003      	movs	r3, r0
  80028ea:	7023      	strb	r3, [r4, #0]
+											&serin->conf_datagram,
+											PYD1598_MASK_OPERATION_MODES,
+											PYD1598_SHIFT_OPERATION_MODES);
+	return status;
  80028ec:	197b      	adds	r3, r7, r5
  80028ee:	781b      	ldrb	r3, [r3, #0]
+}
  80028f0:	0018      	movs	r0, r3
  80028f2:	46bd      	mov	sp, r7
  80028f4:	b004      	add	sp, #16
@@ -6131,6 +7238,9 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80028f8:	01fffe7f 	.word	0x01fffe7f
 
 080028fc <pyd1598_serin_add_signal_source>:
+uint8_t pyd1598_serin_add_signal_source(pyd1598_signal_source_t signal_source,
+														pyd1598_serin_t *serin)
+{
  80028fc:	b5b0      	push	{r4, r5, r7, lr}
  80028fe:	b084      	sub	sp, #16
  8002900:	af00      	add	r7, sp, #0
@@ -6138,20 +7248,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002904:	6039      	str	r1, [r7, #0]
  8002906:	1dfb      	adds	r3, r7, #7
  8002908:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  800290a:	200f      	movs	r0, #15
  800290c:	183b      	adds	r3, r7, r0
  800290e:	2200      	movs	r2, #0
  8002910:	701a      	strb	r2, [r3, #0]
+
+	signal_source &= 0x03;
  8002912:	1dfb      	adds	r3, r7, #7
  8002914:	1dfa      	adds	r2, r7, #7
  8002916:	7812      	ldrb	r2, [r2, #0]
  8002918:	2103      	movs	r1, #3
  800291a:	400a      	ands	r2, r1
  800291c:	701a      	strb	r2, [r3, #0]
+	serin->config.signal_source = signal_source;
  800291e:	683b      	ldr	r3, [r7, #0]
  8002920:	1dfa      	adds	r2, r7, #7
  8002922:	7812      	ldrb	r2, [r2, #0]
  8002924:	715a      	strb	r2, [r3, #5]
+	status = pyd1598_serin_add_to_datagram((uint8_t) signal_source,
  8002926:	683b      	ldr	r3, [r7, #0]
  8002928:	3308      	adds	r3, #8
  800292a:	0019      	movs	r1, r3
@@ -6164,8 +7279,13 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002938:	f000 f85e 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  800293c:	0003      	movs	r3, r0
  800293e:	7023      	strb	r3, [r4, #0]
+												&serin->conf_datagram,
+												PYD1598_MASK_SIGNAL_SOURCE,
+												PYD1598_SHIFT_SIGNAL_SOURCE);
+	return status;
  8002940:	197b      	adds	r3, r7, r5
  8002942:	781b      	ldrb	r3, [r3, #0]
+}
  8002944:	0018      	movs	r0, r3
  8002946:	46bd      	mov	sp, r7
  8002948:	b004      	add	sp, #16
@@ -6173,6 +7293,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800294c:	01ffff9f 	.word	0x01ffff9f
 
 08002950 <pyd1598_serin_add_hpf_cutoff>:
+
+uint8_t pyd1598_serin_add_hpf_cutoff(pyd1598_hpf_cutoff_t new_hpf_cutoff,
+														pyd1598_serin_t *serin)
+{
  8002950:	b5b0      	push	{r4, r5, r7, lr}
  8002952:	b084      	sub	sp, #16
  8002954:	af00      	add	r7, sp, #0
@@ -6180,20 +7304,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002958:	6039      	str	r1, [r7, #0]
  800295a:	1dfb      	adds	r3, r7, #7
  800295c:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  800295e:	200f      	movs	r0, #15
  8002960:	183b      	adds	r3, r7, r0
  8002962:	2200      	movs	r2, #0
  8002964:	701a      	strb	r2, [r3, #0]
+
+	new_hpf_cutoff &= 0x03;
  8002966:	1dfb      	adds	r3, r7, #7
  8002968:	1dfa      	adds	r2, r7, #7
  800296a:	7812      	ldrb	r2, [r2, #0]
  800296c:	2103      	movs	r1, #3
  800296e:	400a      	ands	r2, r1
  8002970:	701a      	strb	r2, [r3, #0]
+	serin->config.hpf_cutoff = new_hpf_cutoff;
  8002972:	683b      	ldr	r3, [r7, #0]
  8002974:	1dfa      	adds	r2, r7, #7
  8002976:	7812      	ldrb	r2, [r2, #0]
  8002978:	719a      	strb	r2, [r3, #6]
+	status = pyd1598_serin_add_to_datagram((uint8_t) new_hpf_cutoff,
  800297a:	683b      	ldr	r3, [r7, #0]
  800297c:	3308      	adds	r3, #8
  800297e:	0019      	movs	r1, r3
@@ -6206,8 +7335,13 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800298c:	f000 f834 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  8002990:	0003      	movs	r3, r0
  8002992:	7023      	strb	r3, [r4, #0]
+											&serin->conf_datagram,
+											PYD1598_MASK_HPF_CUTOFF,
+											PYD1598_SHIFT_HPF_CUTOFF);
+	return status;
  8002994:	197b      	adds	r3, r7, r5
  8002996:	781b      	ldrb	r3, [r3, #0]
+}
  8002998:	0018      	movs	r0, r3
  800299a:	46bd      	mov	sp, r7
  800299c:	b004      	add	sp, #16
@@ -6215,6 +7349,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80029a0:	01fffffb 	.word	0x01fffffb
 
 080029a4 <pyd1598_serin_add_count_mode>:
+
+uint8_t pyd1598_serin_add_count_mode(pyd1598_count_mode_t new_count_mode,
+														pyd1598_serin_t *serin)
+{
  80029a4:	b5b0      	push	{r4, r5, r7, lr}
  80029a6:	b084      	sub	sp, #16
  80029a8:	af00      	add	r7, sp, #0
@@ -6222,20 +7360,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80029ac:	6039      	str	r1, [r7, #0]
  80029ae:	1dfb      	adds	r3, r7, #7
  80029b0:	701a      	strb	r2, [r3, #0]
+	uint8_t status = 0;
  80029b2:	200f      	movs	r0, #15
  80029b4:	183b      	adds	r3, r7, r0
  80029b6:	2200      	movs	r2, #0
  80029b8:	701a      	strb	r2, [r3, #0]
+
+	new_count_mode &= 0x03;
  80029ba:	1dfb      	adds	r3, r7, #7
  80029bc:	1dfa      	adds	r2, r7, #7
  80029be:	7812      	ldrb	r2, [r2, #0]
  80029c0:	2103      	movs	r1, #3
  80029c2:	400a      	ands	r2, r1
  80029c4:	701a      	strb	r2, [r3, #0]
+	serin->config.count_mode = new_count_mode;
  80029c6:	683b      	ldr	r3, [r7, #0]
  80029c8:	1dfa      	adds	r2, r7, #7
  80029ca:	7812      	ldrb	r2, [r2, #0]
  80029cc:	71da      	strb	r2, [r3, #7]
+	status = pyd1598_serin_add_to_datagram((uint8_t) new_count_mode,
  80029ce:	683b      	ldr	r3, [r7, #0]
  80029d0:	3308      	adds	r3, #8
  80029d2:	0019      	movs	r1, r3
@@ -6248,8 +7391,13 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80029e0:	f000 f80a 	bl	80029f8 <pyd1598_serin_add_to_datagram>
  80029e4:	0003      	movs	r3, r0
  80029e6:	7023      	strb	r3, [r4, #0]
+											&serin->conf_datagram,
+											PYD1598_MASK_COUNT_MODE,
+											PYD1598_SHIFT_COUNT_MODE);
+	return status;
  80029e8:	197b      	adds	r3, r7, r5
  80029ea:	781b      	ldrb	r3, [r3, #0]
+}
  80029ec:	0018      	movs	r0, r3
  80029ee:	46bd      	mov	sp, r7
  80029f0:	b004      	add	sp, #16
@@ -6257,6 +7405,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80029f4:	01fffffd 	.word	0x01fffffd
 
 080029f8 <pyd1598_serin_add_to_datagram>:
+
+uint8_t pyd1598_serin_add_to_datagram(uint8_t data, uint32_t *datagram,
+												uint32_t mask, uint8_t shift)
+{
  80029f8:	b590      	push	{r4, r7, lr}
  80029fa:	b087      	sub	sp, #28
  80029fc:	af00      	add	r7, sp, #0
@@ -6271,17 +7423,29 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002a0e:	183b      	adds	r3, r7, r0
  8002a10:	1c0a      	adds	r2, r1, #0
  8002a12:	701a      	strb	r2, [r3, #0]
+	uint32_t old_config = 0;
  8002a14:	2300      	movs	r3, #0
  8002a16:	617b      	str	r3, [r7, #20]
+	uint32_t new_config = 0;
  8002a18:	2300      	movs	r3, #0
  8002a1a:	613b      	str	r3, [r7, #16]
+
+	//generating copy of the datagram to handle the changes
+	//(protecting from possible changes due to interrupts)
+	old_config = *datagram;
  8002a1c:	68bb      	ldr	r3, [r7, #8]
  8002a1e:	681b      	ldr	r3, [r3, #0]
  8002a20:	617b      	str	r3, [r7, #20]
+
+	//Clear section of the datagram copy to set the new data
+	old_config &= mask;
  8002a22:	697b      	ldr	r3, [r7, #20]
  8002a24:	687a      	ldr	r2, [r7, #4]
  8002a26:	4013      	ands	r3, r2
  8002a28:	617b      	str	r3, [r7, #20]
+
+	//Shifting data to the position of the datagram copy
+	new_config |= (((uint32_t) data) << shift);
  8002a2a:	193b      	adds	r3, r7, r4
  8002a2c:	781a      	ldrb	r2, [r3, #0]
  8002a2e:	183b      	adds	r3, r7, r0
@@ -6291,26 +7455,43 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002a36:	693a      	ldr	r2, [r7, #16]
  8002a38:	4313      	orrs	r3, r2
  8002a3a:	613b      	str	r3, [r7, #16]
+
+	//Adding data to the datagram copy
+	new_config |= old_config;
  8002a3c:	693a      	ldr	r2, [r7, #16]
  8002a3e:	697b      	ldr	r3, [r7, #20]
  8002a40:	4313      	orrs	r3, r2
  8002a42:	613b      	str	r3, [r7, #16]
+
+	//substitute the values of the datagram with the new configuration
+	*datagram = new_config;
  8002a44:	68bb      	ldr	r3, [r7, #8]
  8002a46:	693a      	ldr	r2, [r7, #16]
  8002a48:	601a      	str	r2, [r3, #0]
+
+	return 0;
  8002a4a:	2300      	movs	r3, #0
+}
  8002a4c:	0018      	movs	r0, r3
  8002a4e:	46bd      	mov	sp, r7
  8002a50:	b007      	add	sp, #28
  8002a52:	bd90      	pop	{r4, r7, pc}
 
 08002a54 <pyd1598_serin_set_zero_pulse>:
+//Information from:
+//https://www.excelitas.com/product/pyd-1588-pyd-1598-low-power-digipyros
+
+//TODO: (high) change this to decouple from the main.h header.
+void pyd1598_serin_set_zero_pulse(pyd1598_hardware_interface_t gpio)
+{
  8002a54:	b580      	push	{r7, lr}
  8002a56:	b082      	sub	sp, #8
  8002a58:	af00      	add	r7, sp, #0
  8002a5a:	003b      	movs	r3, r7
  8002a5c:	6018      	str	r0, [r3, #0]
  8002a5e:	6059      	str	r1, [r3, #4]
+	//This should takes less than t_{DL}=200-2000ns
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
  8002a60:	003b      	movs	r3, r7
  8002a62:	6818      	ldr	r0, [r3, #0]
  8002a64:	003b      	movs	r3, r7
@@ -6318,6 +7499,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002a68:	2200      	movs	r2, #0
  8002a6a:	0019      	movs	r1, r3
  8002a6c:	f001 f8f5 	bl	8003c5a <HAL_GPIO_WritePin>
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_SET);
  8002a70:	003b      	movs	r3, r7
  8002a72:	6818      	ldr	r0, [r3, #0]
  8002a74:	003b      	movs	r3, r7
@@ -6325,6 +7507,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002a78:	2201      	movs	r2, #1
  8002a7a:	0019      	movs	r1, r3
  8002a7c:	f001 f8ed 	bl	8003c5a <HAL_GPIO_WritePin>
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
  8002a80:	003b      	movs	r3, r7
  8002a82:	6818      	ldr	r0, [r3, #0]
  8002a84:	003b      	movs	r3, r7
@@ -6332,18 +7515,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002a88:	2200      	movs	r2, #0
  8002a8a:	0019      	movs	r1, r3
  8002a8c:	f001 f8e5 	bl	8003c5a <HAL_GPIO_WritePin>
+}
  8002a90:	46c0      	nop			; (mov r8, r8)
  8002a92:	46bd      	mov	sp, r7
  8002a94:	b002      	add	sp, #8
  8002a96:	bd80      	pop	{r7, pc}
 
 08002a98 <pyd1598_serin_set_one_pulse>:
+
+void pyd1598_serin_set_one_pulse(pyd1598_hardware_interface_t gpio)
+{
  8002a98:	b580      	push	{r7, lr}
  8002a9a:	b082      	sub	sp, #8
  8002a9c:	af00      	add	r7, sp, #0
  8002a9e:	003b      	movs	r3, r7
  8002aa0:	6018      	str	r0, [r3, #0]
  8002aa2:	6059      	str	r1, [r3, #4]
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
  8002aa4:	003b      	movs	r3, r7
  8002aa6:	6818      	ldr	r0, [r3, #0]
  8002aa8:	003b      	movs	r3, r7
@@ -6351,6 +7539,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002aac:	2200      	movs	r2, #0
  8002aae:	0019      	movs	r1, r3
  8002ab0:	f001 f8d3 	bl	8003c5a <HAL_GPIO_WritePin>
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_SET);
  8002ab4:	003b      	movs	r3, r7
  8002ab6:	6818      	ldr	r0, [r3, #0]
  8002ab8:	003b      	movs	r3, r7
@@ -6358,18 +7547,26 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002abc:	2201      	movs	r2, #1
  8002abe:	0019      	movs	r1, r3
  8002ac0:	f001 f8cb 	bl	8003c5a <HAL_GPIO_WritePin>
+}
  8002ac4:	46c0      	nop			; (mov r8, r8)
  8002ac6:	46bd      	mov	sp, r7
  8002ac8:	b002      	add	sp, #8
  8002aca:	bd80      	pop	{r7, pc}
 
 08002acc <pyd1598_direct_link_set_as_output>:
+{
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
+}
+
+void pyd1598_direct_link_set_as_output(pyd1598_hardware_interface_t gpio)
+{
  8002acc:	b580      	push	{r7, lr}
  8002ace:	b082      	sub	sp, #8
  8002ad0:	af00      	add	r7, sp, #0
  8002ad2:	003b      	movs	r3, r7
  8002ad4:	6018      	str	r0, [r3, #0]
  8002ad6:	6059      	str	r1, [r3, #4]
+	HAL_DIRECT_LINK_conf_as_output(gpio.port, gpio.pin, gpio.irq_type);
  8002ad8:	003b      	movs	r3, r7
  8002ada:	6818      	ldr	r0, [r3, #0]
  8002adc:	003b      	movs	r3, r7
@@ -6379,18 +7576,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ae4:	b25b      	sxtb	r3, r3
  8002ae6:	001a      	movs	r2, r3
  8002ae8:	f7fd fe22 	bl	8000730 <HAL_DIRECT_LINK_conf_as_output>
+}
  8002aec:	46c0      	nop			; (mov r8, r8)
  8002aee:	46bd      	mov	sp, r7
  8002af0:	b002      	add	sp, #8
  8002af2:	bd80      	pop	{r7, pc}
 
 08002af4 <pyd1598_direct_link_set_as_input>:
+
+void pyd1598_direct_link_set_as_input(pyd1598_hardware_interface_t gpio)
+{
  8002af4:	b580      	push	{r7, lr}
  8002af6:	b082      	sub	sp, #8
  8002af8:	af00      	add	r7, sp, #0
  8002afa:	003b      	movs	r3, r7
  8002afc:	6018      	str	r0, [r3, #0]
  8002afe:	6059      	str	r1, [r3, #4]
+	HAL_DIRECT_LINK_conf_as_input(gpio.port, gpio.pin, gpio.irq_type);
  8002b00:	003b      	movs	r3, r7
  8002b02:	6818      	ldr	r0, [r3, #0]
  8002b04:	003b      	movs	r3, r7
@@ -6400,18 +7602,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002b0c:	b25b      	sxtb	r3, r3
  8002b0e:	001a      	movs	r2, r3
  8002b10:	f7fd fd98 	bl	8000644 <HAL_DIRECT_LINK_conf_as_input>
+}
  8002b14:	46c0      	nop			; (mov r8, r8)
  8002b16:	46bd      	mov	sp, r7
  8002b18:	b002      	add	sp, #8
  8002b1a:	bd80      	pop	{r7, pc}
 
 08002b1c <pyd1598_direct_link_set_as_interrupt_input>:
+
+void pyd1598_direct_link_set_as_interrupt_input(pyd1598_hardware_interface_t gpio)
+{
  8002b1c:	b580      	push	{r7, lr}
  8002b1e:	b082      	sub	sp, #8
  8002b20:	af00      	add	r7, sp, #0
  8002b22:	003b      	movs	r3, r7
  8002b24:	6018      	str	r0, [r3, #0]
  8002b26:	6059      	str	r1, [r3, #4]
+	HAL_DIRECT_LINK_conf_as_interrupt_input(gpio.port, gpio.pin, gpio.irq_type);
  8002b28:	003b      	movs	r3, r7
  8002b2a:	6818      	ldr	r0, [r3, #0]
  8002b2c:	003b      	movs	r3, r7
@@ -6421,18 +7628,26 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002b34:	b25b      	sxtb	r3, r3
  8002b36:	001a      	movs	r2, r3
  8002b38:	f7fd fdba 	bl	80006b0 <HAL_DIRECT_LINK_conf_as_interrupt_input>
+}
  8002b3c:	46c0      	nop			; (mov r8, r8)
  8002b3e:	46bd      	mov	sp, r7
  8002b40:	b002      	add	sp, #8
  8002b42:	bd80      	pop	{r7, pc}
 
 08002b44 <pyd1598_direct_link_set_one_pulse>:
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
+}
+void pyd1598_direct_link_set_one_pulse(pyd1598_hardware_interface_t gpio)
+{
  8002b44:	b580      	push	{r7, lr}
  8002b46:	b082      	sub	sp, #8
  8002b48:	af00      	add	r7, sp, #0
  8002b4a:	003b      	movs	r3, r7
  8002b4c:	6018      	str	r0, [r3, #0]
  8002b4e:	6059      	str	r1, [r3, #4]
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
  8002b50:	003b      	movs	r3, r7
  8002b52:	6818      	ldr	r0, [r3, #0]
  8002b54:	003b      	movs	r3, r7
@@ -6440,6 +7655,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002b58:	2200      	movs	r2, #0
  8002b5a:	0019      	movs	r1, r3
  8002b5c:	f001 f87d 	bl	8003c5a <HAL_GPIO_WritePin>
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_SET);
  8002b60:	003b      	movs	r3, r7
  8002b62:	6818      	ldr	r0, [r3, #0]
  8002b64:	003b      	movs	r3, r7
@@ -6447,18 +7663,22 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002b68:	2201      	movs	r2, #1
  8002b6a:	0019      	movs	r1, r3
  8002b6c:	f001 f875 	bl	8003c5a <HAL_GPIO_WritePin>
+}
  8002b70:	46c0      	nop			; (mov r8, r8)
  8002b72:	46bd      	mov	sp, r7
  8002b74:	b002      	add	sp, #8
  8002b76:	bd80      	pop	{r7, pc}
 
 08002b78 <pyd1598_direct_link_set_negative_edge>:
+void pyd1598_direct_link_set_negative_edge(pyd1598_hardware_interface_t gpio)
+{
  8002b78:	b580      	push	{r7, lr}
  8002b7a:	b082      	sub	sp, #8
  8002b7c:	af00      	add	r7, sp, #0
  8002b7e:	003b      	movs	r3, r7
  8002b80:	6018      	str	r0, [r3, #0]
  8002b82:	6059      	str	r1, [r3, #4]
+	HAL_GPIO_WritePin(gpio.port, gpio.pin, GPIO_PIN_RESET);
  8002b84:	003b      	movs	r3, r7
  8002b86:	6818      	ldr	r0, [r3, #0]
  8002b88:	003b      	movs	r3, r7
@@ -6466,12 +7686,19 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002b8c:	2200      	movs	r2, #0
  8002b8e:	0019      	movs	r1, r3
  8002b90:	f001 f863 	bl	8003c5a <HAL_GPIO_WritePin>
+}
  8002b94:	46c0      	nop			; (mov r8, r8)
  8002b96:	46bd      	mov	sp, r7
  8002b98:	b002      	add	sp, #8
  8002b9a:	bd80      	pop	{r7, pc}
 
 08002b9c <pyd1598_direct_link_read_pin>:
+}
+
+
+uint8_t pyd1598_direct_link_read_pin(pyd1598_hardware_interface_t gpio,
+											uint64_t *buffer, uint32_t shift)
+{
  8002b9c:	b5f0      	push	{r4, r5, r6, r7, lr}
  8002b9e:	b08f      	sub	sp, #60	; 0x3c
  8002ba0:	af00      	add	r7, sp, #0
@@ -6485,6 +7712,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002bb0:	6071      	str	r1, [r6, #4]
  8002bb2:	627a      	str	r2, [r7, #36]	; 0x24
  8002bb4:	623b      	str	r3, [r7, #32]
+	static uint64_t readout_mask = (uint64_t) PYD1598_DIRECT_LINK_MASK;
+	GPIO_PinState pin_value = GPIO_PIN_RESET;
  8002bb6:	2017      	movs	r0, #23
  8002bb8:	0026      	movs	r6, r4
  8002bba:	1983      	adds	r3, r0, r6
@@ -6494,6 +7723,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002bc2:	4463      	add	r3, ip
  8002bc4:	2200      	movs	r2, #0
  8002bc6:	701a      	strb	r2, [r3, #0]
+
+	pin_value = HAL_GPIO_ReadPin(gpio.port, gpio.pin);
  8002bc8:	2108      	movs	r1, #8
  8002bca:	198b      	adds	r3, r1, r6
  8002bcc:	2208      	movs	r2, #8
@@ -6517,6 +7748,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002bf0:	f001 f816 	bl	8003c20 <HAL_GPIO_ReadPin>
  8002bf4:	0003      	movs	r3, r0
  8002bf6:	7033      	strb	r3, [r6, #0]
+
+	if(pin_value == GPIO_PIN_SET)
  8002bf8:	2017      	movs	r0, #23
  8002bfa:	0026      	movs	r6, r4
  8002bfc:	1983      	adds	r3, r0, r6
@@ -6527,6 +7760,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002c06:	781b      	ldrb	r3, [r3, #0]
  8002c08:	2b01      	cmp	r3, #1
  8002c0a:	d110      	bne.n	8002c2e <pyd1598_direct_link_read_pin+0x92>
+	{
+		*buffer  |= readout_mask;
  8002c0c:	6a7b      	ldr	r3, [r7, #36]	; 0x24
  8002c0e:	6818      	ldr	r0, [r3, #0]
  8002c10:	6859      	ldr	r1, [r3, #4]
@@ -6544,6 +7779,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002c28:	6019      	str	r1, [r3, #0]
  8002c2a:	605a      	str	r2, [r3, #4]
  8002c2c:	e020      	b.n	8002c70 <pyd1598_direct_link_read_pin+0xd4>
+	}
+	else if(pin_value == GPIO_PIN_RESET)
  8002c2e:	2317      	movs	r3, #23
  8002c30:	2218      	movs	r2, #24
  8002c32:	189b      	adds	r3, r3, r2
@@ -6554,6 +7791,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002c3c:	781b      	ldrb	r3, [r3, #0]
  8002c3e:	2b00      	cmp	r3, #0
  8002c40:	d115      	bne.n	8002c6e <pyd1598_direct_link_read_pin+0xd2>
+	{
+		*buffer  &= ~readout_mask;
  8002c42:	6a7b      	ldr	r3, [r7, #36]	; 0x24
  8002c44:	681a      	ldr	r2, [r3, #0]
  8002c46:	685b      	ldr	r3, [r3, #4]
@@ -6576,7 +7815,14 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002c68:	6019      	str	r1, [r3, #0]
  8002c6a:	605a      	str	r2, [r3, #4]
  8002c6c:	e000      	b.n	8002c70 <pyd1598_direct_link_read_pin+0xd4>
+	}
+	else
+	{
+		__NOP();
  8002c6e:	46c0      	nop			; (mov r8, r8)
+	}
+
+	readout_mask = (readout_mask >> 1);
  8002c70:	4b0f      	ldr	r3, [pc, #60]	; (8002cb0 <pyd1598_direct_link_read_pin+0x114>)
  8002c72:	681a      	ldr	r2, [r3, #0]
  8002c74:	685b      	ldr	r3, [r3, #4]
@@ -6593,18 +7839,26 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002c8a:	687a      	ldr	r2, [r7, #4]
  8002c8c:	6019      	str	r1, [r3, #0]
  8002c8e:	605a      	str	r2, [r3, #4]
+
+	if(readout_mask == ((uint64_t) 0))
  8002c90:	4b07      	ldr	r3, [pc, #28]	; (8002cb0 <pyd1598_direct_link_read_pin+0x114>)
  8002c92:	681a      	ldr	r2, [r3, #0]
  8002c94:	685b      	ldr	r3, [r3, #4]
  8002c96:	0011      	movs	r1, r2
  8002c98:	4319      	orrs	r1, r3
  8002c9a:	d104      	bne.n	8002ca6 <pyd1598_direct_link_read_pin+0x10a>
+	{
+		readout_mask  = (uint64_t) PYD1598_DIRECT_LINK_MASK;
  8002c9c:	4904      	ldr	r1, [pc, #16]	; (8002cb0 <pyd1598_direct_link_read_pin+0x114>)
  8002c9e:	2200      	movs	r2, #0
  8002ca0:	2380      	movs	r3, #128	; 0x80
  8002ca2:	600a      	str	r2, [r1, #0]
  8002ca4:	604b      	str	r3, [r1, #4]
+	}
+	return 0;
  8002ca6:	2300      	movs	r3, #0
+
+}
  8002ca8:	0018      	movs	r0, r3
  8002caa:	46bd      	mov	sp, r7
  8002cac:	b00f      	add	sp, #60	; 0x3c
@@ -6612,9 +7866,20 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002cb0:	20000008 	.word	0x20000008
 
 08002cb4 <HAL_MspInit>:
+/* USER CODE END 0 */
+/**
+  * Initializes the Global MSP.
+  */
+void HAL_MspInit(void)
+{
  8002cb4:	b580      	push	{r7, lr}
  8002cb6:	b082      	sub	sp, #8
  8002cb8:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN MspInit 0 */
+
+  /* USER CODE END MspInit 0 */
+
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
  8002cba:	4b12      	ldr	r3, [pc, #72]	; (8002d04 <HAL_MspInit+0x50>)
  8002cbc:	6c1a      	ldr	r2, [r3, #64]	; 0x40
  8002cbe:	4b11      	ldr	r3, [pc, #68]	; (8002d04 <HAL_MspInit+0x50>)
@@ -6627,6 +7892,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ccc:	4013      	ands	r3, r2
  8002cce:	607b      	str	r3, [r7, #4]
  8002cd0:	687b      	ldr	r3, [r7, #4]
+  __HAL_RCC_PWR_CLK_ENABLE();
  8002cd2:	4b0c      	ldr	r3, [pc, #48]	; (8002d04 <HAL_MspInit+0x50>)
  8002cd4:	6bda      	ldr	r2, [r3, #60]	; 0x3c
  8002cd6:	4b0b      	ldr	r3, [pc, #44]	; (8002d04 <HAL_MspInit+0x50>)
@@ -6641,10 +7907,20 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ce8:	4013      	ands	r3, r2
  8002cea:	603b      	str	r3, [r7, #0]
  8002cec:	683b      	ldr	r3, [r7, #0]
+
+  /* System interrupt init*/
+
+  HAL_SYSCFG_EnableRemap(SYSCFG_REMAP_PA11);
  8002cee:	2008      	movs	r0, #8
  8002cf0:	f000 fc3c 	bl	800356c <HAL_SYSCFG_EnableRemap>
+  HAL_SYSCFG_EnableRemap(SYSCFG_REMAP_PA12);
  8002cf4:	2010      	movs	r0, #16
  8002cf6:	f000 fc39 	bl	800356c <HAL_SYSCFG_EnableRemap>
+
+  /* USER CODE BEGIN MspInit 1 */
+
+  /* USER CODE END MspInit 1 */
+}
  8002cfa:	46c0      	nop			; (mov r8, r8)
  8002cfc:	46bd      	mov	sp, r7
  8002cfe:	b002      	add	sp, #8
@@ -6653,68 +7929,171 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002d04:	40021000 	.word	0x40021000
 
 08002d08 <NMI_Handler>:
+/******************************************************************************/
+/**
+  * @brief This function handles Non maskable interrupt.
+  */
+void NMI_Handler(void)
+{
  8002d08:	b580      	push	{r7, lr}
  8002d0a:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+
+  /* USER CODE END NonMaskableInt_IRQn 0 */
+  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+  while (1)
  8002d0c:	e7fe      	b.n	8002d0c <NMI_Handler+0x4>
 
 08002d0e <HardFault_Handler>:
+
+/**
+  * @brief This function handles Hard fault interrupt.
+  */
+void HardFault_Handler(void)
+{
  8002d0e:	b580      	push	{r7, lr}
  8002d10:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN HardFault_IRQn 0 */
+
+  /* USER CODE END HardFault_IRQn 0 */
+  while (1)
  8002d12:	e7fe      	b.n	8002d12 <HardFault_Handler+0x4>
 
 08002d14 <SVC_Handler>:
+
+/**
+  * @brief This function handles System service call via SWI instruction.
+  */
+void SVC_Handler(void)
+{
  8002d14:	b580      	push	{r7, lr}
  8002d16:	af00      	add	r7, sp, #0
+
+  /* USER CODE END SVC_IRQn 0 */
+  /* USER CODE BEGIN SVC_IRQn 1 */
+
+  /* USER CODE END SVC_IRQn 1 */
+}
  8002d18:	46c0      	nop			; (mov r8, r8)
  8002d1a:	46bd      	mov	sp, r7
  8002d1c:	bd80      	pop	{r7, pc}
 
 08002d1e <PendSV_Handler>:
+
+/**
+  * @brief This function handles Pendable request for system service.
+  */
+void PendSV_Handler(void)
+{
  8002d1e:	b580      	push	{r7, lr}
  8002d20:	af00      	add	r7, sp, #0
+
+  /* USER CODE END PendSV_IRQn 0 */
+  /* USER CODE BEGIN PendSV_IRQn 1 */
+
+  /* USER CODE END PendSV_IRQn 1 */
+}
  8002d22:	46c0      	nop			; (mov r8, r8)
  8002d24:	46bd      	mov	sp, r7
  8002d26:	bd80      	pop	{r7, pc}
 
 08002d28 <SysTick_Handler>:
+
+/**
+  * @brief This function handles System tick timer.
+  */
+void SysTick_Handler(void)
+{
  8002d28:	b580      	push	{r7, lr}
  8002d2a:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+
+  /* USER CODE END SysTick_IRQn 0 */
+  HAL_IncTick();
  8002d2c:	f000 fbde 	bl	80034ec <HAL_IncTick>
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}
  8002d30:	46c0      	nop			; (mov r8, r8)
  8002d32:	46bd      	mov	sp, r7
  8002d34:	bd80      	pop	{r7, pc}
 
 08002d36 <EXTI2_3_IRQHandler>:
+
+/**
+  * @brief This function handles EXTI line 2 and line 3 interrupts.
+  */
+void EXTI2_3_IRQHandler(void)
+{
  8002d36:	b580      	push	{r7, lr}
  8002d38:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN EXTI2_3_IRQn 0 */
+
+  /* USER CODE END EXTI2_3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(UV_IN_Pin);
  8002d3a:	2004      	movs	r0, #4
  8002d3c:	f000 ffc6 	bl	8003ccc <HAL_GPIO_EXTI_IRQHandler>
+  HAL_GPIO_EXTI_IRQHandler(LAMP2_IN_Pin);
  8002d40:	2008      	movs	r0, #8
  8002d42:	f000 ffc3 	bl	8003ccc <HAL_GPIO_EXTI_IRQHandler>
+  /* USER CODE BEGIN EXTI2_3_IRQn 1 */
+
+  /* USER CODE END EXTI2_3_IRQn 1 */
+}
  8002d46:	46c0      	nop			; (mov r8, r8)
  8002d48:	46bd      	mov	sp, r7
  8002d4a:	bd80      	pop	{r7, pc}
 
 08002d4c <EXTI4_15_IRQHandler>:
+
+/**
+  * @brief This function handles EXTI line 4 to 15 interrupts.
+  */
+void EXTI4_15_IRQHandler(void)
+{
  8002d4c:	b580      	push	{r7, lr}
  8002d4e:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN EXTI4_15_IRQn 0 */
+
+  /* USER CODE END EXTI4_15_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(DIRLINK_Pin);
  8002d50:	2080      	movs	r0, #128	; 0x80
  8002d52:	f000 ffbb 	bl	8003ccc <HAL_GPIO_EXTI_IRQHandler>
+  HAL_GPIO_EXTI_IRQHandler(LAMP1_IN_Pin);
  8002d56:	2380      	movs	r3, #128	; 0x80
  8002d58:	009b      	lsls	r3, r3, #2
  8002d5a:	0018      	movs	r0, r3
  8002d5c:	f000 ffb6 	bl	8003ccc <HAL_GPIO_EXTI_IRQHandler>
+  /* USER CODE BEGIN EXTI4_15_IRQn 1 */
+
+  /* USER CODE END EXTI4_15_IRQn 1 */
+}
  8002d60:	46c0      	nop			; (mov r8, r8)
  8002d62:	46bd      	mov	sp, r7
  8002d64:	bd80      	pop	{r7, pc}
 	...
 
 08002d68 <TIM1_BRK_UP_TRG_COM_IRQHandler>:
+
+/**
+  * @brief This function handles TIM1 break, update, trigger and commutation interrupts.
+  */
+void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
+{
  8002d68:	b580      	push	{r7, lr}
  8002d6a:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 0 */
+
+  /* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
  8002d6c:	4b03      	ldr	r3, [pc, #12]	; (8002d7c <TIM1_BRK_UP_TRG_COM_IRQHandler+0x14>)
  8002d6e:	0018      	movs	r0, r3
  8002d70:	f001 fc66 	bl	8004640 <HAL_TIM_IRQHandler>
+  /* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 1 */
+
+  /* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 1 */
+}
  8002d74:	46c0      	nop			; (mov r8, r8)
  8002d76:	46bd      	mov	sp, r7
  8002d78:	bd80      	pop	{r7, pc}
@@ -6722,11 +8101,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002d7c:	200006f0 	.word	0x200006f0
 
 08002d80 <TIM1_CC_IRQHandler>:
+
+/**
+  * @brief This function handles TIM1 capture compare interrupt.
+  */
+void TIM1_CC_IRQHandler(void)
+{
  8002d80:	b580      	push	{r7, lr}
  8002d82:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN TIM1_CC_IRQn 0 */
+
+  /* USER CODE END TIM1_CC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
  8002d84:	4b03      	ldr	r3, [pc, #12]	; (8002d94 <TIM1_CC_IRQHandler+0x14>)
  8002d86:	0018      	movs	r0, r3
  8002d88:	f001 fc5a 	bl	8004640 <HAL_TIM_IRQHandler>
+  /* USER CODE BEGIN TIM1_CC_IRQn 1 */
+
+  /* USER CODE END TIM1_CC_IRQn 1 */
+}
  8002d8c:	46c0      	nop			; (mov r8, r8)
  8002d8e:	46bd      	mov	sp, r7
  8002d90:	bd80      	pop	{r7, pc}
@@ -6734,11 +8127,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002d94:	200006f0 	.word	0x200006f0
 
 08002d98 <TIM14_IRQHandler>:
+
+/**
+  * @brief This function handles TIM14 global interrupt.
+  */
+void TIM14_IRQHandler(void)
+{
  8002d98:	b580      	push	{r7, lr}
  8002d9a:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN TIM14_IRQn 0 */
+
+  /* USER CODE END TIM14_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim14);
  8002d9c:	4b03      	ldr	r3, [pc, #12]	; (8002dac <TIM14_IRQHandler+0x14>)
  8002d9e:	0018      	movs	r0, r3
  8002da0:	f001 fc4e 	bl	8004640 <HAL_TIM_IRQHandler>
+  /* USER CODE BEGIN TIM14_IRQn 1 */
+
+  /* USER CODE END TIM14_IRQn 1 */
+}
  8002da4:	46c0      	nop			; (mov r8, r8)
  8002da6:	46bd      	mov	sp, r7
  8002da8:	bd80      	pop	{r7, pc}
@@ -6746,11 +8153,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002dac:	20000788 	.word	0x20000788
 
 08002db0 <TIM16_IRQHandler>:
+
+/**
+  * @brief This function handles TIM16 global interrupt.
+  */
+void TIM16_IRQHandler(void)
+{
  8002db0:	b580      	push	{r7, lr}
  8002db2:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN TIM16_IRQn 0 */
+
+  /* USER CODE END TIM16_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim16);
  8002db4:	4b03      	ldr	r3, [pc, #12]	; (8002dc4 <TIM16_IRQHandler+0x14>)
  8002db6:	0018      	movs	r0, r3
  8002db8:	f001 fc42 	bl	8004640 <HAL_TIM_IRQHandler>
+  /* USER CODE BEGIN TIM16_IRQn 1 */
+
+  /* USER CODE END TIM16_IRQn 1 */
+}
  8002dbc:	46c0      	nop			; (mov r8, r8)
  8002dbe:	46bd      	mov	sp, r7
  8002dc0:	bd80      	pop	{r7, pc}
@@ -6758,11 +8179,25 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002dc4:	200007d4 	.word	0x200007d4
 
 08002dc8 <TIM17_IRQHandler>:
+
+/**
+  * @brief This function handles TIM17 global interrupt.
+  */
+void TIM17_IRQHandler(void)
+{
  8002dc8:	b580      	push	{r7, lr}
  8002dca:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN TIM17_IRQn 0 */
+
+  /* USER CODE END TIM17_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim17);
  8002dcc:	4b03      	ldr	r3, [pc, #12]	; (8002ddc <TIM17_IRQHandler+0x14>)
  8002dce:	0018      	movs	r0, r3
  8002dd0:	f001 fc36 	bl	8004640 <HAL_TIM_IRQHandler>
+  /* USER CODE BEGIN TIM17_IRQn 1 */
+
+  /* USER CODE END TIM17_IRQn 1 */
+}
  8002dd4:	46c0      	nop			; (mov r8, r8)
  8002dd6:	46bd      	mov	sp, r7
  8002dd8:	bd80      	pop	{r7, pc}
@@ -6770,6 +8205,12 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ddc:	20000820 	.word	0x20000820
 
 08002de0 <switch_selector_setup>:
+#include "switch_selector.h"
+
+uint8_t switch_selector_setup(switch_selector_t *switch_selector,
+								switch_selector_gpio_t *switch_selector_gpio,
+								uint8_t switch_size)
+{
  8002de0:	b5b0      	push	{r4, r5, r7, lr}
  8002de2:	b088      	sub	sp, #32
  8002de4:	af00      	add	r7, sp, #0
@@ -6777,27 +8218,42 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002de8:	60b9      	str	r1, [r7, #8]
  8002dea:	1dfb      	adds	r3, r7, #7
  8002dec:	701a      	strb	r2, [r3, #0]
+
+	uint8_t status = 0;
  8002dee:	231f      	movs	r3, #31
  8002df0:	18fb      	adds	r3, r7, r3
  8002df2:	2200      	movs	r2, #0
  8002df4:	701a      	strb	r2, [r3, #0]
+	uint8_t idx = 0;
  8002df6:	231e      	movs	r3, #30
  8002df8:	18fb      	adds	r3, r7, r3
  8002dfa:	2200      	movs	r2, #0
  8002dfc:	701a      	strb	r2, [r3, #0]
+
+
+
+	if(switch_size > 32)
  8002dfe:	1dfb      	adds	r3, r7, #7
  8002e00:	781b      	ldrb	r3, [r3, #0]
  8002e02:	2b20      	cmp	r3, #32
  8002e04:	d901      	bls.n	8002e0a <switch_selector_setup+0x2a>
+	{
+		return 2;
  8002e06:	2302      	movs	r3, #2
  8002e08:	e050      	b.n	8002eac <switch_selector_setup+0xcc>
+	}
+
+
+	switch_selector->value = 0;
  8002e0a:	68fb      	ldr	r3, [r7, #12]
  8002e0c:	2200      	movs	r2, #0
  8002e0e:	609a      	str	r2, [r3, #8]
+	switch_selector->switch_size = switch_size;
  8002e10:	68fb      	ldr	r3, [r7, #12]
  8002e12:	1dfa      	adds	r2, r7, #7
  8002e14:	7812      	ldrb	r2, [r2, #0]
  8002e16:	711a      	strb	r2, [r3, #4]
+	switch_selector->switch_selector_gpio = (switch_selector_gpio_t*)malloc(switch_size * sizeof(switch_selector_gpio_t) );
  8002e18:	1dfb      	adds	r3, r7, #7
  8002e1a:	781b      	ldrb	r3, [r3, #0]
  8002e1c:	00db      	lsls	r3, r3, #3
@@ -6807,11 +8263,17 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002e26:	001a      	movs	r2, r3
  8002e28:	68fb      	ldr	r3, [r7, #12]
  8002e2a:	601a      	str	r2, [r3, #0]
+	uint32_t value;
+	switch_selector_status_t pin_status;
+
+	for(idx = 0; idx < switch_size; idx++)
  8002e2c:	231e      	movs	r3, #30
  8002e2e:	18fb      	adds	r3, r7, r3
  8002e30:	2200      	movs	r2, #0
  8002e32:	701a      	strb	r2, [r3, #0]
  8002e34:	e030      	b.n	8002e98 <switch_selector_setup+0xb8>
+	{
+		if((switch_selector_gpio + idx) != NULL)
  8002e36:	201e      	movs	r0, #30
  8002e38:	183b      	adds	r3, r7, r0
  8002e3a:	781b      	ldrb	r3, [r3, #0]
@@ -6820,6 +8282,9 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002e40:	18d3      	adds	r3, r2, r3
  8002e42:	2b00      	cmp	r3, #0
  8002e44:	d012      	beq.n	8002e6c <switch_selector_setup+0x8c>
+		{
+//			switch_selector->switch_selector_gpio[idx] = switch_selector_gpio[idx];
+			*(switch_selector->switch_selector_gpio + idx) = *(switch_selector_gpio + idx);
  8002e46:	183b      	adds	r3, r7, r0
  8002e48:	781b      	ldrb	r3, [r3, #0]
  8002e4a:	00db      	lsls	r3, r3, #3
@@ -6834,16 +8299,26 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002e5c:	000a      	movs	r2, r1
  8002e5e:	ca03      	ldmia	r2!, {r0, r1}
  8002e60:	c303      	stmia	r3!, {r0, r1}
+
+			status = 0;
  8002e62:	231f      	movs	r3, #31
  8002e64:	18fb      	adds	r3, r7, r3
  8002e66:	2200      	movs	r2, #0
  8002e68:	701a      	strb	r2, [r3, #0]
  8002e6a:	e004      	b.n	8002e76 <switch_selector_setup+0x96>
+		}
+		else
+		{
+			status = 1;
  8002e6c:	231f      	movs	r3, #31
  8002e6e:	18fb      	adds	r3, r7, r3
  8002e70:	2201      	movs	r2, #1
  8002e72:	701a      	strb	r2, [r3, #0]
+			break;
  8002e74:	e017      	b.n	8002ea6 <switch_selector_setup+0xc6>
+		}
+
+		switch_selector_read_bit(switch_selector, idx, &pin_status, &value);
  8002e76:	2318      	movs	r3, #24
  8002e78:	18fc      	adds	r4, r7, r3
  8002e7a:	2317      	movs	r3, #23
@@ -6854,6 +8329,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002e84:	68f8      	ldr	r0, [r7, #12]
  8002e86:	0023      	movs	r3, r4
  8002e88:	f000 f814 	bl	8002eb4 <switch_selector_read_bit>
+	for(idx = 0; idx < switch_size; idx++)
  8002e8c:	0029      	movs	r1, r5
  8002e8e:	187b      	adds	r3, r7, r1
  8002e90:	781a      	ldrb	r2, [r3, #0]
@@ -6867,15 +8343,27 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ea0:	781b      	ldrb	r3, [r3, #0]
  8002ea2:	429a      	cmp	r2, r3
  8002ea4:	d3c7      	bcc.n	8002e36 <switch_selector_setup+0x56>
+
+	}
+
+	return status;
  8002ea6:	231f      	movs	r3, #31
  8002ea8:	18fb      	adds	r3, r7, r3
  8002eaa:	781b      	ldrb	r3, [r3, #0]
+
+}
  8002eac:	0018      	movs	r0, r3
  8002eae:	46bd      	mov	sp, r7
  8002eb0:	b008      	add	sp, #32
  8002eb2:	bdb0      	pop	{r4, r5, r7, pc}
 
 08002eb4 <switch_selector_read_bit>:
+
+uint8_t switch_selector_read_bit(switch_selector_t *switch_selector,
+										uint8_t pin,
+										switch_selector_status_t *pin_status,
+										uint32_t *value)
+{
  8002eb4:	b5f0      	push	{r4, r5, r6, r7, lr}
  8002eb6:	b087      	sub	sp, #28
  8002eb8:	af00      	add	r7, sp, #0
@@ -6886,14 +8374,20 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ec2:	197b      	adds	r3, r7, r5
  8002ec4:	1c0a      	adds	r2, r1, #0
  8002ec6:	701a      	strb	r2, [r3, #0]
+	GPIO_PinState pin_value;
+	uint32_t switch_mask = 0x00000001;
  8002ec8:	2301      	movs	r3, #1
  8002eca:	617b      	str	r3, [r7, #20]
+
+	switch_mask <<= pin;
  8002ecc:	197b      	adds	r3, r7, r5
  8002ece:	781b      	ldrb	r3, [r3, #0]
  8002ed0:	697a      	ldr	r2, [r7, #20]
  8002ed2:	409a      	lsls	r2, r3
  8002ed4:	0013      	movs	r3, r2
  8002ed6:	617b      	str	r3, [r7, #20]
+
+	pin_value = HAL_GPIO_ReadPin((switch_selector->switch_selector_gpio + pin)->port,
  8002ed8:	68fb      	ldr	r3, [r7, #12]
  8002eda:	681a      	ldr	r2, [r3, #0]
  8002edc:	197b      	adds	r3, r7, r5
@@ -6901,12 +8395,14 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ee0:	00db      	lsls	r3, r3, #3
  8002ee2:	18d3      	adds	r3, r2, r3
  8002ee4:	6818      	ldr	r0, [r3, #0]
+							(switch_selector->switch_selector_gpio + pin)->pin);
  8002ee6:	68fb      	ldr	r3, [r7, #12]
  8002ee8:	681a      	ldr	r2, [r3, #0]
  8002eea:	197b      	adds	r3, r7, r5
  8002eec:	781b      	ldrb	r3, [r3, #0]
  8002eee:	00db      	lsls	r3, r3, #3
  8002ef0:	18d3      	adds	r3, r2, r3
+	pin_value = HAL_GPIO_ReadPin((switch_selector->switch_selector_gpio + pin)->port,
  8002ef2:	889b      	ldrh	r3, [r3, #4]
  8002ef4:	2613      	movs	r6, #19
  8002ef6:	19bc      	adds	r4, r7, r6
@@ -6914,10 +8410,14 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002efa:	f000 fe91 	bl	8003c20 <HAL_GPIO_ReadPin>
  8002efe:	0003      	movs	r3, r0
  8002f00:	7023      	strb	r3, [r4, #0]
+
+	if(pin_value == GPIO_PIN_SET)
  8002f02:	19bb      	adds	r3, r7, r6
  8002f04:	781b      	ldrb	r3, [r3, #0]
  8002f06:	2b01      	cmp	r3, #1
  8002f08:	d10e      	bne.n	8002f28 <switch_selector_read_bit+0x74>
+	{
+		(switch_selector->switch_selector_gpio + pin)->status = SWITCH_SELECTOR_ON;
  8002f0a:	68fb      	ldr	r3, [r7, #12]
  8002f0c:	681a      	ldr	r2, [r3, #0]
  8002f0e:	197b      	adds	r3, r7, r5
@@ -6926,6 +8426,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002f14:	18d3      	adds	r3, r2, r3
  8002f16:	2201      	movs	r2, #1
  8002f18:	719a      	strb	r2, [r3, #6]
+
+		switch_selector->value |= switch_mask;
  8002f1a:	68fb      	ldr	r3, [r7, #12]
  8002f1c:	689a      	ldr	r2, [r3, #8]
  8002f1e:	697b      	ldr	r3, [r7, #20]
@@ -6933,6 +8435,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002f22:	68fb      	ldr	r3, [r7, #12]
  8002f24:	609a      	str	r2, [r3, #8]
  8002f26:	e00f      	b.n	8002f48 <switch_selector_read_bit+0x94>
+	}
+	else
+	{
+		(switch_selector->switch_selector_gpio + pin)->status = SWITCH_SELECTOR_OFF;
  8002f28:	68fb      	ldr	r3, [r7, #12]
  8002f2a:	681a      	ldr	r2, [r3, #0]
  8002f2c:	230b      	movs	r3, #11
@@ -6942,6 +8448,8 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002f34:	18d3      	adds	r3, r2, r3
  8002f36:	2200      	movs	r2, #0
  8002f38:	719a      	strb	r2, [r3, #6]
+
+		switch_selector->value &= ~switch_mask;
  8002f3a:	68fb      	ldr	r3, [r7, #12]
  8002f3c:	689b      	ldr	r3, [r3, #8]
  8002f3e:	697a      	ldr	r2, [r7, #20]
@@ -6949,6 +8457,9 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002f42:	401a      	ands	r2, r3
  8002f44:	68fb      	ldr	r3, [r7, #12]
  8002f46:	609a      	str	r2, [r3, #8]
+	}
+
+	*pin_status = (switch_selector->switch_selector_gpio + pin)->status;
  8002f48:	68fb      	ldr	r3, [r7, #12]
  8002f4a:	681a      	ldr	r2, [r3, #0]
  8002f4c:	230b      	movs	r3, #11
@@ -6959,11 +8470,16 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002f56:	799a      	ldrb	r2, [r3, #6]
  8002f58:	687b      	ldr	r3, [r7, #4]
  8002f5a:	701a      	strb	r2, [r3, #0]
+
+	*value = switch_selector->value;
  8002f5c:	68fb      	ldr	r3, [r7, #12]
  8002f5e:	689a      	ldr	r2, [r3, #8]
  8002f60:	683b      	ldr	r3, [r7, #0]
  8002f62:	601a      	str	r2, [r3, #0]
+
+	return 0;
  8002f64:	2300      	movs	r3, #0
+}
  8002f66:	0018      	movs	r0, r3
  8002f68:	46bd      	mov	sp, r7
  8002f6a:	b007      	add	sp, #28
@@ -6971,23 +8487,44 @@ __STATIC_FORCEINLINE void __disable_irq(void)
 	...
 
 08002f70 <_sbrk>:
+ *
+ * @param incr Memory size
+ * @return Pointer to allocated memory
+ */
+void *_sbrk(ptrdiff_t incr)
+{
  8002f70:	b580      	push	{r7, lr}
  8002f72:	b086      	sub	sp, #24
  8002f74:	af00      	add	r7, sp, #0
  8002f76:	6078      	str	r0, [r7, #4]
+  extern uint8_t _end; /* Symbol defined in the linker script */
+  extern uint8_t _estack; /* Symbol defined in the linker script */
+  extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
+  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
  8002f78:	4a14      	ldr	r2, [pc, #80]	; (8002fcc <_sbrk+0x5c>)
  8002f7a:	4b15      	ldr	r3, [pc, #84]	; (8002fd0 <_sbrk+0x60>)
  8002f7c:	1ad3      	subs	r3, r2, r3
  8002f7e:	617b      	str	r3, [r7, #20]
+  const uint8_t *max_heap = (uint8_t *)stack_limit;
  8002f80:	697b      	ldr	r3, [r7, #20]
  8002f82:	613b      	str	r3, [r7, #16]
+  uint8_t *prev_heap_end;
+
+  /* Initialize heap end at first call */
+  if (NULL == __sbrk_heap_end)
  8002f84:	4b13      	ldr	r3, [pc, #76]	; (8002fd4 <_sbrk+0x64>)
  8002f86:	681b      	ldr	r3, [r3, #0]
  8002f88:	2b00      	cmp	r3, #0
  8002f8a:	d102      	bne.n	8002f92 <_sbrk+0x22>
+  {
+    __sbrk_heap_end = &_end;
  8002f8c:	4b11      	ldr	r3, [pc, #68]	; (8002fd4 <_sbrk+0x64>)
  8002f8e:	4a12      	ldr	r2, [pc, #72]	; (8002fd8 <_sbrk+0x68>)
  8002f90:	601a      	str	r2, [r3, #0]
+  }
+
+  /* Protect heap from growing into the reserved MSP stack */
+  if (__sbrk_heap_end + incr > max_heap)
  8002f92:	4b10      	ldr	r3, [pc, #64]	; (8002fd4 <_sbrk+0x64>)
  8002f94:	681a      	ldr	r2, [r3, #0]
  8002f96:	687b      	ldr	r3, [r7, #4]
@@ -6995,23 +8532,33 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002f9a:	693a      	ldr	r2, [r7, #16]
  8002f9c:	429a      	cmp	r2, r3
  8002f9e:	d207      	bcs.n	8002fb0 <_sbrk+0x40>
+  {
+    errno = ENOMEM;
  8002fa0:	f002 fb78 	bl	8005694 <__errno>
  8002fa4:	0003      	movs	r3, r0
  8002fa6:	220c      	movs	r2, #12
  8002fa8:	601a      	str	r2, [r3, #0]
+    return (void *)-1;
  8002faa:	2301      	movs	r3, #1
  8002fac:	425b      	negs	r3, r3
  8002fae:	e009      	b.n	8002fc4 <_sbrk+0x54>
+  }
+
+  prev_heap_end = __sbrk_heap_end;
  8002fb0:	4b08      	ldr	r3, [pc, #32]	; (8002fd4 <_sbrk+0x64>)
  8002fb2:	681b      	ldr	r3, [r3, #0]
  8002fb4:	60fb      	str	r3, [r7, #12]
+  __sbrk_heap_end += incr;
  8002fb6:	4b07      	ldr	r3, [pc, #28]	; (8002fd4 <_sbrk+0x64>)
  8002fb8:	681a      	ldr	r2, [r3, #0]
  8002fba:	687b      	ldr	r3, [r7, #4]
  8002fbc:	18d2      	adds	r2, r2, r3
  8002fbe:	4b05      	ldr	r3, [pc, #20]	; (8002fd4 <_sbrk+0x64>)
  8002fc0:	601a      	str	r2, [r3, #0]
+
+  return (void *)prev_heap_end;
  8002fc2:	68fb      	ldr	r3, [r7, #12]
+}
  8002fc4:	0018      	movs	r0, r3
  8002fc6:	46bd      	mov	sp, r7
  8002fc8:	b006      	add	sp, #24
@@ -7022,12 +8569,26 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002fd8:	200009b8 	.word	0x200009b8
 
 08002fdc <SystemInit>:
+  * @brief  Setup the microcontroller system.
+  * @param  None
+  * @retval None
+  */
+void SystemInit(void)
+{
  8002fdc:	b580      	push	{r7, lr}
  8002fde:	af00      	add	r7, sp, #0
+  
+  /* Configure the Vector Table location add offset address ------------------*/
+#ifdef VECT_TAB_SRAM
+  SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+#else
+  SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
  8002fe0:	4b03      	ldr	r3, [pc, #12]	; (8002ff0 <SystemInit+0x14>)
  8002fe2:	2280      	movs	r2, #128	; 0x80
  8002fe4:	0512      	lsls	r2, r2, #20
  8002fe6:	609a      	str	r2, [r3, #8]
+#endif
+}
  8002fe8:	46c0      	nop			; (mov r8, r8)
  8002fea:	46bd      	mov	sp, r7
  8002fec:	bd80      	pop	{r7, pc}
@@ -7035,9 +8596,21 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8002ff0:	e000ed00 	.word	0xe000ed00
 
 08002ff4 <MX_TIM1_Init>:
+TIM_HandleTypeDef htim16;
+TIM_HandleTypeDef htim17;
+
+/* TIM1 init function */
+void MX_TIM1_Init(void)
+{
  8002ff4:	b580      	push	{r7, lr}
  8002ff6:	b088      	sub	sp, #32
  8002ff8:	af00      	add	r7, sp, #0
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
  8002ffa:	2310      	movs	r3, #16
  8002ffc:	18fb      	adds	r3, r7, r3
  8002ffe:	0018      	movs	r0, r3
@@ -7045,45 +8618,63 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003002:	001a      	movs	r2, r3
  8003004:	2100      	movs	r1, #0
  8003006:	f002 fb2b 	bl	8005660 <memset>
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
  800300a:	1d3b      	adds	r3, r7, #4
  800300c:	0018      	movs	r0, r3
  800300e:	230c      	movs	r3, #12
  8003010:	001a      	movs	r2, r3
  8003012:	2100      	movs	r1, #0
  8003014:	f002 fb24 	bl	8005660 <memset>
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
  8003018:	4b21      	ldr	r3, [pc, #132]	; (80030a0 <MX_TIM1_Init+0xac>)
  800301a:	4a22      	ldr	r2, [pc, #136]	; (80030a4 <MX_TIM1_Init+0xb0>)
  800301c:	601a      	str	r2, [r3, #0]
+  htim1.Init.Prescaler = 48-1;
  800301e:	4b20      	ldr	r3, [pc, #128]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003020:	222f      	movs	r2, #47	; 0x2f
  8003022:	605a      	str	r2, [r3, #4]
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
  8003024:	4b1e      	ldr	r3, [pc, #120]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003026:	2200      	movs	r2, #0
  8003028:	609a      	str	r2, [r3, #8]
+  htim1.Init.Period = 1000;
  800302a:	4b1d      	ldr	r3, [pc, #116]	; (80030a0 <MX_TIM1_Init+0xac>)
  800302c:	22fa      	movs	r2, #250	; 0xfa
  800302e:	0092      	lsls	r2, r2, #2
  8003030:	60da      	str	r2, [r3, #12]
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  8003032:	4b1b      	ldr	r3, [pc, #108]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003034:	2200      	movs	r2, #0
  8003036:	611a      	str	r2, [r3, #16]
+  htim1.Init.RepetitionCounter = 0;
  8003038:	4b19      	ldr	r3, [pc, #100]	; (80030a0 <MX_TIM1_Init+0xac>)
  800303a:	2200      	movs	r2, #0
  800303c:	615a      	str	r2, [r3, #20]
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
  800303e:	4b18      	ldr	r3, [pc, #96]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003040:	2200      	movs	r2, #0
  8003042:	619a      	str	r2, [r3, #24]
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
  8003044:	4b16      	ldr	r3, [pc, #88]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003046:	0018      	movs	r0, r3
  8003048:	f001 f99a 	bl	8004380 <HAL_TIM_Base_Init>
  800304c:	1e03      	subs	r3, r0, #0
  800304e:	d001      	beq.n	8003054 <MX_TIM1_Init+0x60>
+  {
+    Error_Handler();
  8003050:	f7ff f812 	bl	8002078 <Error_Handler>
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
  8003054:	2110      	movs	r1, #16
  8003056:	187b      	adds	r3, r7, r1
  8003058:	2280      	movs	r2, #128	; 0x80
  800305a:	0152      	lsls	r2, r2, #5
  800305c:	601a      	str	r2, [r3, #0]
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
  800305e:	187a      	adds	r2, r7, r1
  8003060:	4b0f      	ldr	r3, [pc, #60]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003062:	0011      	movs	r1, r2
@@ -7091,16 +8682,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003066:	f001 fc4d 	bl	8004904 <HAL_TIM_ConfigClockSource>
  800306a:	1e03      	subs	r3, r0, #0
  800306c:	d001      	beq.n	8003072 <MX_TIM1_Init+0x7e>
+  {
+    Error_Handler();
  800306e:	f7ff f803 	bl	8002078 <Error_Handler>
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_OC1REF;
  8003072:	1d3b      	adds	r3, r7, #4
  8003074:	2240      	movs	r2, #64	; 0x40
  8003076:	601a      	str	r2, [r3, #0]
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
  8003078:	1d3b      	adds	r3, r7, #4
  800307a:	2200      	movs	r2, #0
  800307c:	605a      	str	r2, [r3, #4]
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
  800307e:	1d3b      	adds	r3, r7, #4
  8003080:	2200      	movs	r2, #0
  8003082:	609a      	str	r2, [r3, #8]
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
  8003084:	1d3a      	adds	r2, r7, #4
  8003086:	4b06      	ldr	r3, [pc, #24]	; (80030a0 <MX_TIM1_Init+0xac>)
  8003088:	0011      	movs	r1, r2
@@ -7108,7 +8706,15 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800308c:	f002 f9b0 	bl	80053f0 <HAL_TIMEx_MasterConfigSynchronization>
  8003090:	1e03      	subs	r3, r0, #0
  8003092:	d001      	beq.n	8003098 <MX_TIM1_Init+0xa4>
+  {
+    Error_Handler();
  8003094:	f7fe fff0 	bl	8002078 <Error_Handler>
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
  8003098:	46c0      	nop			; (mov r8, r8)
  800309a:	46bd      	mov	sp, r7
  800309c:	b008      	add	sp, #32
@@ -7117,9 +8723,18 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80030a4:	40012c00 	.word	0x40012c00
 
 080030a8 <MX_TIM3_Init>:
+/* TIM3 init function */
+void MX_TIM3_Init(void)
+{
  80030a8:	b580      	push	{r7, lr}
  80030aa:	b090      	sub	sp, #64	; 0x40
  80030ac:	af00      	add	r7, sp, #0
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
  80030ae:	232c      	movs	r3, #44	; 0x2c
  80030b0:	18fb      	adds	r3, r7, r3
  80030b2:	0018      	movs	r0, r3
@@ -7127,6 +8742,7 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80030b6:	001a      	movs	r2, r3
  80030b8:	2100      	movs	r1, #0
  80030ba:	f002 fad1 	bl	8005660 <memset>
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
  80030be:	2320      	movs	r3, #32
  80030c0:	18fb      	adds	r3, r7, r3
  80030c2:	0018      	movs	r0, r3
@@ -7134,56 +8750,82 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80030c6:	001a      	movs	r2, r3
  80030c8:	2100      	movs	r1, #0
  80030ca:	f002 fac9 	bl	8005660 <memset>
+  TIM_OC_InitTypeDef sConfigOC = {0};
  80030ce:	1d3b      	adds	r3, r7, #4
  80030d0:	0018      	movs	r0, r3
  80030d2:	231c      	movs	r3, #28
  80030d4:	001a      	movs	r2, r3
  80030d6:	2100      	movs	r1, #0
  80030d8:	f002 fac2 	bl	8005660 <memset>
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
  80030dc:	4b33      	ldr	r3, [pc, #204]	; (80031ac <MX_TIM3_Init+0x104>)
  80030de:	4a34      	ldr	r2, [pc, #208]	; (80031b0 <MX_TIM3_Init+0x108>)
  80030e0:	601a      	str	r2, [r3, #0]
+  htim3.Init.Prescaler = 47;
  80030e2:	4b32      	ldr	r3, [pc, #200]	; (80031ac <MX_TIM3_Init+0x104>)
  80030e4:	222f      	movs	r2, #47	; 0x2f
  80030e6:	605a      	str	r2, [r3, #4]
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
  80030e8:	4b30      	ldr	r3, [pc, #192]	; (80031ac <MX_TIM3_Init+0x104>)
  80030ea:	2200      	movs	r2, #0
  80030ec:	609a      	str	r2, [r3, #8]
+  htim3.Init.Period = 65535;
  80030ee:	4b2f      	ldr	r3, [pc, #188]	; (80031ac <MX_TIM3_Init+0x104>)
  80030f0:	4a30      	ldr	r2, [pc, #192]	; (80031b4 <MX_TIM3_Init+0x10c>)
  80030f2:	60da      	str	r2, [r3, #12]
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  80030f4:	4b2d      	ldr	r3, [pc, #180]	; (80031ac <MX_TIM3_Init+0x104>)
  80030f6:	2200      	movs	r2, #0
  80030f8:	611a      	str	r2, [r3, #16]
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
  80030fa:	4b2c      	ldr	r3, [pc, #176]	; (80031ac <MX_TIM3_Init+0x104>)
  80030fc:	2200      	movs	r2, #0
  80030fe:	619a      	str	r2, [r3, #24]
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
  8003100:	4b2a      	ldr	r3, [pc, #168]	; (80031ac <MX_TIM3_Init+0x104>)
  8003102:	0018      	movs	r0, r3
  8003104:	f001 f93c 	bl	8004380 <HAL_TIM_Base_Init>
  8003108:	1e03      	subs	r3, r0, #0
  800310a:	d001      	beq.n	8003110 <MX_TIM3_Init+0x68>
+  {
+    Error_Handler();
  800310c:	f7fe ffb4 	bl	8002078 <Error_Handler>
+  }
+  if (HAL_TIM_OC_Init(&htim3) != HAL_OK)
  8003110:	4b26      	ldr	r3, [pc, #152]	; (80031ac <MX_TIM3_Init+0x104>)
  8003112:	0018      	movs	r0, r3
  8003114:	f001 f9da 	bl	80044cc <HAL_TIM_OC_Init>
  8003118:	1e03      	subs	r3, r0, #0
  800311a:	d001      	beq.n	8003120 <MX_TIM3_Init+0x78>
+  {
+    Error_Handler();
  800311c:	f7fe ffac 	bl	8002078 <Error_Handler>
+  }
+  if (HAL_TIM_OnePulse_Init(&htim3, TIM_OPMODE_SINGLE) != HAL_OK)
  8003120:	4b22      	ldr	r3, [pc, #136]	; (80031ac <MX_TIM3_Init+0x104>)
  8003122:	2108      	movs	r1, #8
  8003124:	0018      	movs	r0, r3
  8003126:	f001 fa31 	bl	800458c <HAL_TIM_OnePulse_Init>
  800312a:	1e03      	subs	r3, r0, #0
  800312c:	d001      	beq.n	8003132 <MX_TIM3_Init+0x8a>
+  {
+    Error_Handler();
  800312e:	f7fe ffa3 	bl	8002078 <Error_Handler>
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_DISABLE;
  8003132:	212c      	movs	r1, #44	; 0x2c
  8003134:	187b      	adds	r3, r7, r1
  8003136:	2200      	movs	r2, #0
  8003138:	601a      	str	r2, [r3, #0]
+  sSlaveConfig.InputTrigger = TIM_TS_ITR1;
  800313a:	187b      	adds	r3, r7, r1
  800313c:	2210      	movs	r2, #16
  800313e:	605a      	str	r2, [r3, #4]
+  if (HAL_TIM_SlaveConfigSynchro(&htim3, &sSlaveConfig) != HAL_OK)
  8003140:	187a      	adds	r2, r7, r1
  8003142:	4b1a      	ldr	r3, [pc, #104]	; (80031ac <MX_TIM3_Init+0x104>)
  8003144:	0011      	movs	r1, r2
@@ -7191,14 +8833,20 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003148:	f001 fcb2 	bl	8004ab0 <HAL_TIM_SlaveConfigSynchro>
  800314c:	1e03      	subs	r3, r0, #0
  800314e:	d001      	beq.n	8003154 <MX_TIM3_Init+0xac>
+  {
+    Error_Handler();
  8003150:	f7fe ff92 	bl	8002078 <Error_Handler>
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
  8003154:	2120      	movs	r1, #32
  8003156:	187b      	adds	r3, r7, r1
  8003158:	2200      	movs	r2, #0
  800315a:	601a      	str	r2, [r3, #0]
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
  800315c:	187b      	adds	r3, r7, r1
  800315e:	2200      	movs	r2, #0
  8003160:	609a      	str	r2, [r3, #8]
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
  8003162:	187a      	adds	r2, r7, r1
  8003164:	4b11      	ldr	r3, [pc, #68]	; (80031ac <MX_TIM3_Init+0x104>)
  8003166:	0011      	movs	r1, r2
@@ -7206,19 +8854,27 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800316a:	f002 f941 	bl	80053f0 <HAL_TIMEx_MasterConfigSynchronization>
  800316e:	1e03      	subs	r3, r0, #0
  8003170:	d001      	beq.n	8003176 <MX_TIM3_Init+0xce>
+  {
+    Error_Handler();
  8003172:	f7fe ff81 	bl	8002078 <Error_Handler>
+  }
+  sConfigOC.OCMode = TIM_OCMODE_TIMING;
  8003176:	1d3b      	adds	r3, r7, #4
  8003178:	2200      	movs	r2, #0
  800317a:	601a      	str	r2, [r3, #0]
+  sConfigOC.Pulse = 130;
  800317c:	1d3b      	adds	r3, r7, #4
  800317e:	2282      	movs	r2, #130	; 0x82
  8003180:	605a      	str	r2, [r3, #4]
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
  8003182:	1d3b      	adds	r3, r7, #4
  8003184:	2200      	movs	r2, #0
  8003186:	609a      	str	r2, [r3, #8]
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
  8003188:	1d3b      	adds	r3, r7, #4
  800318a:	2200      	movs	r2, #0
  800318c:	611a      	str	r2, [r3, #16]
+  if (HAL_TIM_OC_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
  800318e:	1d39      	adds	r1, r7, #4
  8003190:	4b06      	ldr	r3, [pc, #24]	; (80031ac <MX_TIM3_Init+0x104>)
  8003192:	2200      	movs	r2, #0
@@ -7226,7 +8882,15 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003196:	f001 fb55 	bl	8004844 <HAL_TIM_OC_ConfigChannel>
  800319a:	1e03      	subs	r3, r0, #0
  800319c:	d001      	beq.n	80031a2 <MX_TIM3_Init+0xfa>
+  {
+    Error_Handler();
  800319e:	f7fe ff6b 	bl	8002078 <Error_Handler>
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
  80031a2:	46c0      	nop			; (mov r8, r8)
  80031a4:	46bd      	mov	sp, r7
  80031a6:	b010      	add	sp, #64	; 0x40
@@ -7237,32 +8901,55 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80031b4:	0000ffff 	.word	0x0000ffff
 
 080031b8 <MX_TIM14_Init>:
+/* TIM14 init function */
+void MX_TIM14_Init(void)
+{
  80031b8:	b580      	push	{r7, lr}
  80031ba:	af00      	add	r7, sp, #0
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
  80031bc:	4b0e      	ldr	r3, [pc, #56]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031be:	4a0f      	ldr	r2, [pc, #60]	; (80031fc <MX_TIM14_Init+0x44>)
  80031c0:	601a      	str	r2, [r3, #0]
+  htim14.Init.Prescaler = 48-1;
  80031c2:	4b0d      	ldr	r3, [pc, #52]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031c4:	222f      	movs	r2, #47	; 0x2f
  80031c6:	605a      	str	r2, [r3, #4]
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
  80031c8:	4b0b      	ldr	r3, [pc, #44]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031ca:	2200      	movs	r2, #0
  80031cc:	609a      	str	r2, [r3, #8]
+  htim14.Init.Period = 145;
  80031ce:	4b0a      	ldr	r3, [pc, #40]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031d0:	2291      	movs	r2, #145	; 0x91
  80031d2:	60da      	str	r2, [r3, #12]
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  80031d4:	4b08      	ldr	r3, [pc, #32]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031d6:	2200      	movs	r2, #0
  80031d8:	611a      	str	r2, [r3, #16]
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
  80031da:	4b07      	ldr	r3, [pc, #28]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031dc:	2200      	movs	r2, #0
  80031de:	619a      	str	r2, [r3, #24]
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
  80031e0:	4b05      	ldr	r3, [pc, #20]	; (80031f8 <MX_TIM14_Init+0x40>)
  80031e2:	0018      	movs	r0, r3
  80031e4:	f001 f8cc 	bl	8004380 <HAL_TIM_Base_Init>
  80031e8:	1e03      	subs	r3, r0, #0
  80031ea:	d001      	beq.n	80031f0 <MX_TIM14_Init+0x38>
+  {
+    Error_Handler();
  80031ec:	f7fe ff44 	bl	8002078 <Error_Handler>
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
+
+}
  80031f0:	46c0      	nop			; (mov r8, r8)
  80031f2:	46bd      	mov	sp, r7
  80031f4:	bd80      	pop	{r7, pc}
@@ -7271,36 +8958,60 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80031fc:	40002000 	.word	0x40002000
 
 08003200 <MX_TIM16_Init>:
+/* TIM16 init function */
+void MX_TIM16_Init(void)
+{
  8003200:	b580      	push	{r7, lr}
  8003202:	af00      	add	r7, sp, #0
+  /* USER CODE END TIM16_Init 0 */
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
+  htim16.Instance = TIM16;
  8003204:	4b10      	ldr	r3, [pc, #64]	; (8003248 <MX_TIM16_Init+0x48>)
  8003206:	4a11      	ldr	r2, [pc, #68]	; (800324c <MX_TIM16_Init+0x4c>)
  8003208:	601a      	str	r2, [r3, #0]
+  htim16.Init.Prescaler = 48-1;
  800320a:	4b0f      	ldr	r3, [pc, #60]	; (8003248 <MX_TIM16_Init+0x48>)
  800320c:	222f      	movs	r2, #47	; 0x2f
  800320e:	605a      	str	r2, [r3, #4]
+  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
  8003210:	4b0d      	ldr	r3, [pc, #52]	; (8003248 <MX_TIM16_Init+0x48>)
  8003212:	2200      	movs	r2, #0
  8003214:	609a      	str	r2, [r3, #8]
+  htim16.Init.Period = 1000;
  8003216:	4b0c      	ldr	r3, [pc, #48]	; (8003248 <MX_TIM16_Init+0x48>)
  8003218:	22fa      	movs	r2, #250	; 0xfa
  800321a:	0092      	lsls	r2, r2, #2
  800321c:	60da      	str	r2, [r3, #12]
+  htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  800321e:	4b0a      	ldr	r3, [pc, #40]	; (8003248 <MX_TIM16_Init+0x48>)
  8003220:	2200      	movs	r2, #0
  8003222:	611a      	str	r2, [r3, #16]
+  htim16.Init.RepetitionCounter = 0;
  8003224:	4b08      	ldr	r3, [pc, #32]	; (8003248 <MX_TIM16_Init+0x48>)
  8003226:	2200      	movs	r2, #0
  8003228:	615a      	str	r2, [r3, #20]
+  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
  800322a:	4b07      	ldr	r3, [pc, #28]	; (8003248 <MX_TIM16_Init+0x48>)
  800322c:	2200      	movs	r2, #0
  800322e:	619a      	str	r2, [r3, #24]
+  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
  8003230:	4b05      	ldr	r3, [pc, #20]	; (8003248 <MX_TIM16_Init+0x48>)
  8003232:	0018      	movs	r0, r3
  8003234:	f001 f8a4 	bl	8004380 <HAL_TIM_Base_Init>
  8003238:	1e03      	subs	r3, r0, #0
  800323a:	d001      	beq.n	8003240 <MX_TIM16_Init+0x40>
+  {
+    Error_Handler();
  800323c:	f7fe ff1c 	bl	8002078 <Error_Handler>
+  }
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
+
+}
  8003240:	46c0      	nop			; (mov r8, r8)
  8003242:	46bd      	mov	sp, r7
  8003244:	bd80      	pop	{r7, pc}
@@ -7309,35 +9020,59 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  800324c:	40014400 	.word	0x40014400
 
 08003250 <MX_TIM17_Init>:
+/* TIM17 init function */
+void MX_TIM17_Init(void)
+{
  8003250:	b580      	push	{r7, lr}
  8003252:	af00      	add	r7, sp, #0
+  /* USER CODE END TIM17_Init 0 */
+
+  /* USER CODE BEGIN TIM17_Init 1 */
+
+  /* USER CODE END TIM17_Init 1 */
+  htim17.Instance = TIM17;
  8003254:	4b0f      	ldr	r3, [pc, #60]	; (8003294 <MX_TIM17_Init+0x44>)
  8003256:	4a10      	ldr	r2, [pc, #64]	; (8003298 <MX_TIM17_Init+0x48>)
  8003258:	601a      	str	r2, [r3, #0]
+  htim17.Init.Prescaler = 48-1;
  800325a:	4b0e      	ldr	r3, [pc, #56]	; (8003294 <MX_TIM17_Init+0x44>)
  800325c:	222f      	movs	r2, #47	; 0x2f
  800325e:	605a      	str	r2, [r3, #4]
+  htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
  8003260:	4b0c      	ldr	r3, [pc, #48]	; (8003294 <MX_TIM17_Init+0x44>)
  8003262:	2200      	movs	r2, #0
  8003264:	609a      	str	r2, [r3, #8]
+  htim17.Init.Period = 130;
  8003266:	4b0b      	ldr	r3, [pc, #44]	; (8003294 <MX_TIM17_Init+0x44>)
  8003268:	2282      	movs	r2, #130	; 0x82
  800326a:	60da      	str	r2, [r3, #12]
+  htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  800326c:	4b09      	ldr	r3, [pc, #36]	; (8003294 <MX_TIM17_Init+0x44>)
  800326e:	2200      	movs	r2, #0
  8003270:	611a      	str	r2, [r3, #16]
+  htim17.Init.RepetitionCounter = 0;
  8003272:	4b08      	ldr	r3, [pc, #32]	; (8003294 <MX_TIM17_Init+0x44>)
  8003274:	2200      	movs	r2, #0
  8003276:	615a      	str	r2, [r3, #20]
+  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
  8003278:	4b06      	ldr	r3, [pc, #24]	; (8003294 <MX_TIM17_Init+0x44>)
  800327a:	2200      	movs	r2, #0
  800327c:	619a      	str	r2, [r3, #24]
+  if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
  800327e:	4b05      	ldr	r3, [pc, #20]	; (8003294 <MX_TIM17_Init+0x44>)
  8003280:	0018      	movs	r0, r3
  8003282:	f001 f87d 	bl	8004380 <HAL_TIM_Base_Init>
  8003286:	1e03      	subs	r3, r0, #0
  8003288:	d001      	beq.n	800328e <MX_TIM17_Init+0x3e>
+  {
+    Error_Handler();
  800328a:	f7fe fef5 	bl	8002078 <Error_Handler>
+  }
+  /* USER CODE BEGIN TIM17_Init 2 */
+
+  /* USER CODE END TIM17_Init 2 */
+
+}
  800328e:	46c0      	nop			; (mov r8, r8)
  8003290:	46bd      	mov	sp, r7
  8003292:	bd80      	pop	{r7, pc}
@@ -7345,15 +9080,26 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003298:	40014800 	.word	0x40014800
 
 0800329c <HAL_TIM_Base_MspInit>:
+
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
+{
  800329c:	b580      	push	{r7, lr}
  800329e:	b088      	sub	sp, #32
  80032a0:	af00      	add	r7, sp, #0
  80032a2:	6078      	str	r0, [r7, #4]
+
+  if(tim_baseHandle->Instance==TIM1)
  80032a4:	687b      	ldr	r3, [r7, #4]
  80032a6:	681b      	ldr	r3, [r3, #0]
  80032a8:	4a45      	ldr	r2, [pc, #276]	; (80033c0 <HAL_TIM_Base_MspInit+0x124>)
  80032aa:	4293      	cmp	r3, r2
  80032ac:	d11e      	bne.n	80032ec <HAL_TIM_Base_MspInit+0x50>
+  {
+  /* USER CODE BEGIN TIM1_MspInit 0 */
+
+  /* USER CODE END TIM1_MspInit 0 */
+    /* TIM1 clock enable */
+    __HAL_RCC_TIM1_CLK_ENABLE();
  80032ae:	4b45      	ldr	r3, [pc, #276]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
  80032b0:	6c1a      	ldr	r2, [r3, #64]	; 0x40
  80032b2:	4b44      	ldr	r3, [pc, #272]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
@@ -7368,24 +9114,38 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80032c4:	4013      	ands	r3, r2
  80032c6:	61fb      	str	r3, [r7, #28]
  80032c8:	69fb      	ldr	r3, [r7, #28]
+
+    /* TIM1 interrupt Init */
+    HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);
  80032ca:	2200      	movs	r2, #0
  80032cc:	2100      	movs	r1, #0
  80032ce:	200d      	movs	r0, #13
  80032d0:	f000 fa2a 	bl	8003728 <HAL_NVIC_SetPriority>
+    HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
  80032d4:	200d      	movs	r0, #13
  80032d6:	f000 fa3c 	bl	8003752 <HAL_NVIC_EnableIRQ>
+    HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 0);
  80032da:	2200      	movs	r2, #0
  80032dc:	2100      	movs	r1, #0
  80032de:	200e      	movs	r0, #14
  80032e0:	f000 fa22 	bl	8003728 <HAL_NVIC_SetPriority>
+    HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
  80032e4:	200e      	movs	r0, #14
  80032e6:	f000 fa34 	bl	8003752 <HAL_NVIC_EnableIRQ>
+    HAL_NVIC_EnableIRQ(TIM17_IRQn);
+  /* USER CODE BEGIN TIM17_MspInit 1 */
+
+  /* USER CODE END TIM17_MspInit 1 */
+  }
+}
  80032ea:	e064      	b.n	80033b6 <HAL_TIM_Base_MspInit+0x11a>
+  else if(tim_baseHandle->Instance==TIM3)
  80032ec:	687b      	ldr	r3, [r7, #4]
  80032ee:	681b      	ldr	r3, [r3, #0]
  80032f0:	4a35      	ldr	r2, [pc, #212]	; (80033c8 <HAL_TIM_Base_MspInit+0x12c>)
  80032f2:	4293      	cmp	r3, r2
  80032f4:	d10c      	bne.n	8003310 <HAL_TIM_Base_MspInit+0x74>
+    __HAL_RCC_TIM3_CLK_ENABLE();
  80032f6:	4b33      	ldr	r3, [pc, #204]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
  80032f8:	6bda      	ldr	r2, [r3, #60]	; 0x3c
  80032fa:	4b32      	ldr	r3, [pc, #200]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
@@ -7398,12 +9158,15 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003308:	4013      	ands	r3, r2
  800330a:	61bb      	str	r3, [r7, #24]
  800330c:	69bb      	ldr	r3, [r7, #24]
+}
  800330e:	e052      	b.n	80033b6 <HAL_TIM_Base_MspInit+0x11a>
+  else if(tim_baseHandle->Instance==TIM14)
  8003310:	687b      	ldr	r3, [r7, #4]
  8003312:	681b      	ldr	r3, [r3, #0]
  8003314:	4a2d      	ldr	r2, [pc, #180]	; (80033cc <HAL_TIM_Base_MspInit+0x130>)
  8003316:	4293      	cmp	r3, r2
  8003318:	d116      	bne.n	8003348 <HAL_TIM_Base_MspInit+0xac>
+    __HAL_RCC_TIM14_CLK_ENABLE();
  800331a:	4b2a      	ldr	r3, [pc, #168]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
  800331c:	6c1a      	ldr	r2, [r3, #64]	; 0x40
  800331e:	4b29      	ldr	r3, [pc, #164]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
@@ -7418,18 +9181,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003330:	4013      	ands	r3, r2
  8003332:	617b      	str	r3, [r7, #20]
  8003334:	697b      	ldr	r3, [r7, #20]
+    HAL_NVIC_SetPriority(TIM14_IRQn, 0, 0);
  8003336:	2200      	movs	r2, #0
  8003338:	2100      	movs	r1, #0
  800333a:	2013      	movs	r0, #19
  800333c:	f000 f9f4 	bl	8003728 <HAL_NVIC_SetPriority>
+    HAL_NVIC_EnableIRQ(TIM14_IRQn);
  8003340:	2013      	movs	r0, #19
  8003342:	f000 fa06 	bl	8003752 <HAL_NVIC_EnableIRQ>
+}
  8003346:	e036      	b.n	80033b6 <HAL_TIM_Base_MspInit+0x11a>
+  else if(tim_baseHandle->Instance==TIM16)
  8003348:	687b      	ldr	r3, [r7, #4]
  800334a:	681b      	ldr	r3, [r3, #0]
  800334c:	4a20      	ldr	r2, [pc, #128]	; (80033d0 <HAL_TIM_Base_MspInit+0x134>)
  800334e:	4293      	cmp	r3, r2
  8003350:	d116      	bne.n	8003380 <HAL_TIM_Base_MspInit+0xe4>
+    __HAL_RCC_TIM16_CLK_ENABLE();
  8003352:	4b1c      	ldr	r3, [pc, #112]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
  8003354:	6c1a      	ldr	r2, [r3, #64]	; 0x40
  8003356:	4b1b      	ldr	r3, [pc, #108]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
@@ -7444,18 +9212,23 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8003368:	4013      	ands	r3, r2
  800336a:	613b      	str	r3, [r7, #16]
  800336c:	693b      	ldr	r3, [r7, #16]
+    HAL_NVIC_SetPriority(TIM16_IRQn, 0, 0);
  800336e:	2200      	movs	r2, #0
  8003370:	2100      	movs	r1, #0
  8003372:	2015      	movs	r0, #21
  8003374:	f000 f9d8 	bl	8003728 <HAL_NVIC_SetPriority>
+    HAL_NVIC_EnableIRQ(TIM16_IRQn);
  8003378:	2015      	movs	r0, #21
  800337a:	f000 f9ea 	bl	8003752 <HAL_NVIC_EnableIRQ>
+}
  800337e:	e01a      	b.n	80033b6 <HAL_TIM_Base_MspInit+0x11a>
+  else if(tim_baseHandle->Instance==TIM17)
  8003380:	687b      	ldr	r3, [r7, #4]
  8003382:	681b      	ldr	r3, [r3, #0]
  8003384:	4a13      	ldr	r2, [pc, #76]	; (80033d4 <HAL_TIM_Base_MspInit+0x138>)
  8003386:	4293      	cmp	r3, r2
  8003388:	d115      	bne.n	80033b6 <HAL_TIM_Base_MspInit+0x11a>
+    __HAL_RCC_TIM17_CLK_ENABLE();
  800338a:	4b0e      	ldr	r3, [pc, #56]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
  800338c:	6c1a      	ldr	r2, [r3, #64]	; 0x40
  800338e:	4b0d      	ldr	r3, [pc, #52]	; (80033c4 <HAL_TIM_Base_MspInit+0x128>)
@@ -7470,12 +9243,15 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  80033a0:	4013      	ands	r3, r2
  80033a2:	60fb      	str	r3, [r7, #12]
  80033a4:	68fb      	ldr	r3, [r7, #12]
+    HAL_NVIC_SetPriority(TIM17_IRQn, 0, 0);
  80033a6:	2200      	movs	r2, #0
  80033a8:	2100      	movs	r1, #0
  80033aa:	2016      	movs	r0, #22
  80033ac:	f000 f9bc 	bl	8003728 <HAL_NVIC_SetPriority>
+    HAL_NVIC_EnableIRQ(TIM17_IRQn);
  80033b0:	2016      	movs	r0, #22
  80033b2:	f000 f9ce 	bl	8003752 <HAL_NVIC_EnableIRQ>
+}
  80033b6:	46c0      	nop			; (mov r8, r8)
  80033b8:	46bd      	mov	sp, r7
  80033ba:	b008      	add	sp, #32

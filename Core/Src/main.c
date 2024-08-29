@@ -28,6 +28,7 @@
 
 #define DEBUG_REYNOLDS
 
+#define LIGHT_AS_ACTUATOR
 //#define DEBUG_UART_REYNOLDS
 
 
@@ -43,29 +44,14 @@
 #include "motion_lights_driver.h"
 #include "led_indicator.h"
 #include "switch_selector.h"
+#include "relay_l114fl_drv8210.h"
+#include "app.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-typedef enum boolean_values
-{
-	FALSE = 0,
-	TRUE,
-}boolean_values_t;
-
-typedef struct timer
-{
-	uint32_t time_msec;
-	uint32_t time_sec;
-}timer_t;
-
-typedef enum action
-{
-	SET_VALUE = 0,
-	GET_VALUE,
-}action_e;
 
 /* USER CODE END PTD */
 
@@ -288,10 +274,16 @@ deadline_timer_t deadline_timer_light_1;
 deadline_timer_t deadline_timer_light_2;
 deadline_timer_t deadline_timer_uv;
 
+#ifdef LIGHT_AS_ACTUATOR
+//Deprecate these:
 light_t light_1;
 light_t light_2;
 light_t light_uv;
-
+#else	//LIGHT_AS_ACTUATOR
+relay_t light_1;
+relay_t light_2;
+relay_t light_uv;
+#endif	//LIGHT_AS_ACTUATOR
 
 
 //General Clock
@@ -462,6 +454,8 @@ int main(void)
   deadline_timer_setup(&deadline_timer_uv, deadline);
 
   //Hardware assignation:
+#ifdef LIGHT_AS_ACTUATOR
+  //Deprecate these:
   light_gpio_t light_1_output_a;
   light_gpio_t light_1_output_b;
   light_gpio_t light_2_output_a;
@@ -486,7 +480,34 @@ int main(void)
   light_setup(&light_1,light_1_output_a, light_1_output_b);
   light_setup(&light_2,light_2_output_a, light_2_output_b);
   light_setup(&light_uv,light_uv_output_a, light_uv_output_b);
+#else	//LIGHT_AS_ACTUATOR
 
+  relay_gpio_t light_1_output_a;
+  relay_gpio_t light_1_output_b;
+  relay_gpio_t light_2_output_a;
+  relay_gpio_t light_2_output_b;
+  relay_gpio_t light_uv_output_a;
+  relay_gpio_t light_uv_output_b;
+
+  light_1_output_a.pin = LAMP1_OUTA_Pin;
+  light_2_output_a.pin = LAMP2_OUTA_Pin;
+  light_uv_output_a.pin = UV_OUTA_Pin;
+  light_1_output_b.pin = LAMP1_OUTB_Pin;
+  light_2_output_b.pin = LAMP2_OUTB_Pin;
+  light_uv_output_b.pin = UV_OUTB_Pin;
+
+  light_1_output_a.port = LAMP1_OUTA_GPIO_Port;
+  light_2_output_a.port = LAMP2_OUTA_GPIO_Port;
+  light_uv_output_a.port = UV_OUTA_GPIO_Port;
+  light_1_output_b.port = LAMP1_OUTB_GPIO_Port;
+  light_2_output_b.port = LAMP2_OUTB_GPIO_Port;
+  light_uv_output_b.port = UV_OUTB_GPIO_Port;
+
+  relay_setup(&light_1, light_1_output_a, light_1_output_b);
+  relay_setup(&light_2, light_2_output_a, light_2_output_b);
+  relay_setup(&light_uv, light_uv_output_a, light_uv_output_b);
+
+#endif	//LIGHT_AS_ACTUATOR
 
   //BUTTONS SETUP
   //-------------
