@@ -28,7 +28,7 @@
 
 #define DEBUG_REYNOLDS
 
-#define LIGHT_AS_ACTUATOR
+//#define LIGHT_AS_ACTUATOR
 //#define DEBUG_UART_REYNOLDS
 
 
@@ -46,6 +46,8 @@
 
 
 #include "Middleware/deadline_timer.h"
+#include "Middleware/output_ctrl.h"
+#include "Middleware/NuTone.h"
 #include "motion_lights_driver.h"
 #include "app.h"
 
@@ -69,7 +71,7 @@
 
 //#define TEST_TIMEOUT
 
-#define FACTORY_PARAMETERS
+//#define FACTORY_PARAMETERS
 
 #ifndef FACTORY_PARAMETERS
 #define 	FAST_TEST
@@ -258,10 +260,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button);
 
 //TODO: (low) Change to main process
 //Testing upper layer:
-
-
-
-
+nutone_t exhaust_fan;
 
 //Motion Sensor declarations
 pyd1598_sensor_t motion_sensor;
@@ -275,18 +274,6 @@ timer_clock_t deadline;
 deadline_timer_t deadline_timer_light_1;
 deadline_timer_t deadline_timer_light_2;
 deadline_timer_t deadline_timer_uv;
-
-#ifdef LIGHT_AS_ACTUATOR
-//Deprecate these:
-light_t light_1;
-light_t light_2;
-light_t light_uv;
-#else	//LIGHT_AS_ACTUATOR
-relay_t light_1;
-relay_t light_2;
-relay_t light_uv;
-#endif	//LIGHT_AS_ACTUATOR
-
 
 //General Clock
 timer_clock_t general_clock;
@@ -377,6 +364,11 @@ int main(void)
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
   /**************************************************************************/
+  general_clock.counts = 0;
+  general_clock.msec = 0;
+
+
+
 
   //Configure PYD 159:
 //  HAL_DIRECT_LINK_conf_as_interrupt_input();
@@ -450,6 +442,20 @@ int main(void)
   //LIGHTS SETUP
   //-----------
 
+#ifdef LIGHT_AS_ACTUATOR
+  //TODO: Deprecate these:
+  light_t light_1;
+  light_t light_2;
+  light_t light_uv;
+#else	//LIGHT_AS_ACTUATOR
+
+  relay_t light_1;
+  relay_t light_2;
+  relay_t light_uv;
+#endif	//LIGHT_AS_ACTUATOR
+
+
+
   deadline.msec = 100;
   deadline_timer_setup(&deadline_timer_light_1, deadline);
   deadline_timer_setup(&deadline_timer_light_2, deadline);
@@ -509,6 +515,10 @@ int main(void)
   relay_setup(&light_2, light_2_output_a, light_2_output_b);
   relay_setup(&light_uv, light_uv_output_a, light_uv_output_b);
 
+
+  nutone_setup(&exhaust_fan, &light_1, &deadline_timer_light_1);
+//  init_output_ctrl();
+
 #endif	//LIGHT_AS_ACTUATOR
 
   //BUTTONS SETUP
@@ -545,8 +555,6 @@ int main(void)
   deadline.msec = 500;
   deadline.sec = 0;
 
-//  deadline_timer_setup_shared_clock(&deadline_led_indicator, &deadline_buttons.time_current,
-//  		  	  	  	  	  	  	  	  	  deadline);
   deadline_timer_setup(&deadline_led_indicator, deadline);
 
   led_signal_type_selector(&signal_led, LED_SIGNAL_SOLID);
@@ -592,6 +600,8 @@ int main(void)
 
   //Light 1
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
+//  deadline_timer_setup_shared_clock(&deadline_motion_light_1, &general_clock,
+//		  	  	  	  	  	  	  	  	  	  timer_motion_light_1);
   light_1_state = MOTION_LIGHT_IDLE;
   //Light 2
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
@@ -631,10 +641,14 @@ int main(void)
   HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
 
+#ifdef LIGHT_AS_ACTUATOR
   light_ask_off_pulse_fsm(&light_1);
   light_ask_off_pulse_fsm(&light_2);
   light_ask_off_pulse_fsm(&light_uv);
+#else //LIGHT_AS_ACTUATOR
   led_signal_stop(&signal_led);
+#endif //LIGHT_AS_ACTUATOR
+
 
 #ifdef DEBUG_REYNOLDS
 #endif //DEBUG_REYNOLDS
@@ -673,9 +687,14 @@ int main(void)
 			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
 										&deadline_motion_light_2, &light_2_state,
 										&motion_sensed_light_2);
-
+#ifdef LIGHT_AS_ACTUATOR
 			  if((light_1.light_status == LIGHT_ON) ||
 				 (light_2.light_status == LIGHT_ON))
+#else	//LIGHT_AS_ACTUATOR
+
+			  if((light_1.relay_status == RELAY_ON) ||
+				 (light_2.relay_status == RELAY_ON))
+#endif	//LIGHT_AS_ACTUATOR
 			  {
 				  wait = MOTION_UV_WAIT_TRUE;
 			  }
@@ -719,7 +738,13 @@ int main(void)
 //								&uv_state, &motion_sensed_uv, &abort_uv,
 //								&signal_led);
 
-			  if(light_1.light_status == LIGHT_ON)
+#ifdef LIGHT_AS_ACTUATOR
+			  if((light_1.light_status == LIGHT_ON) ||
+				 (light_2.light_status == LIGHT_ON))
+#else	//LIGHT_AS_ACTUATOR
+			  if((light_1.relay_status == RELAY_ON) ||
+				 (light_2.relay_status == RELAY_ON))
+#endif	//LIGHT_AS_ACTUATOR
 			  {
 				  wait = MOTION_UV_WAIT_TRUE;
 			  }
@@ -738,24 +763,7 @@ int main(void)
 
 			  break;
 		  case MOTION_SWITCH_MODE_2:
-//			  events_detection(&motion_sensor, &deadline_buttons,
-//								  &button_light_1, &button_light_2, &button_uv,
-//								  &motion_sensed_light_1, &motion_sensed_light_2,
-//								  &motion_sensed_uv,
-//								  &abort_uv);
-//
-//			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
-//									&deadline_motion_light_1, &light_1_state,
-//									&motion_sensed_light_1);
-//
-//			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
-//										&deadline_motion_light_2, &light_2_state,
-//										&motion_sensed_light_2);
-//
-//			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
-//								&deadline_motion_uv, &deadline_motion_uv_safe,
-//								&uv_state,&motion_sensed_uv, &abort_uv, &signal_led);
-			  led_signal_start(&signal_led);
+			  //do nothing
 			  signal_led.type = LED_SIGNAL_BLINK;
 
 			  break;
@@ -772,9 +780,17 @@ int main(void)
 	  }
 
 	  //Actuator routines:
+#ifdef LIGHT_AS_ACTUATOR
 	  discreate_actuator(&light_1, &deadline_timer_light_1);
 	  discreate_actuator(&light_2, &deadline_timer_light_2);
 	  discreate_actuator(&light_uv, &deadline_timer_uv);
+#else //LIGHT_AS_ACTUATOR
+	  output_fsm_ctrl(&light_1, &deadline_timer_light_1);
+	  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
+	  output_fsm_ctrl(&light_uv, &deadline_timer_uv);
+#endif //LIGHT_AS_ACTUATOR
+
+
 
 	  //LED indicator
 	  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
@@ -846,6 +862,8 @@ void SystemClock_Config(void)
 //TODO: (medium) all the digital outputs behave light a light. Last requirement
 //changes added other kind of actuators. Change the HAL layer and middleware
 //layer to set a proper name
+
+#ifdef LIGHT_AS_ACTUATOR
 void discreate_actuator(light_t *actuator, deadline_timer_t *deadline_timer)
 {
 
@@ -893,6 +911,8 @@ void discreate_actuator(light_t *actuator, deadline_timer_t *deadline_timer)
 	  }
 	}
 }
+#endif	//#LIGHT_AS_ACTUATOR
+
 
 //TODO: (high) Change this to create a decoupled function
 
@@ -1674,6 +1694,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		deadline_timer_count(&deadline_motion_uv_timeout);
 		deadline_timer_count(&deadline_uv_wait_timeout);
+
+		deadline_timer_increment(&general_clock);
 
 	}
 

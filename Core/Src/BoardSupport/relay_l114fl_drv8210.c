@@ -128,29 +128,25 @@ uint8_t relay_pulse_fsm(relay_t *relay, relay_status_t new_status)
 	switch(state)
 	{
 		case RELAY_STATE_IDLE:
-//			if(fsm_init == RELAY_INIT_TRUE)
-//			{
-				fsm_status = RELAY_STATE_STATUS_BUSY;
+			fsm_status = RELAY_STATE_STATUS_BUSY;
 
-				if(new_status == RELAY_ON)
-				{
-					relay_on(relay);
-				}
-				else
-				{
-					relay_off(relay);
-				}
+			if(new_status == RELAY_ON)
+			{
+				relay_on(relay);
+			}
+			else
+			{
+				relay_off(relay);
+			}
 
-				if(fsm_pulse_counts == 0)
-				{
-					state = RELAY_STATE_DEENERGIZING;
-				}
-				else
-				{
-					state = RELAY_STATE_WAIT;
-				}
-//				fsm_init = RELAY_INIT_FALSE;
-//			}
+			if(fsm_pulse_counts == 0)
+			{
+				state = RELAY_STATE_DEENERGIZING;
+			}
+			else
+			{
+				state = RELAY_STATE_WAIT;
+			}
 			break;
 		case RELAY_STATE_WAIT:
 

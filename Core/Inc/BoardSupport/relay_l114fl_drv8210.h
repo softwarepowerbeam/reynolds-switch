@@ -77,8 +77,6 @@ typedef struct relay
 	relay_fsm_run_t fsm_run_on;
 	relay_fsm_run_t fsm_run_off;
 	relay_fsm_init_t fsm_init;
-
-
 }relay_t;
 
 uint8_t relay_pulse_fsm(relay_t *relay, relay_status_t new_status);

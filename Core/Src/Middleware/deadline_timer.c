@@ -61,15 +61,9 @@ uint8_t deadline_timer_check(deadline_timer_t *deadline_timer,
 								deadline_timer_expired_t *deadline_expired)
 {
 	uint8_t status = 0;
-	//TODO: (High) fix this to include seconds
+	//TODO: (High) Change if seconds are required
 
-//	deadline_timer_expired_t deadline_expired_sec = TIMER_EXPIRED_FALSE;
 	deadline_timer_expired_t deadline_expired_msec = TIMER_EXPIRED_FALSE;
-
-
-//	uint32_t time_current = deadline_timer->time_current.msec;
-//	uint32_t deadline = deadline_timer->deadline.msec;
-//	uint32_t time_initial = deadline_timer->time_initial.msec;
 
 	deadline_timer_compare_check(deadline_timer->time_current.msec,
 											deadline_timer->deadline.msec,

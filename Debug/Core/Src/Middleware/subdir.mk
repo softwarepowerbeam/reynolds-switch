@@ -5,13 +5,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/Src/Middleware/deadline_timer.c 
+../Core/Src/Middleware/NuTone.c \
+../Core/Src/Middleware/deadline_timer.c \
+../Core/Src/Middleware/output_ctrl.c 
 
 OBJS += \
-./Core/Src/Middleware/deadline_timer.o 
+./Core/Src/Middleware/NuTone.o \
+./Core/Src/Middleware/deadline_timer.o \
+./Core/Src/Middleware/output_ctrl.o 
 
 C_DEPS += \
-./Core/Src/Middleware/deadline_timer.d 
+./Core/Src/Middleware/NuTone.d \
+./Core/Src/Middleware/deadline_timer.d \
+./Core/Src/Middleware/output_ctrl.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +27,7 @@ Core/Src/Middleware/%.o Core/Src/Middleware/%.su Core/Src/Middleware/%.cyclo: ..
 clean: clean-Core-2f-Src-2f-Middleware
 
 clean-Core-2f-Src-2f-Middleware:
-	-$(RM) ./Core/Src/Middleware/deadline_timer.cyclo ./Core/Src/Middleware/deadline_timer.d ./Core/Src/Middleware/deadline_timer.o ./Core/Src/Middleware/deadline_timer.su
+	-$(RM) ./Core/Src/Middleware/NuTone.cyclo ./Core/Src/Middleware/NuTone.d ./Core/Src/Middleware/NuTone.o ./Core/Src/Middleware/NuTone.su ./Core/Src/Middleware/deadline_timer.cyclo ./Core/Src/Middleware/deadline_timer.d ./Core/Src/Middleware/deadline_timer.o ./Core/Src/Middleware/deadline_timer.su ./Core/Src/Middleware/output_ctrl.cyclo ./Core/Src/Middleware/output_ctrl.d ./Core/Src/Middleware/output_ctrl.o ./Core/Src/Middleware/output_ctrl.su
 
 .PHONY: clean-Core-2f-Src-2f-Middleware
 
