@@ -1,1 +1,6 @@
-../Core/Src/Middleware/NuTone.c:15:6:nutone_setup	24	static
+../Core/Src/Middleware/NuTone.c:19:6:nutone_setup	80	static
+../Core/Src/Middleware/NuTone.c:57:9:nutone_fsm	32	static
+../Core/Src/Middleware/NuTone.c:388:9:nutone_set_command	16	static
+../Core/Src/Middleware/NuTone.c:397:9:nutone_select_state	16	static
+../Core/Src/Middleware/NuTone.c:464:9:nutone_invert_light_mode	16	static
+../Core/Src/Middleware/NuTone.c:481:9:nutone_set_mode	16	static

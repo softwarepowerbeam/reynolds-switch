@@ -1,3 +1,5 @@
+"./Core/Src/Application/motion_light_driver.o"
+"./Core/Src/Application/nutone_app.o"
 "./Core/Src/BoardSupport/button.o"
 "./Core/Src/BoardSupport/led_indicator.o"
 "./Core/Src/BoardSupport/lights.o"
@@ -10,7 +12,6 @@
 "./Core/Src/app.o"
 "./Core/Src/gpio.o"
 "./Core/Src/main.o"
-"./Core/Src/motion_light_driver.o"
 "./Core/Src/stm32c0xx_hal_msp.o"
 "./Core/Src/stm32c0xx_it.o"
 "./Core/Src/syscalls.o"

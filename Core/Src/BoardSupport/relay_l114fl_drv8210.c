@@ -68,11 +68,14 @@ uint8_t relay_ask_off_pulse_fsm(relay_t *relay)
 //		status = 1;
 //	}
 
-	relay->fsm_run_on = RELAY_RUN_FALSE;
-	relay->fsm_run_off = RELAY_RUN_TRUE;
-	relay->fsm_init = RELAY_INIT_TRUE;
-	relay->fsm_state = RELAY_STATE_IDLE;
-	status = 0;
+	if(relay->fsm_run_off == RELAY_RUN_FALSE)
+	{
+		relay->fsm_run_on = RELAY_RUN_FALSE;
+		relay->fsm_run_off = RELAY_RUN_TRUE;
+		relay->fsm_init = RELAY_INIT_TRUE;
+		relay->fsm_state = RELAY_STATE_IDLE;
+		status = 0;
+	}
 
 	return status;
 }
@@ -90,11 +93,15 @@ uint8_t relay_ask_on_pulse_fsm(relay_t *relay)
 //		status = 1;
 //	}
 
-	relay->fsm_run_on = RELAY_RUN_TRUE;
-	relay->fsm_run_off = RELAY_RUN_FALSE;
-	relay->fsm_init = RELAY_INIT_TRUE;
-	relay->fsm_state = RELAY_STATE_IDLE;
 
+	//TODO: (high) Test this change (conditional) intensively
+	if(relay->fsm_run_on == RELAY_RUN_FALSE)
+	{
+		relay->fsm_run_on = RELAY_RUN_TRUE;
+		relay->fsm_run_off = RELAY_RUN_FALSE;
+		relay->fsm_init = RELAY_INIT_TRUE;
+		relay->fsm_state = RELAY_STATE_IDLE;
+	}
 	return status;
 }
 uint8_t relay_check_init_fsm(relay_t relay, relay_fsm_init_t *init)

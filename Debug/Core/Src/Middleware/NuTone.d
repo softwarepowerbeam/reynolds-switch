@@ -30,7 +30,8 @@ Core/Src/Middleware/NuTone.o: ../Core/Src/Middleware/NuTone.c \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim.h \
  ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim_ex.h \
  ../Core/Inc/Middleware/deadline_timer.h \
- ../Core/Inc/Middleware/output_ctrl.h
+ ../Core/Inc/Middleware/output_ctrl.h \
+ ../Core/Inc/BoardSupport/led_indicator.h
 ../Core/Inc/Middleware/NuTone.h:
 ../Core/Inc/BoardSupport/relay_l114fl_drv8210.h:
 ../Core/Inc/gpio.h:
@@ -65,3 +66,4 @@ Core/Src/Middleware/NuTone.o: ../Core/Src/Middleware/NuTone.c \
 ../Drivers/STM32C0xx_HAL_Driver/Inc/stm32c0xx_hal_tim_ex.h:
 ../Core/Inc/Middleware/deadline_timer.h:
 ../Core/Inc/Middleware/output_ctrl.h:
+../Core/Inc/BoardSupport/led_indicator.h:

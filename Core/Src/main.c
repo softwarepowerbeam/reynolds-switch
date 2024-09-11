@@ -48,7 +48,10 @@
 #include "Middleware/deadline_timer.h"
 #include "Middleware/output_ctrl.h"
 #include "Middleware/NuTone.h"
-#include "motion_lights_driver.h"
+
+#include "Application/nutone_app.h"
+
+#include "Application/motion_lights_driver.h"
 #include "app.h"
 
 /* USER CODE END Includes */
@@ -115,8 +118,8 @@ const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 #ifdef FAST_TEST
 
 //Office Mode:
-#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		50		//!< Range 0-255 (0 more sensitive -255 less sensitive)
-const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		90		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
 
 #define OFFICE_LAMP1_ON_TIME_MS				1 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
 #define OFFICE_LAMP2_ON_TIME_MS				1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
@@ -132,14 +135,14 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 #define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	50		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define RESIDENTIAL_LAMP1_ON_TIME_MS		1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		10000//1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
 #define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	900 	//!<Waiting period before turning on UV light in milisec
-#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
+#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		10000//3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
 #ifdef TEST_TIMEOUT
 #define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000
 #else	//TEST_TIMEOUT
-#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		10000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		5000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
 #endif	//TEST_TIMEOUT
 
 #endif //FAST_TEST
@@ -178,7 +181,7 @@ void SystemClock_Config(void);
 /****************************PYD 1598 routines*********************************/
 
 //App routines:
-
+#ifdef LIGHT_AS_ACTUATOR
 void motion_light_control_fsm(light_t *light,
 						button_t *button,
 						pyd1598_sensor_t *motion_sensor,
@@ -195,24 +198,60 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 						motion_sensed_t *motion_sensed,
 						motion_light_uv_abort_t *uv_abort,
 						led_signal_t *signal);
-
 void motion_uv_ctrl_wait_fsm(light_t *light_uv,
+								button_t *button_uv,
+								pyd1598_sensor_t *motion_sensor,
+								deadline_timer_t *deadline_timer,
+								deadline_timer_t *deadline_safe_timer,
+								deadline_timer_t *deadline_timeout,
+								deadline_timer_t *deadline_wait_timeout,
+								motion_light_uv_state_t *fsm_state,
+								motion_sensed_t *motion_sensed,
+								motion_light_uv_abort_t *uv_abort,
+								motion_uv_wait_signal_t wait,
+								led_signal_t *signal);
+
+void direct_light_control_fsm(light_t *light,
+					button_t *button,
+					deadline_timer_t *deadline_timer,
+					motion_light_no_motion_state_t *fsm_state);
+#else 	//LIGHT_AS_ACTUATOR
+void motion_light_control_fsm(relay_t *light,
+								button_t *button,
+								pyd1598_sensor_t *motion_sensor,
+								deadline_timer_t *deadline_timer,
+								motion_light_state_t *fsm_state,
+								motion_sensed_t *motion_sensed);
+void motion_light_uv_control_fsm(relay_t *light_uv,
 									button_t *button_uv,
 									pyd1598_sensor_t *motion_sensor,
 									deadline_timer_t *deadline_timer,
 									deadline_timer_t *deadline_safe_timer,
-									deadline_timer_t *deadline_timeout,
-									deadline_timer_t *deadline_wait_timeout,
 									motion_light_uv_state_t *fsm_state,
 									motion_sensed_t *motion_sensed,
 									motion_light_uv_abort_t *uv_abort,
-									motion_uv_wait_signal_t wait,
 									led_signal_t *signal);
+void motion_uv_ctrl_wait_fsm(relay_t *light_uv,
+								button_t *button_uv,
+								pyd1598_sensor_t *motion_sensor,
+								deadline_timer_t *deadline_timer,
+								deadline_timer_t *deadline_safe_timer,
+								deadline_timer_t *deadline_timeout,
+								deadline_timer_t *deadline_wait_timeout,
+								motion_light_uv_state_t *fsm_state,
+								motion_sensed_t *motion_sensed,
+								motion_light_uv_abort_t *uv_abort,
+								motion_uv_wait_signal_t wait,
+								led_signal_t *signal);
 
-void direct_light_control_fsm(light_t *light,
-						button_t *button,
-						deadline_timer_t *deadline_timer,
-						motion_light_no_motion_state_t *fsm_state);
+void direct_light_control_fsm(relay_t *light,
+								button_t *button,
+								deadline_timer_t *deadline_timer,
+								motion_light_no_motion_state_t *fsm_state);
+#endif 	//LIGHT_AS_ACTUATOR
+
+
+
 
 void events_detection(pyd1598_sensor_t *motion,
 							deadline_timer_t *deadline_events,
@@ -260,7 +299,7 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button);
 
 //TODO: (low) Change to main process
 //Testing upper layer:
-nutone_t exhaust_fan;
+
 
 //Motion Sensor declarations
 pyd1598_sensor_t motion_sensor;
@@ -284,15 +323,13 @@ timer_clock_t timer_buttons;//Change this to main
 button_t button_light_1;
 button_t button_light_2;
 button_t button_uv;
+
 motion_sensed_t motion_sensed_light_1;
 motion_sensed_t motion_sensed_light_2;
 motion_sensed_t motion_sensed_uv;
 
-
 //LED indicator
 deadline_timer_t deadline_led_indicator;//TODO: (High) deprecate this variable
-
-
 
 //Application declarations
 deadline_timer_t deadline_motion_light_1;
@@ -319,11 +356,14 @@ timer_clock_t timer_uv_wait_timeout;
 
 motion_light_uv_state_t uv_state;//Change this to main
 
-
-
-
 motion_light_uv_abort_t abort_uv = MOTION_ABORT_FALSE;
 motion_uv_wait_signal_t wait = MOTION_UV_WAIT_FALSE;
+
+
+//NuTone timers
+deadline_timer_t ctrl_timer;
+deadline_timer_t vyv_timeoff;
+nutone_app_t nutone_app_hand;
 
 
 /******************************************************************************/
@@ -375,6 +415,7 @@ int main(void)
 
 
   //DIP SWITCH SETUP
+  //----------------------------------------------------------------------------
   switch_selector_t switch_selector;
   switch_selector_gpio_t switch_selector_gpio[2];//We can use malloc also
   switch_selector_gpio[0].port = DIP_IN1_GPIO_Port;
@@ -385,7 +426,7 @@ int main(void)
   switch_selector_setup(&switch_selector, switch_selector_gpio, 2);
 
   //MOTION SENSOR SETUP
-  //-------------------
+  //----------------------------------------------------------------------------
 
   switch(switch_selector.value)
   {
@@ -398,11 +439,15 @@ int main(void)
 		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
 	  break;
 	case MOTION_SWITCH_MODE_2:
+		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
+		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
 		//do nothing
 		__NOP();
 		break;
 	case MOTION_SWITCH_MODE_3:
 		//do nothing
+		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
+		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
 		__NOP();
 		break;
 	default:
@@ -430,8 +475,6 @@ int main(void)
   direct_link_pin.port = DIRLINK_GPIO_Port;
   direct_link_pin.irq_type = EXTI4_15_IRQn;
 
-//  uint8_t idx = 0;
-
   pyd1598_setup(&motion_sensor, motion_initial_conf, setin_pin, direct_link_pin);
 
 //  pyd1598_serin_set_zero_pulse(setin_pin);
@@ -440,7 +483,7 @@ int main(void)
   pyd1598_request_write(&motion_sensor);
 
   //LIGHTS SETUP
-  //-----------
+  //----------------------------------------------------------------------------
 
 #ifdef LIGHT_AS_ACTUATOR
   //TODO: Deprecate these:
@@ -448,15 +491,12 @@ int main(void)
   light_t light_2;
   light_t light_uv;
 #else	//LIGHT_AS_ACTUATOR
-
   relay_t light_1;
   relay_t light_2;
   relay_t light_uv;
 #endif	//LIGHT_AS_ACTUATOR
 
-
-
-  deadline.msec = 100;
+  deadline.msec = 80;
   deadline_timer_setup(&deadline_timer_light_1, deadline);
   deadline_timer_setup(&deadline_timer_light_2, deadline);
   deadline_timer_setup(&deadline_timer_uv, deadline);
@@ -485,9 +525,10 @@ int main(void)
   light_2_output_b.port = LAMP2_OUTB_GPIO_Port;
   light_uv_output_b.port = UV_OUTB_GPIO_Port;
 
-  light_setup(&light_1,light_1_output_a, light_1_output_b);
-  light_setup(&light_2,light_2_output_a, light_2_output_b);
-  light_setup(&light_uv,light_uv_output_a, light_uv_output_b);
+  light_setup(&light_1, light_1_output_a, light_1_output_b);
+  light_setup(&light_2, light_2_output_a, light_2_output_b);
+  light_setup(&light_uv, light_uv_output_a, light_uv_output_b);
+
 #else	//LIGHT_AS_ACTUATOR
 
   relay_gpio_t light_1_output_a;
@@ -516,13 +557,12 @@ int main(void)
   relay_setup(&light_uv, light_uv_output_a, light_uv_output_b);
 
 
-  nutone_setup(&exhaust_fan, &light_1, &deadline_timer_light_1);
-//  init_output_ctrl();
+
 
 #endif	//LIGHT_AS_ACTUATOR
 
   //BUTTONS SETUP
-  //-------------
+  //----------------------------------------------------------------------------
 
   //timers config:
   timer_buttons.msec = 1;
@@ -544,7 +584,7 @@ int main(void)
 
 
   //SIGNAL LED SETUP
-  //-------------
+  //----------------------------------------------------------------------------
   led_signal_t signal_led;
   led_signal_gpio_t signal_led_gpio;
   deadline_timer_expired_t indicator_timer_expired;
@@ -560,7 +600,7 @@ int main(void)
   led_signal_type_selector(&signal_led, LED_SIGNAL_SOLID);
 
   //APPLICATION LIGHT SETUP
-  //-------------
+  //----------------------------------------------------------------------------
 //TODO: (medium) create a typedef for all this
 
 
@@ -587,9 +627,18 @@ int main(void)
 		  timer_motion_uv_timeout.msec = RESIDENTIAL_LAMP_UV_TIMEOUT_MS;
     	  break;
       case MOTION_SWITCH_MODE_2:
+    	  timer_motion_light_1.msec = RESIDENTIAL_LAMP1_ON_TIME_MS;
+		  timer_motion_light_2.msec = RESIDENTIAL_LAMP2_ON_TIME_MS;
+		  timer_motion_uv_safe.msec = RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS;
+		  timer_motion_uv.msec = RESIDENTIAL_LAMP_UV_ON_TIME_MS;
+		  timer_motion_uv_timeout.msec = RESIDENTIAL_LAMP_UV_TIMEOUT_MS;
     	  break;
       case MOTION_SWITCH_MODE_3:
-    	  //do nothing
+    	  timer_motion_light_1.msec = RESIDENTIAL_LAMP1_ON_TIME_MS;
+		  timer_motion_light_2.msec = RESIDENTIAL_LAMP2_ON_TIME_MS;
+		  timer_motion_uv_safe.msec = RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS;
+		  timer_motion_uv.msec = RESIDENTIAL_LAMP_UV_ON_TIME_MS;
+		  timer_motion_uv_timeout.msec = RESIDENTIAL_LAMP_UV_TIMEOUT_MS;
     	  __NOP();
     	  break;
       default:
@@ -616,6 +665,84 @@ int main(void)
   deadline.msec = 5000;
   deadline_timer_setup(&deadline_uv_wait_timeout, deadline);
 
+
+
+
+
+  //MODE 2 Setup (NuTone)
+  //----------------------------------------------------------------------------
+
+  nutone_t exhaust_fan;
+//  nutone_app_t nutone_app_hand;
+  button_handler_t button_fan;
+  button_handler_t button_white;
+  button_handler_t button_vyv;
+  motion_handler_t motion_sensor_hand;
+  led_signal_handler_t led_signal_hand;
+  nutone_relay_handler_t lights;
+  nutone_relay_handler_t fan;
+
+  if(switch_selector.value == MOTION_SWITCH_MODE_3)
+  {
+
+	  lights.relay = &light_1;
+	  lights.deadline_timer = &deadline_timer_light_1;
+	  fan.relay = &light_2;
+	  fan.deadline_timer = &deadline_timer_light_2;
+
+	  nutone_setup(&exhaust_fan, &lights, &fan, &ctrl_timer, &vyv_timeoff);
+
+	  button_white.button = &button_light_1;
+	  button_white.btn_timer = &deadline_buttons;
+	  button_fan.button = &button_light_2;
+	  button_fan.btn_timer = &deadline_buttons;
+	  button_vyv.button = &button_uv;
+	  button_vyv.btn_timer = &deadline_buttons;
+	  motion_sensor_hand.motion_sensor = &motion_sensor;
+
+	  led_signal_hand.led_signal = &signal_led;
+	  led_signal_hand.led_signal_timer = &deadline_led_indicator;
+
+	  nutone_app_config(&nutone_app_hand, &exhaust_fan, &motion_sensor_hand,
+			  	  	  	  	  &button_fan, &button_white, &button_vyv,
+							  &led_signal_hand,
+							  &deadline_motion_light_2,
+							  &deadline_motion_light_1,
+							  &deadline_motion_uv,
+							  &deadline_motion_uv_timeout,
+							  &deadline_motion_uv_safe);
+
+  }
+
+
+  //Start Timers
+  //----------------------------------------------------------------------------
+	//Start interrupts:
+	HAL_TIM_Base_Start_IT(&htim1);
+	HAL_TIM_Base_Start_IT(&htim14);//SERIN communication timer
+	HAL_TIM_Base_Start_IT(&htim16);//Used to generate a clock
+	//Direct Link communication timer
+	HAL_NVIC_SetPriority(TIM17_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(TIM17_IRQn);
+	HAL_TIM_Base_Start_IT(&htim17);
+	HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 1);
+	HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+	HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
+	HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
+
+  //Set initial states:
+  //----------------------------------------------------------------------------
+#ifdef LIGHT_AS_ACTUATOR
+  light_ask_off_pulse_fsm(&light_1);
+  light_ask_off_pulse_fsm(&light_2);
+  light_ask_off_pulse_fsm(&light_uv);
+#else //LIGHT_AS_ACTUATOR
+  relay_ask_off_pulse_fsm(&light_1);
+  relay_ask_off_pulse_fsm(&light_2);
+  relay_ask_off_pulse_fsm(&light_uv);
+#endif //LIGHT_AS_ACTUATOR
+
+
   uv_state = MOTION_LIGHT_UV_IDLE;
   abort_uv = MOTION_ABORT_FALSE;
   //Light timeout UV
@@ -625,29 +752,8 @@ int main(void)
   motion_sensed_light_2 = MOTION_ISR_ATTENDED;
   motion_sensed_uv = MOTION_ISR_ATTENDED;
 
-  //Start interrupts:
-  HAL_TIM_Base_Start_IT(&htim1);
-  HAL_TIM_Base_Start_IT(&htim14);//SERIN communication timer
-  HAL_TIM_Base_Start_IT(&htim16);//Used to generate a clock
-
-  //Direct Link communication timer
-  HAL_NVIC_SetPriority(TIM17_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(TIM17_IRQn);
-  HAL_TIM_Base_Start_IT(&htim17);
-
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
-
-#ifdef LIGHT_AS_ACTUATOR
-  light_ask_off_pulse_fsm(&light_1);
-  light_ask_off_pulse_fsm(&light_2);
-  light_ask_off_pulse_fsm(&light_uv);
-#else //LIGHT_AS_ACTUATOR
   led_signal_stop(&signal_led);
-#endif //LIGHT_AS_ACTUATOR
+
 
 
 #ifdef DEBUG_REYNOLDS
@@ -679,19 +785,17 @@ int main(void)
 								  &motion_sensed_light_1, &motion_sensed_light_2,
 								  &motion_sensed_uv,
 								  &abort_uv);
-
 			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
 									&deadline_motion_light_1, &light_1_state,
 									&motion_sensed_light_1);
-
 			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
-										&deadline_motion_light_2, &light_2_state,
-										&motion_sensed_light_2);
+									&deadline_motion_light_2, &light_2_state,
+									&motion_sensed_light_2);
+
 #ifdef LIGHT_AS_ACTUATOR
 			  if((light_1.light_status == LIGHT_ON) ||
 				 (light_2.light_status == LIGHT_ON))
 #else	//LIGHT_AS_ACTUATOR
-
 			  if((light_1.relay_status == RELAY_ON) ||
 				 (light_2.relay_status == RELAY_ON))
 #endif	//LIGHT_AS_ACTUATOR
@@ -710,14 +814,32 @@ int main(void)
 								&uv_state, &motion_sensed_uv, &abort_uv, wait,
 								&signal_led);
 
+
+
+			  //Actuator routines:
+#ifdef LIGHT_AS_ACTUATOR
+				discreate_actuator(&light_1, &deadline_timer_light_1);
+				discreate_actuator(&light_2, &deadline_timer_light_2);
+				discreate_actuator(&light_uv, &deadline_timer_uv);
+#else //LIGHT_AS_ACTUATOR
+			  output_fsm_ctrl(&light_1, &deadline_timer_light_1);
+			  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
+			  output_fsm_ctrl(&light_uv, &deadline_timer_uv);
+#endif //LIGHT_AS_ACTUATOR
+
+			  //LED indicator
+			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
+
+			  if(indicator_timer_expired == TIMER_EXPIRED_TRUE)
+			  {
+				  led_signal_fsm(&signal_led);
+				  deadline_timer_set_initial_time(&deadline_led_indicator);
+			  }
+
+
 			  break;
 
 		  case MOTION_SWITCH_MODE_1:
-
-//			  events_detection_motion_in_one_lamp(&motion_sensor, &deadline_buttons,
-//								  &button_light_1, &button_light_2, &button_uv,
-//								  &motion_sensed_light_1, &motion_sensed_uv,
-//								  &abort_uv);
 
 			  events_detection_uv_waits(&motion_sensor, &deadline_buttons,
 			  								  &button_light_1, &button_light_2, &button_uv,
@@ -733,11 +855,6 @@ int main(void)
 												  &deadline_motion_light_2,
 												  &light_2_no_motion_state);
 
-//			  motion_light_uv_control_fsm(&light_uv, &button_uv, &motion_sensor,
-//								&deadline_motion_uv, &deadline_motion_uv_safe,
-//								&uv_state, &motion_sensed_uv, &abort_uv,
-//								&signal_led);
-
 #ifdef LIGHT_AS_ACTUATOR
 			  if((light_1.light_status == LIGHT_ON) ||
 				 (light_2.light_status == LIGHT_ON))
@@ -761,6 +878,27 @@ int main(void)
 								&signal_led);
 
 
+			  //Actuator routines:
+#ifdef LIGHT_AS_ACTUATOR
+				discreate_actuator(&light_1, &deadline_timer_light_1);
+				discreate_actuator(&light_2, &deadline_timer_light_2);
+				discreate_actuator(&light_uv, &deadline_timer_uv);
+#else //LIGHT_AS_ACTUATOR
+			  output_fsm_ctrl(&light_1, &deadline_timer_light_1);
+			  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
+			  output_fsm_ctrl(&light_uv, &deadline_timer_uv);
+#endif //LIGHT_AS_ACTUATOR
+
+			  //LED indicator
+			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
+
+			  if(indicator_timer_expired == TIMER_EXPIRED_TRUE)
+			  {
+				  led_signal_fsm(&signal_led);
+				  deadline_timer_set_initial_time(&deadline_led_indicator);
+			  }
+
+
 			  break;
 		  case MOTION_SWITCH_MODE_2:
 			  //do nothing
@@ -768,37 +906,17 @@ int main(void)
 
 			  break;
 		  case MOTION_SWITCH_MODE_3:
-			  //do nothing
-			  led_signal_start(&signal_led);
-			  signal_led.type = LED_SIGNAL_BLINK;
+
+			  nutone_app_process(&nutone_app_hand);
+
+//			  led_signal_start(&signal_led);
+//			  signal_led.type = LED_SIGNAL_BLINK;
 			  __NOP();
 			  break;
 		  default:
 			  //do nothing
 			  __NOP();
 			  break;
-	  }
-
-	  //Actuator routines:
-#ifdef LIGHT_AS_ACTUATOR
-	  discreate_actuator(&light_1, &deadline_timer_light_1);
-	  discreate_actuator(&light_2, &deadline_timer_light_2);
-	  discreate_actuator(&light_uv, &deadline_timer_uv);
-#else //LIGHT_AS_ACTUATOR
-	  output_fsm_ctrl(&light_1, &deadline_timer_light_1);
-	  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
-	  output_fsm_ctrl(&light_uv, &deadline_timer_uv);
-#endif //LIGHT_AS_ACTUATOR
-
-
-
-	  //LED indicator
-	  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
-
-	  if(indicator_timer_expired == TIMER_EXPIRED_TRUE)
-	  {
-		  led_signal_fsm(&signal_led);
-		  deadline_timer_set_initial_time(&deadline_led_indicator);
 	  }
 
 
@@ -1033,7 +1151,7 @@ void events_detection_uv_waits(pyd1598_sensor_t *motion,
 	}
 #endif //ABORT_WITH_BUTTONS
 
-	//Check if lamp buttons are active to invalidate UV button events.
+	//Since a push button does not maintain its state, memory is needed.
 	button_check_isr_request(*button_lamp_uv, &button_isr_stat, &check_edge);
 	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
 	{
@@ -1085,7 +1203,6 @@ void events_detection_motion_in_one_lamp(pyd1598_sensor_t *motion,
 
 
 	//Activating a switch while uv fsm is running acts as motion detection
-
 	button_check_isr_request(*button_lamp_1, &button_isr_stat, &check_edge);
 	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
 	{
@@ -1127,13 +1244,21 @@ void sense_button_event(deadline_timer_t *deadline_events, button_t *button)
 
 
 }
-
+#ifdef LIGHT_AS_ACTUATOR
 void motion_light_control_fsm(light_t *light,
 								button_t *button,
 								pyd1598_sensor_t *motion_sensor,
 								deadline_timer_t *deadline_timer,
 								motion_light_state_t *fsm_state,
 								motion_sensed_t *motion_sensed)
+#else	//LIGHT_AS_ACTUATOR
+void motion_light_control_fsm(relay_t *light,
+								button_t *button,
+								pyd1598_sensor_t *motion_sensor,
+								deadline_timer_t *deadline_timer,
+								motion_light_state_t *fsm_state,
+								motion_sensed_t *motion_sensed)
+#endif	//LIGHT_AS_ACTUATOR
 {
 
 	button_isr_status_t button_isr_status;
@@ -1195,7 +1320,7 @@ void motion_light_control_fsm(light_t *light,
 		case MOTION_LIGHT_TURN_ON_LIGHT:
 
 			//this is done in another fsm
-			light_ask_on_pulse_fsm(light);
+			relay_ask_on_pulse_fsm(light);
 			*fsm_state = MOTION_LIGHT_INIT_TIMER;
 
 			break;
@@ -1222,7 +1347,6 @@ void motion_light_control_fsm(light_t *light,
 			if(*motion_sensed == MOTION_ISR_UNATTENDED)
 			{
 				*motion_sensed = MOTION_ISR_ATTENDED;
-//					*fsm_state = MOTION_LIGHT_INIT_TIMER;
 				*fsm_state = MOTION_LIGHT_CHECK_BUTTON;
 			}
 			break;
@@ -1230,7 +1354,7 @@ void motion_light_control_fsm(light_t *light,
 
 			deadline_timer_force_expiration(deadline_timer);
 			//this is done in another fsm
-			light_ask_off_pulse_fsm(light);
+			relay_ask_off_pulse_fsm(light);
 			*fsm_state = MOTION_LIGHT_IDLE;
 			break;
 		default:
@@ -1241,7 +1365,7 @@ void motion_light_control_fsm(light_t *light,
 	button->edge_attended = button_isr_status;
 
 }
-
+#ifdef LIGHT_AS_ACTUATOR
 void motion_light_uv_control_fsm(light_t *light_uv,
 									button_t *button_uv,
 									pyd1598_sensor_t *motion_sensor,
@@ -1251,6 +1375,17 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 									motion_sensed_t *motion_sensed,
 									motion_light_uv_abort_t *uv_abort,
 									led_signal_t *signal)
+#else	//LIGHT_AS_ACTUATOR
+void motion_light_uv_control_fsm(relay_t *light_uv,
+									button_t *button_uv,
+									pyd1598_sensor_t *motion_sensor,
+									deadline_timer_t *deadline_timer,
+									deadline_timer_t *deadline_safe_timer,
+									motion_light_uv_state_t *fsm_state,
+									motion_sensed_t *motion_sensed,
+									motion_light_uv_abort_t *uv_abort,
+									led_signal_t *signal)
+#endif	//LIGHT_AS_ACTUATOR
 {
 	button_isr_status_t button_isr_status;
 	button_edge_t edge = button_uv->edge;
@@ -1309,7 +1444,11 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 			break;
 		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
 			//this is done in another fsm
+#ifdef LIGHT_AS_ACTUATOR
 			light_ask_on_pulse_fsm(light_uv);
+#else	//LIGHT_AS_ACTUATOR
+			relay_ask_on_pulse_fsm(light_uv);
+#endif	//LIGHT_AS_ACTUATOR
 			*fsm_state = MOTION_LIGHT_UV_INIT_TIMER;
 
 			break;
@@ -1348,7 +1487,11 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 
 			//Stop LED indicator
 			led_signal_stop(signal);
+#ifdef LIGHT_AS_ACTUATOR
 			light_ask_off_pulse_fsm(light_uv);
+#else	//LIGHT_AS_ACTUATOR
+			relay_ask_off_pulse_fsm(light_uv);
+#endif	//LIGHT_AS_ACTUATOR
 
 
 			*fsm_state = MOTION_LIGHT_UV_IDLE;
@@ -1362,7 +1505,7 @@ void motion_light_uv_control_fsm(light_t *light_uv,
 
 }
 
-
+#ifdef LIGHT_AS_ACTUATOR
 
 void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 									button_t *button_uv,
@@ -1376,13 +1519,27 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 									motion_light_uv_abort_t *uv_abort,
 									motion_uv_wait_signal_t wait,
 									led_signal_t *signal)
+#else	//LIGHT_AS_ACTUATOR
+
+void motion_uv_ctrl_wait_fsm(relay_t *light_uv,
+									button_t *button_uv,
+									pyd1598_sensor_t *motion_sensor,
+									deadline_timer_t *deadline_timer,
+									deadline_timer_t *deadline_safe_timer,
+									deadline_timer_t *deadline_timeout,
+									deadline_timer_t *deadline_wait_timeout,
+									motion_light_uv_state_t *fsm_state,
+									motion_sensed_t *motion_sensed,
+									motion_light_uv_abort_t *uv_abort,
+									motion_uv_wait_signal_t wait,
+									led_signal_t *signal)
+#endif	//LIGHT_AS_ACTUATOR
 {
 	button_isr_status_t button_isr_status;
 	button_edge_t edge = button_uv->edge;
 	pyd1598_motion_isr_status_t motion_isr_status;
 	deadline_timer_expired_t deadline_safe_expired;
 	deadline_timer_expired_t deadline_timeout_expired;
-	deadline_timer_expired_t deadline_wait_timeout_expired;
 
 	button_check_isr_request(*button_uv, &button_isr_status, &edge);
 	pyd1598_check_isr_request(*motion_sensor, &motion_isr_status);
@@ -1526,7 +1683,11 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 			break;
 		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
 			//this is done in another fsm
+#ifdef LIGHT_AS_ACTUATOR
 			light_ask_on_pulse_fsm(light_uv);
+#else	//LIGHT_AS_ACTUATOR
+			relay_ask_on_pulse_fsm(light_uv);
+#endif	//LIGHT_AS_ACTUATOR
 //			signal->type = LED_SIGNAL_SOLID;
 			*fsm_state = MOTION_LIGHT_UV_INIT_TIMER;
 
@@ -1568,7 +1729,12 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 
 
 			//Send signal to turn off UV lamp
+#ifdef LIGHT_AS_ACTUATOR
 			light_ask_off_pulse_fsm(light_uv);
+#else	//LIGHT_AS_ACTUATOR
+			relay_ask_off_pulse_fsm(light_uv);
+#endif	//LIGHT_AS_ACTUATOR
+
 			//Send signal stop LED indicator
 			led_signal_stop(signal);
 
@@ -1584,11 +1750,18 @@ void motion_uv_ctrl_wait_fsm(light_t *light_uv,
 }
 
 
+#ifdef LIGHT_AS_ACTUATOR
 
 void direct_light_control_fsm(light_t *light,
 						button_t *button,
 						deadline_timer_t *deadline_timer,
 						motion_light_no_motion_state_t *fsm_state)
+#else	//LIGHT_AS_ACTUATOR
+void direct_light_control_fsm(relay_t *light,
+								button_t *button,
+								deadline_timer_t *deadline_timer,
+								motion_light_no_motion_state_t *fsm_state)
+#endif	//LIGHT_AS_ACTUATOR
 {
 
 	button_isr_status_t button_isr_status;
@@ -1621,7 +1794,11 @@ void direct_light_control_fsm(light_t *light,
 		case NO_MOTION_LIGHT_TURN_ON_LIGHT:
 
 			//this is done in another fsm
+#ifdef LIGHT_AS_ACTUATOR
 			light_ask_on_pulse_fsm(light);
+#else	//LIGHT_AS_ACTUATOR
+			relay_ask_on_pulse_fsm(light);
+#endif	//LIGHT_AS_ACTUATOR
 			*fsm_state = NO_MOTION_LIGHT_CHECK_BUTTON;
 
 			break;
@@ -1638,7 +1815,11 @@ void direct_light_control_fsm(light_t *light,
 			break;
 		case NO_MOTION_LIGHT_TURN_OFF_LIGHT:
 			//this is done in another fsm
+#ifdef LIGHT_AS_ACTUATOR
 			light_ask_off_pulse_fsm(light);
+#else	//LIGHT_AS_ACTUATOR
+			relay_ask_off_pulse_fsm(light);
+#endif	//LIGHT_AS_ACTUATOR
 			*fsm_state = NO_MOTION_LIGHT_IDLE;
 			break;
 		default:
@@ -1694,6 +1875,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		deadline_timer_count(&deadline_motion_uv_timeout);
 		deadline_timer_count(&deadline_uv_wait_timeout);
+
+		deadline_timer_count(&ctrl_timer);
+		deadline_timer_count(&vyv_timeoff);
 
 		deadline_timer_increment(&general_clock);
 

@@ -1,0 +1,9 @@
+../Core/Src/Application/nutone_app.c:17:9:nutone_app_config	24	static
+../Core/Src/Application/nutone_app.c:50:9:nutone_app_process	16	static
+../Core/Src/Application/nutone_app.c:64:9:nutone_app_fsm	16	static
+../Core/Src/Application/nutone_app.c:86:9:nutone_fan_fsm	16	static
+../Core/Src/Application/nutone_app.c:106:9:nutone_white_fsm	48	static,ignoring_inline_asm
+../Core/Src/Application/nutone_app.c:225:9:nutone_vyv_fsm	120	static,ignoring_inline_asm
+../Core/Src/Application/nutone_app.c:412:6:nutone_app_check_events	48	static
+../Core/Src/Application/nutone_app.c:458:6:nutone_app_check_button_event	32	static
+../Core/Src/Application/nutone_app.c:475:6:nutone_app_set_outputs	16	static

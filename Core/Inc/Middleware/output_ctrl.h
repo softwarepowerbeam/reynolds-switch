@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include "BoardSupport/relay_l114fl_drv8210.h"
+#include "BoardSupport/led_indicator.h"
 #include "Middleware/deadline_timer.h"
 
 #ifdef __cplusplus
@@ -21,7 +22,8 @@ extern "C" {
 
 
 void output_fsm_ctrl(relay_t *actuator, deadline_timer_t *deadline_timer);
-
+void output_led_indicator(led_signal_t *led_signal,
+								deadline_timer_t *deadline_timer);
 
 
 #ifdef __cplusplus

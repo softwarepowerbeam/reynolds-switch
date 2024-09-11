@@ -57,3 +57,20 @@ void output_fsm_ctrl(relay_t *actuator, deadline_timer_t *deadline_timer)
 	  }
 	}
 }
+
+
+void output_led_indicator(led_signal_t *led_signal,
+								deadline_timer_t *deadline_timer)
+{
+	deadline_timer_expired_t indicator_timer_expired;
+	deadline_timer_check(deadline_timer, &indicator_timer_expired);
+
+	if(indicator_timer_expired == TIMER_EXPIRED_TRUE)
+	{
+		led_signal_fsm(led_signal);
+		deadline_timer_set_initial_time(deadline_timer);
+	}
+}
+
+
+
