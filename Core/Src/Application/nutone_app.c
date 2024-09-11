@@ -7,12 +7,19 @@
 
 #include "Application/nutone_app.h"
 
+
+
+#define NUTONE_APP_DEBUG_CODE
+
 //TODO: Change this to a different, more general, library
 void nutone_app_check_button_event(deadline_timer_t *deadline_events, button_t *button);
 void nutone_app_set_outputs(nutone_app_t *nutone_app_hand);
 uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand);
 uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand);
 uint8_t nutone_fan_fsm(nutone_app_t *nutone_app_hand);
+
+//TODO: (high) debug function
+uint8_t nutone_test(nutone_app_t *nutone_app_hand);
 
 uint8_t nutone_app_config(nutone_app_t *nutone_app_hand, nutone_t *nutone_dev,
 							motion_handler_t *motion_hand,
@@ -69,11 +76,17 @@ uint8_t nutone_app_fsm(nutone_app_t *nutone_app_hand)
 
 //	relay_ask_on_pulse_fsm(nutone_app_hand->nutone_dev->lights->relay);
 
+#ifdef NUTONE_APP_DEBUG_CODE
+	nutone_test(nutone_app_hand);
+
+#else //NUTONE_APP_DEBUG_CODE
 	nutone_fan_fsm(nutone_app_hand);
 
 	nutone_white_fsm(nutone_app_hand);
 
 	nutone_vyv_fsm(nutone_app_hand);
+#endif //NUTONE_APP_DEBUG_CODE
+
 
 	nutone_fsm(nutone_app_hand->nutone_dev);
 
@@ -82,6 +95,66 @@ uint8_t nutone_app_fsm(nutone_app_t *nutone_app_hand)
 
 }
 
+//TODO: (high) debug function
+uint8_t nutone_test(nutone_app_t *nutone_app_hand)
+{
+	if(nutone_app_hand->button_fan->button->edge_attended ==
+														BUTTON_ISR_UNATTENDED)
+	{
+		if(nutone_app_hand->button_fan->button->edge == BUTTON_EDGE_POSITIVE)
+		{
+			nutone_set_command(nutone_app_hand->nutone_dev,
+														NUTONE_CMD_FAN_TURN_ON);
+		}
+		else
+		{
+			nutone_set_command(nutone_app_hand->nutone_dev,
+													NUTONE_CMD_FAN_TURN_OFF);
+		}
+		nutone_app_hand->button_fan->button->edge_attended = BUTTON_ISR_ATTENDED;
+	}
+
+	//White light test
+	if(nutone_app_hand->button_white->button->edge_attended ==
+														BUTTON_ISR_UNATTENDED)
+	{
+		if(nutone_app_hand->button_white->button->edge == BUTTON_EDGE_POSITIVE)
+		{
+			nutone_set_command(nutone_app_hand->nutone_dev,
+													NUTONE_CMD_WHITE_TURN_ON);
+		}
+		else
+		{
+			nutone_set_command(nutone_app_hand->nutone_dev,
+													NUTONE_CMD_WHITE_TURN_OFF);
+		}
+		nutone_app_hand->button_white->button->edge_attended = BUTTON_ISR_ATTENDED;
+	}
+
+
+	//VYV test
+	if(nutone_app_hand->button_vyv->button->edge_attended ==
+														BUTTON_ISR_UNATTENDED)
+	{
+		if(nutone_app_hand->button_vyv->button->push_status == BUTTON_PUSH_ON)
+		{
+			nutone_set_command(nutone_app_hand->nutone_dev,
+														NUTONE_CMD_VYV_TURN_ON);
+
+//			nutone_app_hand->button_vyv->button->push_status = BUTTON_PUSH_OFF;
+		}
+		else
+		{
+			nutone_set_command(nutone_app_hand->nutone_dev,
+													NUTONE_CMD_VYV_TURN_OFF);
+
+//			nutone_app_hand->button_vyv->button->push_status = BUTTON_PUSH_ON;
+		}
+		nutone_app_hand->button_vyv->button->edge_attended = BUTTON_ISR_ATTENDED;
+	}
+
+	return 0;
+}
 
 uint8_t nutone_fan_fsm(nutone_app_t *nutone_app_hand)
 {

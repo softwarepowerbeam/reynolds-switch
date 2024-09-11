@@ -906,12 +906,8 @@ int main(void)
 
 			  break;
 		  case MOTION_SWITCH_MODE_3:
-
 			  nutone_app_process(&nutone_app_hand);
 
-//			  led_signal_start(&signal_led);
-//			  signal_led.type = LED_SIGNAL_BLINK;
-			  __NOP();
 			  break;
 		  default:
 			  //do nothing
