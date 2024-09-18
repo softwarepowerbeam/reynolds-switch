@@ -1,10 +1,10 @@
 ../Core/Src/Application/nutone_app.c:24:9:nutone_app_config	1
-../Core/Src/Application/nutone_app.c:57:9:nutone_app_process	1
-../Core/Src/Application/nutone_app.c:71:9:nutone_app_fsm	1
 ../Core/Src/Application/nutone_app.c:99:9:nutone_test	7
 ../Core/Src/Application/nutone_app.c:159:9:nutone_fan_fsm	3
 ../Core/Src/Application/nutone_app.c:179:9:nutone_white_fsm	16
 ../Core/Src/Application/nutone_app.c:298:9:nutone_vyv_fsm	24
-../Core/Src/Application/nutone_app.c:485:6:nutone_app_check_events	4
-../Core/Src/Application/nutone_app.c:531:6:nutone_app_check_button_event	3
-../Core/Src/Application/nutone_app.c:548:6:nutone_app_set_outputs	1
+../Core/Src/Application/nutone_app.c:71:9:nutone_app_fsm	1
+../Core/Src/Application/nutone_app.c:533:6:nutone_app_check_button_event	3
+../Core/Src/Application/nutone_app.c:487:6:nutone_app_check_events	4
+../Core/Src/Application/nutone_app.c:550:6:nutone_app_set_outputs	1
+../Core/Src/Application/nutone_app.c:57:9:nutone_app_process	1

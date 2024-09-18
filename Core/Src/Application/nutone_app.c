@@ -9,7 +9,7 @@
 
 
 
-#define NUTONE_APP_DEBUG_CODE
+//#define NUTONE_APP_DEBUG_CODE
 
 //TODO: Change this to a different, more general, library
 void nutone_app_check_button_event(deadline_timer_t *deadline_events, button_t *button);
@@ -402,7 +402,7 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 			}
 			else
 			{
-				if(nutone_app_hand->signals.motion_uv== MOTION_ISR_UNATTENDED)
+				if(nutone_app_hand->signals.motion_uv == MOTION_ISR_UNATTENDED)
 				{
 					nutone_app_hand->signals.motion_uv = MOTION_ISR_ATTENDED;
 					nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_ABORT;
@@ -427,11 +427,13 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 
 			break;
 		case MOTION_LIGHT_UV_INIT_TIMER:
+			nutone_app_hand->signals.motion_uv = MOTION_ISR_ATTENDED;
 			deadline_timer_set_initial_time(nutone_app_hand->timer_fsm_vyv);
 			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_WAIT_EXPIRATION;
 			break;
 		case MOTION_LIGHT_UV_WAIT_EXPIRATION:
 			deadline_timer_expired_t deadline_expired;
+
 			deadline_timer_check(nutone_app_hand->timer_fsm_vyv,
 															&deadline_expired);
 
@@ -497,7 +499,7 @@ void nutone_app_check_events(nutone_app_t *nutone_app_hand)
 	if(motion_isr_status == PYD1598_MOTION_ISR_UNATTENDED)
 	{
 		nutone_app_hand->signals.motion_light = MOTION_ISR_UNATTENDED;
-		nutone_app_hand->signals.motion_uv = MOTION_ISR_UNATTENDED;
+//		nutone_app_hand->signals.motion_uv = MOTION_ISR_UNATTENDED;
 		nutone_app_hand->motion_hand->motion_sensor->motion_sensed = PYD1598_MOTION_ISR_ATTENDED;
 	}
 

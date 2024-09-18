@@ -1,10 +1,10 @@
-../Core/Src/BoardSupport/led_indicator.c:10:9:led_signal_setup	24	static
-../Core/Src/BoardSupport/led_indicator.c:20:9:led_signal_fsm	24	static
-../Core/Src/BoardSupport/led_indicator.c:48:9:led_signal_type_selector	16	static
-../Core/Src/BoardSupport/led_indicator.c:55:9:led_signal_solid_fsm	24	static
-../Core/Src/BoardSupport/led_indicator.c:96:9:led_signal_togle_fsm	24	static
-../Core/Src/BoardSupport/led_indicator.c:140:9:led_signal_start	16	static
-../Core/Src/BoardSupport/led_indicator.c:146:9:led_signal_stop	16	static
+../Core/Src/BoardSupport/led_indicator.c:10:9:led_signal_setup	16	static
+../Core/Src/BoardSupport/led_indicator.c:48:9:led_signal_type_selector	0	static
+../Core/Src/BoardSupport/led_indicator.c:140:9:led_signal_start	0	static
+../Core/Src/BoardSupport/led_indicator.c:146:9:led_signal_stop	0	static
 ../Core/Src/BoardSupport/led_indicator.c:153:9:led_signal_turn_on	24	static
 ../Core/Src/BoardSupport/led_indicator.c:159:9:led_signal_turn_off	24	static
+../Core/Src/BoardSupport/led_indicator.c:55:9:led_signal_solid_fsm	8	static
 ../Core/Src/BoardSupport/led_indicator.c:166:9:led_signal_toggle	24	static
+../Core/Src/BoardSupport/led_indicator.c:96:9:led_signal_togle_fsm	16	static
+../Core/Src/BoardSupport/led_indicator.c:20:9:led_signal_fsm	8	static

@@ -1,2 +1,2 @@
-../Core/Src/Middleware/output_ctrl.c:17:6:output_fsm_ctrl	64	static
-../Core/Src/Middleware/output_ctrl.c:62:6:output_led_indicator	32	static
+../Core/Src/Middleware/output_ctrl.c:17:6:output_fsm_ctrl	56	static
+../Core/Src/Middleware/output_ctrl.c:62:6:output_led_indicator	24	static
