@@ -57,16 +57,6 @@ uint8_t relay_off_pulse_fsm(relay_t *relay)
 uint8_t relay_ask_off_pulse_fsm(relay_t *relay)
 {
 	uint8_t status = 0;
-//	if(relay->fsm_run_on != RELAY_RUN_TRUE)
-//	{
-//		relay->fsm_run_off = RELAY_RUN_TRUE;
-//		relay->fsm_init = RELAY_INIT_TRUE;
-//		status = 0;
-//	}
-//	else
-//	{
-//		status = 1;
-//	}
 
 	if(relay->fsm_run_off == RELAY_RUN_FALSE)
 	{
@@ -82,16 +72,6 @@ uint8_t relay_ask_off_pulse_fsm(relay_t *relay)
 uint8_t relay_ask_on_pulse_fsm(relay_t *relay)
 {
 	uint8_t status = 0;
-//	if(relay->fsm_run_off != RELAY_RUN_TRUE)
-//	{
-//		relay->fsm_run_on = RELAY_RUN_TRUE;
-//		relay->fsm_init = RELAY_INIT_TRUE;
-//		status = 0;
-//	}
-//	else
-//	{
-//		status = 1;
-//	}
 
 
 	//TODO: (high) Test this change (conditional) intensively
@@ -122,14 +102,11 @@ uint8_t relay_pulse_fsm(relay_t *relay, relay_status_t new_status)
 {
 	//TODO: (high) check if the implementation of this FSM is necessary
 
-	relay_fsm_state_t state = relay->fsm_state;
-//	relay_fsm_init_t fsm_init = relay->fsm_init;
-	uint32_t fsm_pulse_counts = relay->fsm_pulse_counts;
-	uint32_t fsm_pulse_idx = relay->fsm_pulse_idx;
-	relay_fsm_status_t fsm_status = relay->fsm_status;
-	relay_fsm_init_t fsm_init = relay->fsm_init;
-//	relay_status_t relay_status = relay->relay_status;
-//	relay_status_t new_relay_status = relay->new_relay_status;
+	volatile relay_fsm_state_t state = relay->fsm_state;
+	volatile uint32_t fsm_pulse_counts = relay->fsm_pulse_counts;
+	volatile uint32_t fsm_pulse_idx = relay->fsm_pulse_idx;
+	volatile relay_fsm_status_t fsm_status = relay->fsm_status;
+	volatile relay_fsm_init_t fsm_init = relay->fsm_init;
 
 
 	switch(state)

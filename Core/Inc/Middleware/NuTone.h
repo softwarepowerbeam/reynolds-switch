@@ -20,10 +20,10 @@ extern "C" {
 #define NUTONE_VYV_TIMEOUT	10000
 
 
-#define NUTONE_WHITE_LIGHT_ON_PULSE_TIME	100//TODO: (high) find the minimum pulse time
+#define NUTONE_WHITE_LIGHT_ON_PULSE_TIME	2500//TODO: (high) find the minimum pulse time
 #define NUTONE_WHITE_LIGHT_ON_PULSES		3//!<(always use an even number) find the minimum pulse time
 
-#define NUTONE_VYV_ON_PULSE_TIME	100//TODO: (high) find the minimum pulse time
+#define NUTONE_VYV_ON_PULSE_TIME	2500//TODO: (high) find the minimum pulse time
 #define NUTONE_VYV_ON_PULSES		2//!<(always use an even number) find the minimum pulse time
 
 typedef enum nutone_states

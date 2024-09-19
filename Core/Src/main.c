@@ -134,10 +134,10 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
 #define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	255		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define RESIDENTIAL_LAMP1_ON_TIME_MS		10000//1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		40000//1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
 #define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	900 	//!<Waiting period before turning on UV light in milisec
-#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		10000//3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
+#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		30000//3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
 #ifdef TEST_TIMEOUT
 #define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000
 #else	//TEST_TIMEOUT
@@ -565,7 +565,7 @@ int main(void)
   //----------------------------------------------------------------------------
 
   //timers config:
-  timer_buttons.msec = 1;
+  timer_buttons.msec = 100;
   deadline_timer_setup(&deadline_buttons, timer_buttons);
 
   //Hardware assignation:
@@ -687,7 +687,7 @@ int main(void)
 
 	  lights.relay = &light_2;
 	  lights.deadline_timer = &deadline_timer_light_1;
-	  fan.relay = &light_1;
+	  fan.relay = &light_uv;
 	  fan.deadline_timer = &deadline_timer_light_2;
 
 	  nutone_setup(&exhaust_fan, &lights, &fan, &ctrl_timer, &vyv_timeoff);

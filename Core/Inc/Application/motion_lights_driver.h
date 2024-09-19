@@ -46,7 +46,8 @@ typedef enum motion_light_uv_state
 	MOTION_LIGHT_UV_INIT_TIMER,
 	MOTION_LIGHT_UV_WAIT_EXPIRATION,
 	MOTION_LIGHT_UV_TURN_OFF_LIGHT,
-	MOTION_LIGHT_UV_ABORT
+	MOTION_LIGHT_UV_ABORT,
+	MOTION_LIGHT_UV_ABORT_WHITE_BUTTON
 }motion_light_uv_state_t;
 
 typedef enum motion_light_no_motion_state
