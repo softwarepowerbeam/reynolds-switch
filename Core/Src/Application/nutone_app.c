@@ -48,9 +48,12 @@ uint8_t nutone_app_config(nutone_app_t *nutone_app_hand, nutone_t *nutone_dev,
 
 
 	nutone_app_hand->signals.uv_abort = MOTION_ABORT_FALSE;
+	nutone_app_hand->signals.uv_abort_white_button = MOTION_ABORT_FALSE;
 	nutone_app_hand->signals.wait = MOTION_UV_WAIT_FALSE;
 	nutone_app_hand->signals.motion_uv = MOTION_ISR_ATTENDED;
 	nutone_app_hand->signals.motion_light = MOTION_ISR_ATTENDED;
+	nutone_app_hand->signals.vyv_fsm_status = MOTION_LIGHT_FSM_STATUS_READY;
+	nutone_app_hand->signals.white_fsm_status = MOTION_LIGHT_FSM_STATUS_READY;
 	return 0;
 }
 
@@ -187,7 +190,7 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 	button_check_isr_request(*nutone_app_hand->button_white->button,
 													&button_isr_status, &edge);
 
-
+#ifdef WHILE_TEST_SELECTION_IN_IDDLE
 	if( (button_isr_status == BUTTON_ISR_UNATTENDED) ||
 			(nutone_app_hand->signals.motion_light == MOTION_ISR_UNATTENDED))
 	{
@@ -215,14 +218,43 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 		}
 
 	}
+#endif //WHILE_TEST_SELECTION_IN_IDDLE
 
+#ifndef WHILE_TEST_SELECTION_IN_IDDLE
+	if(button_isr_status == BUTTON_ISR_UNATTENDED)
+	{
+		if(edge == BUTTON_EDGE_NEGATIVE)
+		{
+			nutone_app_hand->fsm_state_white = MOTION_LIGHT_TURN_OFF_LIGHT;
+			nutone_app_hand->button_white->button->edge_attended = PYD1598_WAKEUP_ISR_ATTENDED;
+		}
+	}
+#endif //WHILE_TEST_SELECTION_IN_IDDLE
 
 
 	switch(nutone_app_hand->fsm_state_white)
 	{
 		case MOTION_LIGHT_IDLE:
 
+#ifndef WHILE_TEST_SELECTION_IN_IDDLE
+			if(button_isr_status == BUTTON_ISR_UNATTENDED)
+			{
+				if(edge == BUTTON_EDGE_POSITIVE)
+				{
+					nutone_app_hand->fsm_state_white = MOTION_LIGHT_CHECK_BUTTON;
+					nutone_app_hand->button_white->button->edge_attended = PYD1598_WAKEUP_ISR_ATTENDED;
+				}
+			}
+
+			if(nutone_app_hand->signals.motion_light == MOTION_ISR_UNATTENDED)
+			{
+				nutone_app_hand->fsm_state_white = MOTION_LIGHT_CHECK_BUTTON;
+				nutone_app_hand->signals.motion_light  = MOTION_ISR_ATTENDED;
+			}
+
+#else //WHILE_TEST_SELECTION_IN_IDDLE
 			__NOP();//Do nothing
+#endif //WHILE_TEST_SELECTION_IN_IDDLE
 
 			break;
 		case MOTION_LIGHT_CHECK_BUTTON:
@@ -233,6 +265,7 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 
 			if(button_status == BUTTON_ON)
 			{
+				nutone_app_hand->signals.white_fsm_status = MOTION_LIGHT_FSM_STATUS_BUSY;
 				nutone_app_hand->fsm_state_white  = MOTION_LIGHT_TURN_ON_LIGHT;
 				nutone_app_hand->signals.motion_light = MOTION_ISR_ATTENDED;
 			}
@@ -245,10 +278,10 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 
 			break;
 		case MOTION_LIGHT_TURN_ON_LIGHT:
-
 			//this is done in another fsm
 			nutone_set_command(nutone_app_hand->nutone_dev,
 													NUTONE_CMD_WHITE_TURN_ON);
+
 			nutone_app_hand->fsm_state_white = MOTION_LIGHT_INIT_TIMER;
 
 			break;
@@ -260,10 +293,8 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 			break;
 		case MOTION_LIGHT_WAIT_EXPIRATION:
 
-
-
 			deadline_timer_check(nutone_app_hand->timer_fsm_white,
-												&deadline_expired);
+														&deadline_expired);
 
 			if(deadline_expired == TIMER_EXPIRED_TRUE)
 			{
@@ -275,14 +306,18 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 				nutone_app_hand->signals.motion_light  = MOTION_ISR_ATTENDED;
 				nutone_app_hand->fsm_state_white = MOTION_LIGHT_INIT_TIMER;
 			}
+
 			break;
 		case MOTION_LIGHT_TURN_OFF_LIGHT:
+
+			nutone_app_hand->signals.white_fsm_status = MOTION_LIGHT_FSM_STATUS_READY;
 
 			deadline_timer_force_expiration(nutone_app_hand->timer_fsm_white);
 			//this is done in another fsm
 			nutone_set_command(nutone_app_hand->nutone_dev,
 													NUTONE_CMD_WHITE_TURN_OFF);
 			nutone_app_hand->fsm_state_white = MOTION_LIGHT_IDLE;
+
 			break;
 		default:
 			nutone_app_hand->fsm_state_white = MOTION_LIGHT_IDLE;
@@ -306,27 +341,26 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 	deadline_timer_expired_t deadline_safe_expired;
 	deadline_timer_expired_t deadline_timeout_expired;
 
-	button_check_isr_request(*nutone_app_hand->button_vyv->button, &button_isr_status, &edge);
-	pyd1598_check_isr_request(*nutone_app_hand->motion_hand->motion_sensor, &motion_isr_status);
+//	button_check_isr_request(*nutone_app_hand->button_vyv->button, &button_isr_status, &edge);
+//	pyd1598_check_isr_request(*nutone_app_hand->motion_hand->motion_sensor, &motion_isr_status);
+
+	pyd1598_sensor_t *sensor = nutone_app_hand->motion_hand->motion_sensor;
+	pyd1598_check_isr_request(*sensor, &motion_isr_status);
+
+	button_t *button = nutone_app_hand->button_vyv->button;
+	button_check_isr_request(*button, &button_isr_status, &edge);
 
 
-	if(button_isr_status == BUTTON_ISR_UNATTENDED)
+
+	if(	nutone_app_hand->nutone_dev->current_light_mode ==
+														NUTONE_LIGHT_MODE_WHITE)
 	{
-
-		//Change if abort is not required with a second push
-		if(nutone_app_hand->button_vyv->button->push_status == BUTTON_PUSH_ON)
-		{
-			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER;
-		}
-		else
-		{
-			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_ABORT;
-		}
-
-		button_isr_status = PYD1598_WAKEUP_ISR_ATTENDED;
+		nutone_app_hand->signals.wait = MOTION_UV_WAIT_TRUE;
 	}
-	nutone_app_hand->button_vyv->button->edge_attended = button_isr_status;
-
+	else
+	{
+		nutone_app_hand->signals.wait = MOTION_UV_WAIT_FALSE;
+	}
 
 	if(nutone_app_hand->signals.uv_abort == MOTION_ABORT_TRUE)
 	{
@@ -340,22 +374,52 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 		nutone_app_hand->signals.uv_abort_white_button = MOTION_ABORT_FALSE;
 	}
 
-	if(	nutone_app_hand->nutone_dev->current_light_mode ==
-														NUTONE_LIGHT_MODE_WHITE)
+
+#ifdef WHILE_TEST_SELECTION_IN_IDDLE
+	if(button_isr_status == BUTTON_ISR_UNATTENDED)
 	{
-		nutone_app_hand->signals.wait = MOTION_UV_WAIT_TRUE;
-	}
-	else
-	{
-		nutone_app_hand->signals.wait = MOTION_UV_WAIT_FALSE;
+
+		//Change if abort is not required with a second push
+		if(nutone_app_hand->button_vyv->button->push_status == BUTTON_PUSH_ON)
+		{
+			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER;
+			nutone_app_hand->button_vyv->button->edge_attended = PYD1598_WAKEUP_ISR_ATTENDED;
+		}
+		else
+		{
+			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_ABORT;
+			nutone_app_hand->button_vyv->button->edge_attended = PYD1598_WAKEUP_ISR_ATTENDED;
+		}
 	}
 
+#endif //WHILE_TEST_SELECTION_IN_IDDLE
+
+
+#ifndef WHILE_TEST_SELECTION_IN_IDDLE
+	if(button_isr_status == BUTTON_ISR_UNATTENDED)
+	{
+		if(nutone_app_hand->button_vyv->button->push_status == BUTTON_PUSH_OFF)
+		{
+			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_ABORT;
+			nutone_app_hand->button_vyv->button->edge_attended = PYD1598_WAKEUP_ISR_ATTENDED;
+		}
+	}
+#endif //WHILE_TEST_SELECTION_IN_IDDLE
 
 
 	switch(nutone_app_hand->fsm_state_uyu)
 	{
 		case MOTION_LIGHT_UV_IDLE:
-
+#ifndef WHILE_TEST_SELECTION_IN_IDDLE
+			if(button_isr_status == BUTTON_ISR_UNATTENDED)
+			{
+				if(nutone_app_hand->button_vyv->button->push_status == BUTTON_PUSH_ON)
+				{
+					nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER;
+					nutone_app_hand->button_vyv->button->edge_attended = PYD1598_WAKEUP_ISR_ATTENDED;
+				}
+			}
+#endif //WHILE_TEST_SELECTION_IN_IDDLE
 
 			if(nutone_app_hand->signals.motion_uv  == MOTION_ISR_UNATTENDED)
 			{
@@ -366,6 +430,10 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 
 			break;
 		case MOTION_LIGHT_UV_INIT_TIMEOUT_TIMER:
+
+			//Block the FSM from a new signal
+			nutone_app_hand->signals.vyv_fsm_status = MOTION_LIGHT_FSM_STATUS_BUSY;
+
 			//Initialize deadline_timeout
 			deadline_timer_set_initial_time(nutone_app_hand->timer_fsm_vyv_timeout);
 
@@ -402,34 +470,41 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 
 		case MOTION_LIGHT_UV_WAIT_SAFE_TIMER:
 
-			deadline_timer_check(nutone_app_hand->timer_fsm_vyv_safe,
-														&deadline_safe_expired);
-
-			if(deadline_safe_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
+			if(nutone_app_hand->signals.wait == MOTION_UV_WAIT_TRUE)
 			{
-				nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_TURN_ON_LIGHT;
+				nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
 			}
 			else
 			{
-				if(nutone_app_hand->signals.motion_uv == MOTION_ISR_UNATTENDED)
+				deadline_timer_check(nutone_app_hand->timer_fsm_vyv_safe,
+															&deadline_safe_expired);
+
+				if(deadline_safe_expired == TIMER_EXPIRED_TRUE)//This should be a long timer
 				{
-					nutone_app_hand->signals.motion_uv = MOTION_ISR_ATTENDED;
-					nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_ABORT;
+					nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_TURN_ON_LIGHT;
 				}
 				else
 				{
-					if(nutone_app_hand->signals.wait == MOTION_UV_WAIT_TRUE)
+					if(nutone_app_hand->signals.motion_uv == MOTION_ISR_UNATTENDED)
 					{
-						nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+						nutone_app_hand->signals.motion_uv = MOTION_ISR_ATTENDED;
+						nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_ABORT;
 					}
-				}
+//					else
+//					{
+	//					if(nutone_app_hand->signals.wait == MOTION_UV_WAIT_TRUE)
+	//					{
+	//						nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_SAFE_TIMER;
+	//					}
+//					}
 
+
+				}
 			}
 
 			break;
 		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
 			//this is done in another fsm
-//			relay_ask_on_pulse_fsm(light_uv);
 			nutone_set_command(nutone_app_hand->nutone_dev,
 														NUTONE_CMD_VYV_TURN_ON);
 			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_INIT_TIMER;
@@ -474,9 +549,12 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 			nutone_app_hand->button_vyv->button->push_status = BUTTON_PUSH_OFF;
 
 			//Send signal to turn off UV lamp
-
 			nutone_set_command(nutone_app_hand->nutone_dev,
 														NUTONE_CMD_VYV_TURN_OFF);
+
+			//Free the FSM for a new signal
+			nutone_app_hand->signals.vyv_fsm_status = MOTION_LIGHT_FSM_STATUS_READY;
+
 			//Send signal stop LED indicator
 			led_signal_stop(nutone_app_hand->led_signal_hand->led_signal);
 			nutone_app_hand->fsm_state_uyu = MOTION_LIGHT_UV_IDLE;
@@ -488,6 +566,9 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 			deadline_timer_force_expiration(nutone_app_hand->timer_fsm_vyv_timeout);
 			deadline_timer_force_expiration(nutone_app_hand->timer_fsm_vyv_safe);
 			nutone_app_hand->button_vyv->button->push_status = BUTTON_PUSH_OFF;
+
+			//Free the FSM for a new signal
+			nutone_app_hand->signals.vyv_fsm_status = MOTION_LIGHT_FSM_STATUS_READY;
 
 			//Send signal stop LED indicator
 			led_signal_stop(nutone_app_hand->led_signal_hand->led_signal);
@@ -513,15 +594,15 @@ void nutone_app_check_events(nutone_app_t *nutone_app_hand)
 	button_edge_t check_edge;
 
 
-//	pyd1598_read_wakeup_signal(nutone_app_hand->motion_hand->motion_sensor,
-//															&motion_isr_status);
-//
-//	if(motion_isr_status == PYD1598_MOTION_ISR_UNATTENDED)
-//	{
-//		nutone_app_hand->signals.motion_light = MOTION_ISR_UNATTENDED;
-//		nutone_app_hand->signals.motion_uv = MOTION_ISR_UNATTENDED;
-//		nutone_app_hand->motion_hand->motion_sensor->motion_sensed = PYD1598_MOTION_ISR_ATTENDED;
-//	}
+	pyd1598_read_wakeup_signal(nutone_app_hand->motion_hand->motion_sensor,
+															&motion_isr_status);
+
+	if(motion_isr_status == PYD1598_MOTION_ISR_UNATTENDED)
+	{
+		nutone_app_hand->signals.motion_light = MOTION_ISR_UNATTENDED;
+		nutone_app_hand->signals.motion_uv = MOTION_ISR_UNATTENDED;
+		nutone_app_hand->motion_hand->motion_sensor->motion_sensed = PYD1598_MOTION_ISR_ATTENDED;
+	}
 
 	nutone_app_check_button_event(nutone_app_hand->button_white->btn_timer,
 								nutone_app_hand->button_white->button);
@@ -547,9 +628,13 @@ void nutone_app_check_events(nutone_app_t *nutone_app_hand)
 
 	}
 
+	button_t *button = nutone_app_hand->button_white->button;
 
-	button_check_isr_request(*nutone_app_hand->button_white->button,
-													&button_isr_stat, &check_edge);
+	button_check_isr_request(*button, &button_isr_stat, &check_edge);
+
+
+//	button_check_isr_request(*nutone_app_hand->button_white->button,
+//													&button_isr_stat, &check_edge);
 
 	if(button_isr_stat == BUTTON_ISR_UNATTENDED)
 	{

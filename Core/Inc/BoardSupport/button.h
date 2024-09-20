@@ -50,6 +50,12 @@ typedef enum button_debounce_lock
 	BUTTON_DEBOUNCE_LOCK_OFF,
 }button_debounce_lock_t;
 
+typedef enum button_type
+{
+	BUTTON_TYPE_PUSH = 0,
+	BUTTON_TYPE_TOGGLE,
+}button_type_t;
+
 typedef enum button_isr_status
 {
 	BUTTON_ISR_ATTENDED = 0,
@@ -57,6 +63,12 @@ typedef enum button_isr_status
 	BUTTON_ISR_UNATTENDED
 
 }button_isr_status_t;
+
+typedef enum button_logic
+{
+	BUTTON_LOGIC_NEGATIVE,
+	BUTTON_LOGIC_POSITIVE
+}button_logic_t;
 
 typedef struct button_gpio
 {
@@ -68,9 +80,12 @@ typedef struct button
 {
 	button_status_t status;
 	button_edge_t edge;
+	button_logic_t logic;
 	button_push_status_t push_status;
 	button_isr_status_t edge_attended;
 	button_gpio_t hardware_input;
+	button_type_t type;
+
 
 	button_debounce_state_fsm_t debounce_fsm_state;
 	button_debounce_lock_t debounce_lock;
@@ -96,11 +111,13 @@ uint8_t button_debounce_fsm(button_t *button);
 
 //basic functions
 uint8_t button_setup(button_t *button, button_gpio_t hardware_input);
-uint8_t button_get_state(button_t *button);
+uint8_t button_set_logic(button_t *button, button_logic_t button_logic);
+
+
+//ISR functions
 uint8_t button_positive_edge_detected(button_t *button);
 uint8_t button_negative_edge_detected(button_t *button);
 uint8_t button_clear_edge_detected(button_t *button);
-
 uint8_t button_check_isr_request(button_t button,
 									button_isr_status_t *button_isr_status,
 									button_edge_t *edge);
@@ -108,6 +125,11 @@ uint8_t button_set_isr_attended(button_t *button);
 
 //Hardware Layer
 uint8_t button_get_status(button_t *button, button_status_t *status);
+uint8_t button_get_state(button_t *button);
+
+
+
+
 #ifdef __cplusplus
 }
 #endif

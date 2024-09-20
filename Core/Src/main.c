@@ -131,13 +131,13 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
 #endif	//TEST_TIMEOUT
 
 //Residential mode:
-#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	255		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	50		//!< Range 0-255 (0 more sensitive -255 less sensitive)
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
-#define RESIDENTIAL_LAMP1_ON_TIME_MS		40000//1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
+#define RESIDENTIAL_LAMP1_ON_TIME_MS		10000//1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
 #define RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS	900 	//!<Waiting period before turning on UV light in milisec
-#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		30000//3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
+#define RESIDENTIAL_LAMP_UV_ON_TIME_MS		10000//3 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
 #ifdef TEST_TIMEOUT
 #define RESIDENTIAL_LAMP_UV_TIMEOUT_MS		30000
 #else	//TEST_TIMEOUT

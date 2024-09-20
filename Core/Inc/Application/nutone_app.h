@@ -68,6 +68,8 @@ typedef struct nutone_app_signals
 	motion_light_uv_abort_t uv_abort;
 	motion_light_uv_abort_t uv_abort_white_button;
 	motion_uv_wait_signal_t wait;
+	motion_light_fsm_status_t white_fsm_status;
+	motion_light_fsm_status_t vyv_fsm_status;
 }nutone_app_signals_t;
 
 typedef struct nutone_app

@@ -63,6 +63,8 @@ uint8_t deadline_timer_check(deadline_timer_t *deadline_timer,
 	uint8_t status = 0;
 	//TODO: (High) Change if seconds are required
 
+	*deadline_expired = TIMER_EXPIRED_FALSE;
+
 	deadline_timer_expired_t deadline_expired_msec = TIMER_EXPIRED_FALSE;
 
 	deadline_timer_compare_check(deadline_timer->time_current.msec,

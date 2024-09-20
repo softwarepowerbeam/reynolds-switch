@@ -33,6 +33,12 @@ typedef enum motion_light_state
 	MOTION_LIGHT_TURN_OFF_LIGHT
 }motion_light_state_t;
 
+typedef enum motion_light_fsm_status
+{
+	MOTION_LIGHT_FSM_STATUS_BUSY = 0,
+	MOTION_LIGHT_FSM_STATUS_READY
+}motion_light_fsm_status_t;
+
 
 typedef enum motion_light_uv_state
 {

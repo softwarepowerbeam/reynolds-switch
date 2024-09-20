@@ -1,8 +1,8 @@
 ../Core/Src/main.c:1225:6:sense_button_event	24	static
-../Core/Src/main.c:1102:6:events_detection_uv_waits	56	static
-../Core/Src/main.c:1251:6:motion_light_control_fsm	48	static,ignoring_inline_asm
+../Core/Src/main.c:1102:6:events_detection_uv_waits	64	static
+../Core/Src/main.c:1251:6:motion_light_control_fsm	64	static,ignoring_inline_asm
 ../Core/Src/main.c:1520:6:motion_uv_ctrl_wait_fsm	128	static,ignoring_inline_asm
-../Core/Src/main.c:1756:6:direct_light_control_fsm	48	static,ignoring_inline_asm
+../Core/Src/main.c:1756:6:direct_light_control_fsm	64	static,ignoring_inline_asm
 ../Core/Src/main.c:1836:6:HAL_TIM_PeriodElapsedCallback	8	static
 ../Core/Src/main.c:1886:6:HAL_GPIO_EXTI_Rising_Callback	8	static,ignoring_inline_asm
 ../Core/Src/main.c:1929:6:HAL_GPIO_EXTI_Falling_Callback	8	static

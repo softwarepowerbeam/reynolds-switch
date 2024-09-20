@@ -8,6 +8,7 @@
 
 #include "BoardSupport/button.h"
 
+const button_logic_t INITIAL_LOGIC = BUTTON_LOGIC_POSITIVE;
 
 uint8_t button_setup(button_t *button, button_gpio_t hardware_input)
 {
@@ -21,9 +22,19 @@ uint8_t button_setup(button_t *button, button_gpio_t hardware_input)
 	button->debounce_count_limit = 1;
 	button->push_status = BUTTON_PUSH_OFF;//For push button only
 
+	button->logic = BUTTON_LOGIC_POSITIVE;
+	button->type = BUTTON_TYPE_TOGGLE;
+
 	return 0;
 
 }
+
+uint8_t button_set_logic(button_t *button, button_logic_t button_logic)
+{
+	button->logic = button_logic;
+	return 0;
+}
+
 
 
 uint8_t button_debounce_fsm(button_t *button)
@@ -113,7 +124,14 @@ uint8_t button_positive_edge_detected(button_t *button)
 
 	if(button->debounce_lock == BUTTON_DEBOUNCE_LOCK_OFF)
 	{
-		button->edge = BUTTON_EDGE_POSITIVE;
+		if(button->logic == BUTTON_LOGIC_POSITIVE)
+		{
+			button->edge = BUTTON_EDGE_POSITIVE;
+		}
+		else
+		{
+			button->edge = BUTTON_EDGE_NEGATIVE;
+		}
 		button->debounce_lock = BUTTON_DEBOUNCE_LOCK_ON;
 	}
 	return 0;
@@ -123,7 +141,14 @@ uint8_t button_negative_edge_detected(button_t *button)
 {
 	if(button->debounce_lock == BUTTON_DEBOUNCE_LOCK_OFF)
 	{
-		button->edge = BUTTON_EDGE_NEGATIVE;
+		if(button->logic == BUTTON_LOGIC_POSITIVE)
+		{
+			button->edge = BUTTON_EDGE_NEGATIVE;
+		}
+		else
+		{
+			button->edge = BUTTON_EDGE_POSITIVE;
+		}
 		button->debounce_lock = BUTTON_DEBOUNCE_LOCK_ON;
 	}
 	return 0;
@@ -145,19 +170,43 @@ uint8_t button_get_status(button_t *button, button_status_t *status)
 	GPIO_PinState pin_value;
 	pin_value = HAL_GPIO_ReadPin(button->hardware_input.port,
 												button->hardware_input.pin);
-	if(pin_value == GPIO_PIN_SET)
+
+
+	if(button->logic == BUTTON_LOGIC_POSITIVE)
 	{
-		button->status = BUTTON_ON;
+		if(pin_value == GPIO_PIN_SET)
+		{
+			button->status = BUTTON_ON;
+		}
+		else
+		{
+			button->status = BUTTON_OFF;
+		}
 	}
 	else
 	{
-		button->status = BUTTON_OFF;
+		if(pin_value == GPIO_PIN_SET)
+		{
+			button->status = BUTTON_OFF;
+		}
+		else
+		{
+			button->status = BUTTON_ON;
+		}
 	}
+
+//
+//	if(button->type == BUTTON_TYPE_TOGGLE)
+//	{
+//		__NOPE();
+//	}
 
 	*status = button->status;
 
 	return 0;
 }
+
+
 
 uint8_t button_set_isr_attended(button_t *button)
 {
