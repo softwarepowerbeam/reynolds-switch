@@ -6,8 +6,8 @@
 ../Core/Src/BoardSupport/relay_l114fl_drv8210.c:179:9:relay_off	8	static
 ../Core/Src/BoardSupport/relay_l114fl_drv8210.c:195:9:relay_deenergize	8	static
 ../Core/Src/BoardSupport/relay_l114fl_drv8210.c:11:9:relay_setup	24	static
-../Core/Src/BoardSupport/relay_l114fl_drv8210.c:101:9:relay_pulse_fsm	24	static
-../Core/Src/BoardSupport/relay_l114fl_drv8210.c:25:9:relay_on_pulse_fsm	8	static
-../Core/Src/BoardSupport/relay_l114fl_drv8210.c:40:9:relay_off_pulse_fsm	8	static
+../Core/Src/BoardSupport/relay_l114fl_drv8210.c:101:9:relay_pulse_fsm	48	static
+../Core/Src/BoardSupport/relay_l114fl_drv8210.c:25:9:relay_on_pulse_fsm	16	static
+../Core/Src/BoardSupport/relay_l114fl_drv8210.c:40:9:relay_off_pulse_fsm	16	static
 ../Core/Src/BoardSupport/relay_l114fl_drv8210.c:210:9:relay_get_status	0	static
-../Core/Src/BoardSupport/relay_l114fl_drv8210.c:217:9:relay_get_power_status	0	static
+../Core/Src/BoardSupport/relay_l114fl_drv8210.c:217:9:relay_get_power_status	8	static

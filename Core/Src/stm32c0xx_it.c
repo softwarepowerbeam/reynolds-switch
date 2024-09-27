@@ -88,10 +88,21 @@ void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
 
+	NVIC_ClearPendingIRQ(TIM17_IRQn);
+	NVIC_ClearPendingIRQ(EXTI4_15_IRQn);
+	NVIC_ClearPendingIRQ(EXTI2_3_IRQn);
+	NVIC_SystemReset();
+
+
+	//from:
+//#ifdef DEBUG
+// 	__BKPT(0);
+//#endif
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }

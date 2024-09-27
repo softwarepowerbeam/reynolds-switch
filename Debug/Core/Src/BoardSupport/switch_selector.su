@@ -1,4 +1,4 @@
 ../Core/Src/BoardSupport/switch_selector.c:56:9:switch_selector_deinit	8	static
-../Core/Src/BoardSupport/switch_selector.c:77:9:switch_selector_read_bit	24	static
+../Core/Src/BoardSupport/switch_selector.c:77:9:switch_selector_read_bit	32	static
 ../Core/Src/BoardSupport/switch_selector.c:11:9:switch_selector_setup	32	static
 ../Core/Src/BoardSupport/switch_selector.c:63:9:switch_selector_read	24	static

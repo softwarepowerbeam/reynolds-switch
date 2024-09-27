@@ -17,7 +17,7 @@
 void output_fsm_ctrl(relay_t *actuator, deadline_timer_t *deadline_timer)
 {
 	relay_fsm_init_t init = RELAY_INIT_FALSE;
-	deadline_timer_expired_t expired;
+	volatile deadline_timer_expired_t expired;
 
 	if(actuator->fsm_run_on == RELAY_RUN_TRUE)
 	{

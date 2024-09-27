@@ -49,6 +49,8 @@ void nutone_setup(nutone_t *exhaust_fan, nutone_relay_handler_t *lights,
 	exhaust_fan->cmd_state = NUTONE_CMD_STE_READY;
 	exhaust_fan->command = NUTONE_CMD_NONE;
 
+	exhaust_fan->fsm_state = NUTONE_STE_IDLE;
+
 
 }
 
@@ -377,6 +379,9 @@ uint8_t nutone_fsm(nutone_t *exhaust_fan)
 				}
 			}
 			break;
+		default:
+			exhaust_fan->fsm_state = NUTONE_STE_IDLE;
+			break;
 	}
 
 
@@ -388,6 +393,13 @@ uint8_t nutone_fsm(nutone_t *exhaust_fan)
 uint8_t nutone_set_command(nutone_t *exhaust_fan, nutone_command_e command)
 {
 	exhaust_fan->command = command;
+	return 0;
+}
+
+uint8_t nutone_get_cmd_status(nutone_t exhaust_fan,
+												nutone_cmd_state_t *cmd_status)
+{
+	*cmd_status = exhaust_fan.cmd_state;
 	return 0;
 }
 

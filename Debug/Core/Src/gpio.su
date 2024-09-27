@@ -1,4 +1,4 @@
 ../Core/Src/gpio.c:26:6:HAL_DIRECT_LINK_conf_as_input	40	static
 ../Core/Src/gpio.c:45:6:HAL_DIRECT_LINK_conf_as_interrupt_input	40	static
 ../Core/Src/gpio.c:66:6:HAL_DIRECT_LINK_conf_as_output	40	static
-../Core/Src/gpio.c:106:6:MX_GPIO_Init	72	static
+../Core/Src/gpio.c:106:6:MX_GPIO_Init	64	static

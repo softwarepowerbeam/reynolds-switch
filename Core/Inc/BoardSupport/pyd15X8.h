@@ -319,7 +319,7 @@ uint8_t pyd1598_check_isr_request(pyd1598_sensor_t sensor,
 								pyd1598_motion_isr_status_t *wakeup_isr_status);
 
 uint8_t pyd1598_read_wakeup_signal(pyd1598_sensor_t *sensor,
-								pyd1598_motion_isr_status_t *motion_isr_status);
+					volatile pyd1598_motion_isr_status_t *motion_isr_status);
 
 
 

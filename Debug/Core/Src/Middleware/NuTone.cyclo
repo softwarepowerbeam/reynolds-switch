@@ -1,6 +1,7 @@
 ../Core/Src/Middleware/NuTone.c:19:6:nutone_setup	1
-../Core/Src/Middleware/NuTone.c:388:9:nutone_set_command	1
-../Core/Src/Middleware/NuTone.c:397:9:nutone_select_state	9
-../Core/Src/Middleware/NuTone.c:57:9:nutone_fsm	45
-../Core/Src/Middleware/NuTone.c:464:9:nutone_invert_light_mode	3
-../Core/Src/Middleware/NuTone.c:481:9:nutone_set_mode	1
+../Core/Src/Middleware/NuTone.c:393:9:nutone_set_command	1
+../Core/Src/Middleware/NuTone.c:399:9:nutone_get_cmd_status	1
+../Core/Src/Middleware/NuTone.c:409:9:nutone_select_state	7
+../Core/Src/Middleware/NuTone.c:59:9:nutone_fsm	45
+../Core/Src/Middleware/NuTone.c:476:9:nutone_invert_light_mode	3
+../Core/Src/Middleware/NuTone.c:493:9:nutone_set_mode	1

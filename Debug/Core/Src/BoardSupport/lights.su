@@ -6,8 +6,8 @@
 ../Core/Src/BoardSupport/lights.c:199:9:light_off	8	static
 ../Core/Src/BoardSupport/lights.c:215:9:light_deenergize	8	static
 ../Core/Src/BoardSupport/lights.c:11:9:light_setup	24	static
-../Core/Src/BoardSupport/lights.c:114:9:light_pulse_fsm	24	static
-../Core/Src/BoardSupport/lights.c:25:9:light_on_pulse_fsm	8	static
-../Core/Src/BoardSupport/lights.c:40:9:light_off_pulse_fsm	8	static
+../Core/Src/BoardSupport/lights.c:114:9:light_pulse_fsm	32	static
+../Core/Src/BoardSupport/lights.c:25:9:light_on_pulse_fsm	16	static
+../Core/Src/BoardSupport/lights.c:40:9:light_off_pulse_fsm	16	static
 ../Core/Src/BoardSupport/lights.c:230:9:light_get_status	0	static
-../Core/Src/BoardSupport/lights.c:237:9:light_get_power_status	0	static
+../Core/Src/BoardSupport/lights.c:237:9:light_get_power_status	8	static

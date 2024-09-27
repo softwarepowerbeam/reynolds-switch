@@ -91,6 +91,7 @@ void pyd1598_direct_link_setup(pyd1598_direct_link_t *direct_link,
 	direct_link->datagram_bufffer = 0;
 	direct_link->start_fsm = 0;
 	direct_link->time_update_idx = 0;
+	direct_link->readout_state = PYD1598_READOUT_IDLE;
 
 
 //	if(direct_link->config.op_mode == PYD1598_FORCE_READOUT)
@@ -114,15 +115,15 @@ void pyd1598_dl_readout_fsm(pyd1598_direct_link_t *direct_link,
 {
 
 	//Information variables
-	uint64_t datagram_bufffer = direct_link->datagram_bufffer;
+	volatile uint64_t datagram_bufffer = direct_link->datagram_bufffer;
 
 	//FSM variables
-	pyd1598_wakeup_conf_t wakeup_mode = direct_link->wakeup_mode;
-	pyd1598_readout_status_t readout_status = direct_link->readout_status;
-	pyd1598_readout_state_t readout_state = direct_link->readout_state;
-	uint8_t time_update_idx = direct_link->time_update_idx;
-	bool start_fsm = direct_link->start_fsm;
-	pyd1598_wakeup_isr_status_t wakeup_isr_status = direct_link->wakeup_isr_status;
+	volatile pyd1598_wakeup_conf_t wakeup_mode = direct_link->wakeup_mode;
+	volatile pyd1598_readout_status_t readout_status = direct_link->readout_status;
+	volatile pyd1598_readout_state_t readout_state = direct_link->readout_state;
+	volatile uint8_t time_update_idx = direct_link->time_update_idx;
+	volatile bool start_fsm = direct_link->start_fsm;
+	volatile pyd1598_wakeup_isr_status_t wakeup_isr_status = direct_link->wakeup_isr_status;
 
 	//Local variable
 	uint32_t idx = 0;
@@ -314,12 +315,12 @@ void pyd1598_serin_send_datagram_fsm(pyd1598_serin_t *serin,
 	//Declaring the FSM variables and define them to protect the serin variables
 	//from any outside change
 
-	pyd1598_serin_state_t state = serin->state;//Define if it requires to be static
-	uint32_t data_idx = serin->data_idx;
-	bool start_fsm = serin->start_fsm;
-	pyd1598_config_t config = serin->config;
-	uint32_t mask = serin->mask;
-	uint32_t conf_datagram = serin->conf_datagram;
+	volatile pyd1598_serin_state_t state = serin->state;//Define if it requires to be static
+	volatile uint32_t data_idx = serin->data_idx;
+	volatile bool start_fsm = serin->start_fsm;
+	volatile pyd1598_config_t config = serin->config;
+	volatile uint32_t mask = serin->mask;
+	volatile uint32_t conf_datagram = serin->conf_datagram;
 
 	pyd1598_hardware_interface_t output = serin->hardware_inteface;
 
@@ -429,7 +430,7 @@ uint8_t pyd1598_check_isr_request(pyd1598_sensor_t sensor,
 
 //Use this in the main loop
 uint8_t pyd1598_read_wakeup_signal(pyd1598_sensor_t *sensor,
-								pyd1598_motion_isr_status_t *motion_isr_status)
+								volatile pyd1598_motion_isr_status_t *motion_isr_status)
 {
 
 	if( sensor->direct_link.wakeup_isr_status == PYD1598_WAKEUP_ISR_UNATTENDED)
@@ -437,6 +438,10 @@ uint8_t pyd1598_read_wakeup_signal(pyd1598_sensor_t *sensor,
 		sensor->direct_link.wakeup_isr_status = PYD1598_WAKEUP_ISR_ATTENDED;
 		*motion_isr_status = PYD1598_MOTION_ISR_UNATTENDED;
 		sensor->motion_sensed = PYD1598_MOTION_ISR_UNATTENDED;
+	}
+	else
+	{
+		sensor->motion_sensed = PYD1598_MOTION_ISR_ATTENDED;
 	}
 
 	return 0;

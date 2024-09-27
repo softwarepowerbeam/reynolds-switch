@@ -138,6 +138,10 @@ uint8_t nutone_set_mode(nutone_t *exhaust_fan, nutone_mode_e op_mode);
 
 uint8_t nutone_set_command(nutone_t *exhaust_fan, nutone_command_e command);
 
+
+uint8_t nutone_get_cmd_status(nutone_t exhaust_fan,
+											nutone_cmd_state_t *cmd_status);
+
 #ifdef __cplusplus
 }
 #endif

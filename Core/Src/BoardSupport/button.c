@@ -22,7 +22,8 @@ uint8_t button_setup(button_t *button, button_gpio_t hardware_input)
 	button->debounce_count_limit = 1;
 	button->push_status = BUTTON_PUSH_OFF;//For push button only
 
-	button->logic = BUTTON_LOGIC_POSITIVE;
+//	button->logic = BUTTON_LOGIC_POSITIVE;
+	button->logic = BUTTON_LOGIC_NEGATIVE;
 	button->type = BUTTON_TYPE_TOGGLE;
 
 	return 0;
@@ -44,6 +45,7 @@ uint8_t button_debounce_fsm(button_t *button)
 	uint32_t debounce_idx = button->debounce_idx;
 	uint32_t debounce_count_limit = button->debounce_count_limit;
 	button_status_t button_status;
+
 
 	switch(debounce_fsm_state)
 	{
@@ -91,11 +93,6 @@ uint8_t button_debounce_fsm(button_t *button)
 
 	return 0;
 }
-
-
-
-
-
 
 uint8_t button_get_state(button_t *button)
 {
