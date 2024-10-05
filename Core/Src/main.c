@@ -73,9 +73,16 @@
 
 //#define TEST_TIMEOUT
 
-#define FACTORY_PARAMETERS
+/******************************************************************************/
+/******************************************************************************/
+/***************************CONFIG SECTION 1***********************************/
+/******************************************************************************/
+/******************************************************************************/
+#define DEBUG_MEMORY//<<----This is inverted, if you want to enable all the modes available UNCOMMENT THIS (LOGIC NAME IS WRONG)
 
-#ifndef FACTORY_PARAMETERS
+#define FACTORY_PARAMETERS //<<---------Comment for fast tests
+
+#ifndef FACTORY_PARAMETERS//Time parameters for the app
 #define 	FAST_TEST
 #endif //FAST_TEST
 
@@ -124,7 +131,7 @@ const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SE
 #define SURFACESHIELD_LAMP_UV_SAFETY_TIME_MS	900 	//!<Waiting period before turning on UV light in milisec
 #define SURFACESHIELD_LAMP_UV_ON_TIME_MS		3 * HOURS_2_MILI_SECONDS 	//!<Waiting period of Lamp UV illumination in milisec
 
-#define SURFACESHIELD_LAMP_UV_TIMEOUT_MS		10000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
+#define SURFACESHIELD_LAMP_UV_TIMEOUT_MS		10000	//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
 
 
 #endif //FAST_TEST
@@ -176,6 +183,14 @@ const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SE
 #define SURFACESHIELD_LAMP_UV_TIMEOUT_MS		5000						//!<Waiting period for timeout. If motion is detected and UV button had been pressed finishes process automatically.
 
 #endif //FAST_TEST
+
+
+/******************************************************************************/
+/******************************************************************************/
+/***************************CONFIG SECTION ENDS********************************/
+/******************************************************************************/
+/******************************************************************************/
+
 
 /* USER CODE END PM */
 
