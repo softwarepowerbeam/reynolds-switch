@@ -115,17 +115,17 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, UV_OUTB_Pin|SERIN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LAMP2_OUTB_Pin|SERIN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, UV_OUTA_Pin|LED_Pin|LAMP2_OUTB_Pin|LAMP2_OUTA_Pin
+  HAL_GPIO_WritePin(GPIOA, LAMP2_OUTA_Pin|LED_Pin|UV_OUTB_Pin|UV_OUTA_Pin
                           |LAMP1_OUTB_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LAMP1_OUTA_GPIO_Port, LAMP1_OUTA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PCPin PCPin */
-  GPIO_InitStruct.Pin = UV_OUTB_Pin|SERIN_Pin;
+  GPIO_InitStruct.Pin = LAMP2_OUTB_Pin|SERIN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -139,7 +139,7 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PAPin PAPin PAPin PAPin
                            PAPin */
-  GPIO_InitStruct.Pin = UV_OUTA_Pin|LED_Pin|LAMP2_OUTB_Pin|LAMP2_OUTA_Pin
+  GPIO_InitStruct.Pin = LAMP2_OUTA_Pin|LED_Pin|UV_OUTB_Pin|UV_OUTA_Pin
                           |LAMP1_OUTB_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;

@@ -88,7 +88,7 @@ uint8_t nutone_app_fsm(nutone_app_t *nutone_app_hand)
 	nutone_test(nutone_app_hand);
 
 #else //NUTONE_APP_DEBUG_CODE
-//	nutone_fan_fsm(nutone_app_hand);
+	nutone_fan_fsm(nutone_app_hand);
 
 	nutone_white_fsm(nutone_app_hand);
 
@@ -641,6 +641,8 @@ uint8_t nutone_vyv_fsm(nutone_app_t *nutone_app_hand)
 	return 0;
 }
 
+//#define TESTING_SENSOR
+
 void nutone_app_check_events(nutone_app_t *nutone_app_hand)
 {
 	//variables to check motion events
@@ -649,10 +651,10 @@ void nutone_app_check_events(nutone_app_t *nutone_app_hand)
 	button_isr_status_t button_isr_stat;
 	button_edge_t check_edge;
 
-
+#ifndef TESTING_SENSOR
 	pyd1598_read_wakeup_signal(nutone_app_hand->motion_hand->motion_sensor,
 															&motion_isr_status);
-
+#endif //TESTING_SENSOR
 	if(motion_isr_status == PYD1598_MOTION_ISR_UNATTENDED)
 	{
 		nutone_app_hand->signals.motion_light = MOTION_ISR_UNATTENDED;

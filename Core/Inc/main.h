@@ -57,12 +57,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define UV_OUTB_Pin GPIO_PIN_15
-#define UV_OUTB_GPIO_Port GPIOC
+#define LAMP2_OUTB_Pin GPIO_PIN_15
+#define LAMP2_OUTB_GPIO_Port GPIOC
 #define Button_Pin GPIO_PIN_2
 #define Button_GPIO_Port GPIOF
-#define UV_OUTA_Pin GPIO_PIN_0
-#define UV_OUTA_GPIO_Port GPIOA
+#define LAMP2_OUTA_Pin GPIO_PIN_0
+#define LAMP2_OUTA_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_1
 #define LED_GPIO_Port GPIOA
 #define UV_IN_Pin GPIO_PIN_2
@@ -75,10 +75,10 @@ void Error_Handler(void);
 #define DIP_IN1_GPIO_Port GPIOA
 #define DIP_IN2_Pin GPIO_PIN_6
 #define DIP_IN2_GPIO_Port GPIOA
-#define LAMP2_OUTB_Pin GPIO_PIN_7
-#define LAMP2_OUTB_GPIO_Port GPIOA
-#define LAMP2_OUTA_Pin GPIO_PIN_8
-#define LAMP2_OUTA_GPIO_Port GPIOA
+#define UV_OUTB_Pin GPIO_PIN_7
+#define UV_OUTB_GPIO_Port GPIOA
+#define UV_OUTA_Pin GPIO_PIN_8
+#define UV_OUTA_GPIO_Port GPIOA
 #define LAMP1_IN_Pin GPIO_PIN_9
 #define LAMP1_IN_GPIO_Port GPIOA
 #define LAMP1_IN_EXTI_IRQn EXTI4_15_IRQn

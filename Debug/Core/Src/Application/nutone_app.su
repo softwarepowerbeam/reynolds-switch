@@ -4,7 +4,7 @@
 ../Core/Src/Application/nutone_app.c:187:9:nutone_white_fsm	56	static
 ../Core/Src/Application/nutone_app.c:379:9:nutone_vyv_fsm	120	static,ignoring_inline_asm
 ../Core/Src/Application/nutone_app.c:79:9:nutone_app_fsm	8	static
-../Core/Src/Application/nutone_app.c:706:6:nutone_app_check_button_event	24	static
-../Core/Src/Application/nutone_app.c:644:6:nutone_app_check_events	64	static
-../Core/Src/Application/nutone_app.c:723:6:nutone_app_set_outputs	8	static
+../Core/Src/Application/nutone_app.c:708:6:nutone_app_check_button_event	24	static
+../Core/Src/Application/nutone_app.c:646:6:nutone_app_check_events	64	static
+../Core/Src/Application/nutone_app.c:725:6:nutone_app_set_outputs	8	static
 ../Core/Src/Application/nutone_app.c:65:9:nutone_app_process	8	static
