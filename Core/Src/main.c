@@ -80,7 +80,7 @@
 /******************************************************************************/
 #define DEBUG_MEMORY//<<----This is inverted, if you want to enable all the modes available UNCOMMENT THIS (LOGIC NAME IS WRONG)
 
-#define PRODUCTION_PARAM //<<---------Comment for fast tests
+//#define PRODUCTION_PARAM //<<---------Comment for fast tests
 
 #ifndef PRODUCTION_PARAM//Time parameters for the app
 #define 	FAST_TEST
@@ -687,6 +687,13 @@ int main(void)
 							  &deadline_motion_uv,
 							  &deadline_motion_uv_timeout,
 							  &deadline_motion_uv_safe);
+
+	  //deenergize unused relay
+	  relay_off(&light_1);
+	  HAL_Delay(100);
+	  relay_deenergize(&light_1);
+
+	  //synchronization of SurfaceShield light to avoid inversion
 	  led_signal_start(&signal_led);
 	  signal_led.type = LED_SIGNAL_BLINK;
 
@@ -700,6 +707,11 @@ int main(void)
 		  led_signal_fsm(led_signal_hand.led_signal);
 	  }
 	  led_signal_stop(led_signal_hand.led_signal);
+
+	  relay_ask_off_pulse_fsm(&light_1);
+
+
+
 
 
   }
