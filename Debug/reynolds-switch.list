@@ -39,15 +39,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  0001407d  00000000  00000000  00027172  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00016072  00000000  00000000  0003b1ef  2**0
+ 18 .debug_line   0001606a  00000000  00000000  0003b1ef  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0007cbbd  00000000  00000000  00051261  2**0
+ 19 .debug_str    0007cbbd  00000000  00000000  00051259  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  000cde1e  2**0
+ 20 .comment      00000043  00000000  00000000  000cde16  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  0000287c  00000000  00000000  000cde64  2**2
+ 21 .debug_frame  0000287c  00000000  00000000  000cde5c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000072  00000000  00000000  000d06e0  2**0
+ 22 .debug_line_str 00000072  00000000  00000000  000d06d8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -433,11 +433,8 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
  8000306:	2200      	movs	r2, #0
  8000308:	0025      	movs	r5, r4
  800030a:	779a      	strb	r2, [r3, #30]
+	volatile nutone_cmd_state_t cmd_status;
 
-	}
-#endif //WHILE_TEST_SELECTION_IN_IDDLE
-
-#ifndef WHILE_TEST_SELECTION_IN_IDDLE
 	if(button_isr_status == BUTTON_ISR_UNATTENDED)
  800030c:	7f1b      	ldrb	r3, [r3, #28]
  800030e:	353b      	adds	r5, #59	@ 0x3b
@@ -628,10 +625,10 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
  800041c:	e7dc      	b.n	80003d8 <nutone_white_fsm+0xf8>
 
 0800041e <nutone_vyv_fsm>:
+	button_edge_t edge;
+	pyd1598_motion_isr_status_t motion_isr_status;
+	deadline_timer_expired_t deadline_safe_expired;
 	deadline_timer_expired_t deadline_timeout_expired;
-
-//	button_check_isr_request(*nutone_app_hand->button_vyv->button, &button_isr_status, &edge);
-//	pyd1598_check_isr_request(*nutone_app_hand->motion_hand->motion_sensor, &motion_isr_status);
 
 	pyd1598_sensor_t *sensor = nutone_app_hand->motion_hand->motion_sensor;
  800041e:	6843      	ldr	r3, [r0, #4]
@@ -717,11 +714,8 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 		nutone_app_hand->signals.uv_abort_white_button = MOTION_ABORT_FALSE;
  8000492:	380b      	subs	r0, #11
  8000494:	7010      	strb	r0, [r2, #0]
+	}
 
-#endif //WHILE_TEST_SELECTION_IN_IDDLE
-
-
-#ifndef WHILE_TEST_SELECTION_IN_IDDLE
 	if(button_isr_status == BUTTON_ISR_UNATTENDED)
  8000496:	7832      	ldrb	r2, [r6, #0]
  8000498:	2a02      	cmp	r2, #2

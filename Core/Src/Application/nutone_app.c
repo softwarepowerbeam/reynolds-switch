@@ -207,7 +207,6 @@ uint8_t nutone_white_fsm(nutone_app_t *nutone_app_hand)
 	{
 		case MOTION_LIGHT_IDLE:
 
-#ifndef WHILE_TEST_SELECTION_IN_IDDLE
 			if(button_isr_status == BUTTON_ISR_UNATTENDED)
 			{
 				if(edge == BUTTON_EDGE_POSITIVE)

@@ -5124,30 +5124,30 @@ LOAD C:/ST/STM32CubeIDE_1.16.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_macro   0x00013cf7      0x1c4 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_tim.o
  .debug_macro   0x00013ebb      0x1c2 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_tim_ex.o
 
-.debug_line     0x00000000    0x16072
- .debug_line    0x00000000      0xf42 ./Core/Src/Application/nutone_app.o
- .debug_line    0x00000f42      0xa66 ./Core/Src/BoardSupport/button.o
- .debug_line    0x000019a8      0xa13 ./Core/Src/BoardSupport/led_indicator.o
- .debug_line    0x000023bb     0x157b ./Core/Src/BoardSupport/pyd15X8.o
- .debug_line    0x00003936      0xb3a ./Core/Src/BoardSupport/relay_l114fl_drv8210.o
- .debug_line    0x00004470      0xaa9 ./Core/Src/BoardSupport/switch_selector.o
- .debug_line    0x00004f19      0xc8e ./Core/Src/Middleware/NuTone.o
- .debug_line    0x00005ba7      0xdcd ./Core/Src/Middleware/deadline_timer.o
- .debug_line    0x00006974      0x87a ./Core/Src/Middleware/output_ctrl.o
- .debug_line    0x000071ee      0x995 ./Core/Src/gpio.o
- .debug_line    0x00007b83     0x1535 ./Core/Src/main.o
- .debug_line    0x000090b8      0x770 ./Core/Src/stm32c0xx_hal_msp.o
- .debug_line    0x00009828      0x931 ./Core/Src/stm32c0xx_it.o
- .debug_line    0x0000a159      0x5b1 ./Core/Src/sysmem.o
- .debug_line    0x0000a70a      0x7ac ./Core/Src/system_stm32c0xx.o
- .debug_line    0x0000aeb6      0xb8f ./Core/Src/tim.o
- .debug_line    0x0000ba45       0x7d ./Core/Startup/startup_stm32c011f6ux.o
- .debug_line    0x0000bac2      0xba6 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal.o
- .debug_line    0x0000c668      0xc5d ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_cortex.o
- .debug_line    0x0000d2c5      0xc95 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_gpio.o
- .debug_line    0x0000df5a     0x10e5 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_rcc.o
- .debug_line    0x0000f03f     0x5019 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_tim.o
- .debug_line    0x00014058     0x201a ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_tim_ex.o
+.debug_line     0x00000000    0x1606a
+ .debug_line    0x00000000      0xf3a ./Core/Src/Application/nutone_app.o
+ .debug_line    0x00000f3a      0xa66 ./Core/Src/BoardSupport/button.o
+ .debug_line    0x000019a0      0xa13 ./Core/Src/BoardSupport/led_indicator.o
+ .debug_line    0x000023b3     0x157b ./Core/Src/BoardSupport/pyd15X8.o
+ .debug_line    0x0000392e      0xb3a ./Core/Src/BoardSupport/relay_l114fl_drv8210.o
+ .debug_line    0x00004468      0xaa9 ./Core/Src/BoardSupport/switch_selector.o
+ .debug_line    0x00004f11      0xc8e ./Core/Src/Middleware/NuTone.o
+ .debug_line    0x00005b9f      0xdcd ./Core/Src/Middleware/deadline_timer.o
+ .debug_line    0x0000696c      0x87a ./Core/Src/Middleware/output_ctrl.o
+ .debug_line    0x000071e6      0x995 ./Core/Src/gpio.o
+ .debug_line    0x00007b7b     0x1535 ./Core/Src/main.o
+ .debug_line    0x000090b0      0x770 ./Core/Src/stm32c0xx_hal_msp.o
+ .debug_line    0x00009820      0x931 ./Core/Src/stm32c0xx_it.o
+ .debug_line    0x0000a151      0x5b1 ./Core/Src/sysmem.o
+ .debug_line    0x0000a702      0x7ac ./Core/Src/system_stm32c0xx.o
+ .debug_line    0x0000aeae      0xb8f ./Core/Src/tim.o
+ .debug_line    0x0000ba3d       0x7d ./Core/Startup/startup_stm32c011f6ux.o
+ .debug_line    0x0000baba      0xba6 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal.o
+ .debug_line    0x0000c660      0xc5d ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_cortex.o
+ .debug_line    0x0000d2bd      0xc95 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_gpio.o
+ .debug_line    0x0000df52     0x10e5 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_rcc.o
+ .debug_line    0x0000f037     0x5019 ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_tim.o
+ .debug_line    0x00014050     0x201a ./Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_hal_tim_ex.o
 
 .debug_str      0x00000000    0x7cbbd
  .debug_str     0x00000000    0x7499d ./Core/Src/Application/nutone_app.o
