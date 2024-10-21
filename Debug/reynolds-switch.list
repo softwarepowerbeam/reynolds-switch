@@ -27,27 +27,27 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  00005068  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00015af8  00000000  00000000  00005090  2**0
+ 12 .debug_info   00015b27  00000000  00000000  00005090  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 0000358b  00000000  00000000  0001ab88  2**0
+ 13 .debug_abbrev 0000358b  00000000  00000000  0001abb7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_loclists 0000742a  00000000  00000000  0001e113  2**0
+ 14 .debug_loclists 0000742a  00000000  00000000  0001e142  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00000e40  00000000  00000000  00025540  2**3
+ 15 .debug_aranges 00000e40  00000000  00000000  00025570  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 00000df2  00000000  00000000  00026380  2**0
+ 16 .debug_rnglists 00000df2  00000000  00000000  000263b0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0001407d  00000000  00000000  00027172  2**0
+ 17 .debug_macro  00014080  00000000  00000000  000271a2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0001606a  00000000  00000000  0003b1ef  2**0
+ 18 .debug_line   00016048  00000000  00000000  0003b222  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0007cbbd  00000000  00000000  00051259  2**0
+ 19 .debug_str    0007cc93  00000000  00000000  0005126a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  000cde16  2**0
+ 20 .comment      00000043  00000000  00000000  000cdefd  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  0000287c  00000000  00000000  000cde5c  2**2
+ 21 .debug_frame  0000287c  00000000  00000000  000cdf40  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000072  00000000  00000000  000d06d8  2**0
+ 22 .debug_line_str 00000072  00000000  00000000  000d07bc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -5517,7 +5517,7 @@ void Error_Handler(void)
   general_clock.msec = 0;
  8001c6c:	2200      	movs	r2, #0
   general_clock.counts = 0;
- 8001c6e:	4b8c      	ldr	r3, [pc, #560]	@ (8001ea0 <main+0x25c>)
+ 8001c6e:	4b87      	ldr	r3, [pc, #540]	@ (8001e8c <main+0x248>)
  8001c70:	6018      	str	r0, [r3, #0]
  8001c72:	6059      	str	r1, [r3, #4]
   general_clock.msec = 0;
@@ -5550,939 +5550,930 @@ void Error_Handler(void)
  8001c96:	a82f      	add	r0, sp, #188	@ 0xbc
  8001c98:	f7ff fa16 	bl	80010c8 <switch_selector_setup>
   switch(switch_selector.value)
- 8001c9c:	9831      	ldr	r0, [sp, #196]	@ 0xc4
- 8001c9e:	4b81      	ldr	r3, [pc, #516]	@ (8001ea4 <main+0x260>)
- 8001ca0:	2803      	cmp	r0, #3
+ 8001c9c:	9a31      	ldr	r2, [sp, #196]	@ 0xc4
+ 8001c9e:	4b7c      	ldr	r3, [pc, #496]	@ (8001e90 <main+0x24c>)
+ 8001ca0:	2a03      	cmp	r2, #3
  8001ca2:	d900      	bls.n	8001ca6 <main+0x62>
- 8001ca4:	e0f4      	b.n	8001e90 <main+0x24c>
- 8001ca6:	223c      	movs	r2, #60	@ 0x3c
-		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
+ 8001ca4:	e0eb      	b.n	8001e7e <main+0x23a>
+		motion_initial_conf.threshold = OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD;
+ 8001ca6:	2207      	movs	r2, #7
  8001ca8:	701a      	strb	r2, [r3, #0]
-  switch(switch_selector.value)
- 8001caa:	f7fe fa37 	bl	800011c <__gnu_thumb1_case_uqi>
- 8001cae:	ed02      	.short	0xed02
- 8001cb0:	edef      	.short	0xedef
 		motion_initial_conf.window_time = OFFICE_MOTION_SENSOR_WINDOW;
- 8001cb2:	2200      	movs	r2, #0
-		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
- 8001cb4:	70da      	strb	r2, [r3, #3]
+ 8001caa:	3a05      	subs	r2, #5
+ 8001cac:	70da      	strb	r2, [r3, #3]
+		motion_initial_conf.pulse_counter = OFFICE_MOTION_PULSE_COUNTER;
+ 8001cae:	3a01      	subs	r2, #1
+ 8001cb0:	709a      	strb	r2, [r3, #2]
   motion_initial_conf.blind_time = PYD1598_BT_0_5_SEC;
- 8001cb6:	2200      	movs	r2, #0
- 8001cb8:	705a      	strb	r2, [r3, #1]
+ 8001cb2:	2200      	movs	r2, #0
+ 8001cb4:	705a      	strb	r2, [r3, #1]
   motion_initial_conf.count_mode = PYD1598_COUNT_MODE_NO_BPF_SIGN_CHANGE;
- 8001cba:	71da      	strb	r2, [r3, #7]
+ 8001cb6:	71da      	strb	r2, [r3, #7]
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
- 8001cbc:	715a      	strb	r2, [r3, #5]
+ 8001cb8:	715a      	strb	r2, [r3, #5]
   setin_pin.pin = SERIN_Pin;
- 8001cbe:	2280      	movs	r2, #128	@ 0x80
+ 8001cba:	2280      	movs	r2, #128	@ 0x80
   motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_2HZ;
- 8001cc0:	2101      	movs	r1, #1
-  setin_pin.pin = SERIN_Pin;
- 8001cc2:	ac0d      	add	r4, sp, #52	@ 0x34
- 8001cc4:	01d2      	lsls	r2, r2, #7
- 8001cc6:	80a2      	strh	r2, [r4, #4]
-  motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_2HZ;
- 8001cc8:	7199      	strb	r1, [r3, #6]
-  motion_initial_conf.pulse_counter = PYD1598_PC_2_PULSES;
- 8001cca:	7099      	strb	r1, [r3, #2]
+ 8001cbc:	2101      	movs	r1, #1
+  motion_initial_conf.op_mode = PYD1598_WAKE_UP;
+ 8001cbe:	2502      	movs	r5, #2
   direct_link_pin.pin = DIRLINK_Pin;
- 8001ccc:	aa0f      	add	r2, sp, #60	@ 0x3c
-  setin_pin.irq_type = EXTI4_15_IRQn;
- 8001cce:	3106      	adds	r1, #6
+ 8001cc0:	2680      	movs	r6, #128	@ 0x80
+  direct_link_pin.port = DIRLINK_GPIO_Port;
+ 8001cc2:	4f74      	ldr	r7, [pc, #464]	@ (8001e94 <main+0x250>)
+  setin_pin.pin = SERIN_Pin;
+ 8001cc4:	ac0d      	add	r4, sp, #52	@ 0x34
   setin_pin.port = SERIN_GPIO_Port;
- 8001cd0:	4d75      	ldr	r5, [pc, #468]	@ (8001ea8 <main+0x264>)
+ 8001cc6:	4874      	ldr	r0, [pc, #464]	@ (8001e98 <main+0x254>)
+  setin_pin.pin = SERIN_Pin;
+ 8001cc8:	01d2      	lsls	r2, r2, #7
+ 8001cca:	80a2      	strh	r2, [r4, #4]
+  motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_2HZ;
+ 8001ccc:	7199      	strb	r1, [r3, #6]
+  direct_link_pin.pin = DIRLINK_Pin;
+ 8001cce:	aa0f      	add	r2, sp, #60	@ 0x3c
   setin_pin.irq_type = EXTI4_15_IRQn;
+ 8001cd0:	3106      	adds	r1, #6
  8001cd2:	71a1      	strb	r1, [r4, #6]
+  motion_initial_conf.op_mode = PYD1598_WAKE_UP;
+ 8001cd4:	711d      	strb	r5, [r3, #4]
+  direct_link_pin.pin = DIRLINK_Pin;
+ 8001cd6:	8096      	strh	r6, [r2, #4]
   direct_link_pin.irq_type = EXTI4_15_IRQn;
- 8001cd4:	7191      	strb	r1, [r2, #6]
-  direct_link_pin.pin = DIRLINK_Pin;
- 8001cd6:	2680      	movs	r6, #128	@ 0x80
-  motion_initial_conf.op_mode = PYD1598_WAKE_UP;
- 8001cd8:	2002      	movs	r0, #2
-  pyd1598_setup(&motion_sensor, motion_initial_conf, setin_pin, direct_link_pin);
- 8001cda:	a901      	add	r1, sp, #4
+ 8001cd8:	7191      	strb	r1, [r2, #6]
   setin_pin.port = SERIN_GPIO_Port;
- 8001cdc:	950d      	str	r5, [sp, #52]	@ 0x34
-  pyd1598_setup(&motion_sensor, motion_initial_conf, setin_pin, direct_link_pin);
- 8001cde:	000d      	movs	r5, r1
+ 8001cda:	900d      	str	r0, [sp, #52]	@ 0x34
   direct_link_pin.port = DIRLINK_GPIO_Port;
- 8001ce0:	4f72      	ldr	r7, [pc, #456]	@ (8001eac <main+0x268>)
-  motion_initial_conf.op_mode = PYD1598_WAKE_UP;
- 8001ce2:	7118      	strb	r0, [r3, #4]
-  direct_link_pin.pin = DIRLINK_Pin;
- 8001ce4:	8096      	strh	r6, [r2, #4]
-  direct_link_pin.port = DIRLINK_GPIO_Port;
- 8001ce6:	970f      	str	r7, [sp, #60]	@ 0x3c
+ 8001cdc:	970f      	str	r7, [sp, #60]	@ 0x3c
   pyd1598_setup(&motion_sensor, motion_initial_conf, setin_pin, direct_link_pin);
- 8001ce8:	cac0      	ldmia	r2!, {r6, r7}
- 8001cea:	c5c0      	stmia	r5!, {r6, r7}
- 8001cec:	2280      	movs	r2, #128	@ 0x80
- 8001cee:	781d      	ldrb	r5, [r3, #0]
- 8001cf0:	78d9      	ldrb	r1, [r3, #3]
- 8001cf2:	2302      	movs	r3, #2
- 8001cf4:	0252      	lsls	r2, r2, #9
- 8001cf6:	4315      	orrs	r5, r2
- 8001cf8:	431a      	orrs	r2, r3
- 8001cfa:	9b0e      	ldr	r3, [sp, #56]	@ 0x38
- 8001cfc:	486c      	ldr	r0, [pc, #432]	@ (8001eb0 <main+0x26c>)
- 8001cfe:	0609      	lsls	r1, r1, #24
- 8001d00:	4329      	orrs	r1, r5
- 8001d02:	9300      	str	r3, [sp, #0]
- 8001d04:	4b68      	ldr	r3, [pc, #416]	@ (8001ea8 <main+0x264>)
- 8001d06:	0004      	movs	r4, r0
- 8001d08:	f7fe ff07 	bl	8000b1a <pyd1598_setup>
+ 8001cde:	a901      	add	r1, sp, #4
+ 8001ce0:	cac0      	ldmia	r2!, {r6, r7}
+ 8001ce2:	c1c0      	stmia	r1!, {r6, r7}
+ 8001ce4:	789a      	ldrb	r2, [r3, #2]
+ 8001ce6:	7819      	ldrb	r1, [r3, #0]
+ 8001ce8:	0412      	lsls	r2, r2, #16
+ 8001cea:	430a      	orrs	r2, r1
+ 8001cec:	78d9      	ldrb	r1, [r3, #3]
+ 8001cee:	9b0e      	ldr	r3, [sp, #56]	@ 0x38
+ 8001cf0:	0609      	lsls	r1, r1, #24
+ 8001cf2:	4311      	orrs	r1, r2
+ 8001cf4:	2280      	movs	r2, #128	@ 0x80
+ 8001cf6:	4869      	ldr	r0, [pc, #420]	@ (8001e9c <main+0x258>)
+ 8001cf8:	0252      	lsls	r2, r2, #9
+ 8001cfa:	432a      	orrs	r2, r5
+ 8001cfc:	9300      	str	r3, [sp, #0]
+ 8001cfe:	4b66      	ldr	r3, [pc, #408]	@ (8001e98 <main+0x254>)
+ 8001d00:	0004      	movs	r4, r0
+ 8001d02:	f7fe ff0a 	bl	8000b1a <pyd1598_setup>
   HAL_Delay(1000);
- 8001d0c:	20fa      	movs	r0, #250	@ 0xfa
- 8001d0e:	0080      	lsls	r0, r0, #2
- 8001d10:	f000 fe50 	bl	80029b4 <HAL_Delay>
+ 8001d06:	20fa      	movs	r0, #250	@ 0xfa
+ 8001d08:	0080      	lsls	r0, r0, #2
+ 8001d0a:	f000 fe53 	bl	80029b4 <HAL_Delay>
   pyd1598_request_write(&motion_sensor);
- 8001d14:	0020      	movs	r0, r4
- 8001d16:	f7fe fe2e 	bl	8000976 <pyd1598_request_write>
+ 8001d0e:	0020      	movs	r0, r4
+ 8001d10:	f7fe fe31 	bl	8000976 <pyd1598_request_write>
   deadline.msec = 80;
- 8001d1a:	2350      	movs	r3, #80	@ 0x50
- 8001d1c:	4c65      	ldr	r4, [pc, #404]	@ (8001eb4 <main+0x270>)
+ 8001d14:	2350      	movs	r3, #80	@ 0x50
+ 8001d16:	4c62      	ldr	r4, [pc, #392]	@ (8001ea0 <main+0x25c>)
   deadline_timer_setup(&deadline_timer_light_1, deadline);
- 8001d1e:	4d66      	ldr	r5, [pc, #408]	@ (8001eb8 <main+0x274>)
- 8001d20:	4966      	ldr	r1, [pc, #408]	@ (8001ebc <main+0x278>)
- 8001d22:	2210      	movs	r2, #16
- 8001d24:	4668      	mov	r0, sp
+ 8001d18:	4d62      	ldr	r5, [pc, #392]	@ (8001ea4 <main+0x260>)
+ 8001d1a:	4963      	ldr	r1, [pc, #396]	@ (8001ea8 <main+0x264>)
+ 8001d1c:	2210      	movs	r2, #16
+ 8001d1e:	4668      	mov	r0, sp
   deadline.msec = 80;
- 8001d26:	60a3      	str	r3, [r4, #8]
+ 8001d20:	60a3      	str	r3, [r4, #8]
   deadline_timer_setup(&deadline_timer_light_1, deadline);
- 8001d28:	f001 ffb8 	bl	8003c9c <memcpy>
- 8001d2c:	6863      	ldr	r3, [r4, #4]
- 8001d2e:	6822      	ldr	r2, [r4, #0]
- 8001d30:	0028      	movs	r0, r5
- 8001d32:	f7ff fb79 	bl	8001428 <deadline_timer_setup>
+ 8001d22:	f001 ffbb 	bl	8003c9c <memcpy>
+ 8001d26:	6863      	ldr	r3, [r4, #4]
+ 8001d28:	6822      	ldr	r2, [r4, #0]
+ 8001d2a:	0028      	movs	r0, r5
+ 8001d2c:	f7ff fb7c 	bl	8001428 <deadline_timer_setup>
   deadline_timer_setup(&deadline_timer_light_2, deadline);
- 8001d36:	4d62      	ldr	r5, [pc, #392]	@ (8001ec0 <main+0x27c>)
- 8001d38:	4960      	ldr	r1, [pc, #384]	@ (8001ebc <main+0x278>)
- 8001d3a:	2210      	movs	r2, #16
- 8001d3c:	4668      	mov	r0, sp
- 8001d3e:	f001 ffad 	bl	8003c9c <memcpy>
- 8001d42:	6863      	ldr	r3, [r4, #4]
- 8001d44:	6822      	ldr	r2, [r4, #0]
- 8001d46:	0028      	movs	r0, r5
- 8001d48:	f7ff fb6e 	bl	8001428 <deadline_timer_setup>
+ 8001d30:	4d5e      	ldr	r5, [pc, #376]	@ (8001eac <main+0x268>)
+ 8001d32:	495d      	ldr	r1, [pc, #372]	@ (8001ea8 <main+0x264>)
+ 8001d34:	2210      	movs	r2, #16
+ 8001d36:	4668      	mov	r0, sp
+ 8001d38:	f001 ffb0 	bl	8003c9c <memcpy>
+ 8001d3c:	6863      	ldr	r3, [r4, #4]
+ 8001d3e:	6822      	ldr	r2, [r4, #0]
+ 8001d40:	0028      	movs	r0, r5
+ 8001d42:	f7ff fb71 	bl	8001428 <deadline_timer_setup>
   deadline_timer_setup(&deadline_timer_uv, deadline);
- 8001d4c:	4d5d      	ldr	r5, [pc, #372]	@ (8001ec4 <main+0x280>)
- 8001d4e:	495b      	ldr	r1, [pc, #364]	@ (8001ebc <main+0x278>)
- 8001d50:	2210      	movs	r2, #16
- 8001d52:	4668      	mov	r0, sp
- 8001d54:	f001 ffa2 	bl	8003c9c <memcpy>
- 8001d58:	6822      	ldr	r2, [r4, #0]
- 8001d5a:	6863      	ldr	r3, [r4, #4]
- 8001d5c:	0028      	movs	r0, r5
- 8001d5e:	f7ff fb63 	bl	8001428 <deadline_timer_setup>
+ 8001d46:	4d5a      	ldr	r5, [pc, #360]	@ (8001eb0 <main+0x26c>)
+ 8001d48:	4957      	ldr	r1, [pc, #348]	@ (8001ea8 <main+0x264>)
+ 8001d4a:	2210      	movs	r2, #16
+ 8001d4c:	4668      	mov	r0, sp
+ 8001d4e:	f001 ffa5 	bl	8003c9c <memcpy>
+ 8001d52:	6822      	ldr	r2, [r4, #0]
+ 8001d54:	6863      	ldr	r3, [r4, #4]
+ 8001d56:	0028      	movs	r0, r5
+ 8001d58:	f7ff fb66 	bl	8001428 <deadline_timer_setup>
   light_1_output_a.pin = LAMP1_OUTA_Pin;
- 8001d62:	2340      	movs	r3, #64	@ 0x40
+ 8001d5c:	2340      	movs	r3, #64	@ 0x40
   light_2_output_a.pin = LAMP2_OUTA_Pin;
- 8001d64:	2548      	movs	r5, #72	@ 0x48
- 8001d66:	2101      	movs	r1, #1
+ 8001d5e:	2648      	movs	r6, #72	@ 0x48
   light_1_output_a.pin = LAMP1_OUTA_Pin;
- 8001d68:	aa11      	add	r2, sp, #68	@ 0x44
- 8001d6a:	8093      	strh	r3, [r2, #4]
+ 8001d60:	aa11      	add	r2, sp, #68	@ 0x44
+ 8001d62:	8093      	strh	r3, [r2, #4]
   light_2_output_a.pin = LAMP2_OUTA_Pin;
- 8001d6c:	ab04      	add	r3, sp, #16
- 8001d6e:	195b      	adds	r3, r3, r5
- 8001d70:	8019      	strh	r1, [r3, #0]
+ 8001d64:	ab04      	add	r3, sp, #16
+ 8001d66:	199e      	adds	r6, r3, r6
+ 8001d68:	2301      	movs	r3, #1
   light_uv_output_a.pin = UV_OUTA_Pin;
- 8001d72:	2658      	movs	r6, #88	@ 0x58
- 8001d74:	2380      	movs	r3, #128	@ 0x80
+ 8001d6a:	2758      	movs	r7, #88	@ 0x58
   light_1_output_b.pin = LAMP1_OUTB_Pin;
- 8001d76:	2180      	movs	r1, #128	@ 0x80
+ 8001d6c:	2180      	movs	r1, #128	@ 0x80
+  light_2_output_a.pin = LAMP2_OUTA_Pin;
+ 8001d6e:	8033      	strh	r3, [r6, #0]
   light_uv_output_a.pin = UV_OUTA_Pin;
- 8001d78:	ad04      	add	r5, sp, #16
- 8001d7a:	19ad      	adds	r5, r5, r6
- 8001d7c:	005b      	lsls	r3, r3, #1
- 8001d7e:	802b      	strh	r3, [r5, #0]
+ 8001d70:	ae04      	add	r6, sp, #16
+ 8001d72:	19f6      	adds	r6, r6, r7
+ 8001d74:	33ff      	adds	r3, #255	@ 0xff
+ 8001d76:	8033      	strh	r3, [r6, #0]
   light_1_output_b.pin = LAMP1_OUTB_Pin;
- 8001d80:	00c9      	lsls	r1, r1, #3
- 8001d82:	ab13      	add	r3, sp, #76	@ 0x4c
- 8001d84:	8099      	strh	r1, [r3, #4]
+ 8001d78:	00c9      	lsls	r1, r1, #3
+ 8001d7a:	ab13      	add	r3, sp, #76	@ 0x4c
+ 8001d7c:	8099      	strh	r1, [r3, #4]
   light_2_output_b.pin = LAMP2_OUTB_Pin;
- 8001d86:	4950      	ldr	r1, [pc, #320]	@ (8001ec8 <main+0x284>)
- 8001d88:	af17      	add	r7, sp, #92	@ 0x5c
- 8001d8a:	80b9      	strh	r1, [r7, #4]
+ 8001d7e:	494d      	ldr	r1, [pc, #308]	@ (8001eb4 <main+0x270>)
+ 8001d80:	af17      	add	r7, sp, #92	@ 0x5c
+ 8001d82:	80b9      	strh	r1, [r7, #4]
+  light_2_output_a.port = LAMP2_OUTA_GPIO_Port;
+ 8001d84:	25a0      	movs	r5, #160	@ 0xa0
   light_uv_output_b.pin = UV_OUTB_Pin;
- 8001d8c:	2180      	movs	r1, #128	@ 0x80
-  light_2_output_a.port = LAMP2_OUTA_GPIO_Port;
- 8001d8e:	25a0      	movs	r5, #160	@ 0xa0
+ 8001d86:	2180      	movs	r1, #128	@ 0x80
+  relay_setup(&light_1, light_1_output_a, light_1_output_b);
+ 8001d88:	9b14      	ldr	r3, [sp, #80]	@ 0x50
+  light_2_output_b.port = LAMP2_OUTB_GPIO_Port;
+ 8001d8a:	4843      	ldr	r0, [pc, #268]	@ (8001e98 <main+0x254>)
   light_uv_output_b.pin = UV_OUTB_Pin;
- 8001d90:	ae1b      	add	r6, sp, #108	@ 0x6c
- 8001d92:	80b1      	strh	r1, [r6, #4]
-  light_1_output_a.port = LAMP1_OUTA_GPIO_Port;
- 8001d94:	4945      	ldr	r1, [pc, #276]	@ (8001eac <main+0x268>)
-  relay_setup(&light_1, light_1_output_a, light_1_output_b);
- 8001d96:	9b14      	ldr	r3, [sp, #80]	@ 0x50
-  light_1_output_a.port = LAMP1_OUTA_GPIO_Port;
- 8001d98:	9111      	str	r1, [sp, #68]	@ 0x44
-  light_2_output_b.port = LAMP2_OUTB_GPIO_Port;
- 8001d9a:	4943      	ldr	r1, [pc, #268]	@ (8001ea8 <main+0x264>)
+ 8001d8c:	ae1b      	add	r6, sp, #108	@ 0x6c
   light_2_output_a.port = LAMP2_OUTA_GPIO_Port;
- 8001d9c:	05ed      	lsls	r5, r5, #23
+ 8001d8e:	05ed      	lsls	r5, r5, #23
+  light_uv_output_b.pin = UV_OUTB_Pin;
+ 8001d90:	80b1      	strh	r1, [r6, #4]
+  light_1_output_a.port = LAMP1_OUTA_GPIO_Port;
+ 8001d92:	4940      	ldr	r1, [pc, #256]	@ (8001e94 <main+0x250>)
   relay_setup(&light_1, light_1_output_a, light_1_output_b);
- 8001d9e:	9a12      	ldr	r2, [sp, #72]	@ 0x48
+ 8001d94:	9a12      	ldr	r2, [sp, #72]	@ 0x48
   light_2_output_b.port = LAMP2_OUTB_GPIO_Port;
- 8001da0:	9117      	str	r1, [sp, #92]	@ 0x5c
+ 8001d96:	9017      	str	r0, [sp, #92]	@ 0x5c
   relay_setup(&light_1, light_1_output_a, light_1_output_b);
- 8001da2:	9300      	str	r3, [sp, #0]
- 8001da4:	4941      	ldr	r1, [pc, #260]	@ (8001eac <main+0x268>)
- 8001da6:	002b      	movs	r3, r5
- 8001da8:	a83f      	add	r0, sp, #252	@ 0xfc
+ 8001d98:	9300      	str	r3, [sp, #0]
+ 8001d9a:	a83f      	add	r0, sp, #252	@ 0xfc
+ 8001d9c:	002b      	movs	r3, r5
+  light_1_output_a.port = LAMP1_OUTA_GPIO_Port;
+ 8001d9e:	9111      	str	r1, [sp, #68]	@ 0x44
   light_2_output_a.port = LAMP2_OUTA_GPIO_Port;
- 8001daa:	9515      	str	r5, [sp, #84]	@ 0x54
+ 8001da0:	9515      	str	r5, [sp, #84]	@ 0x54
   light_uv_output_a.port = UV_OUTA_GPIO_Port;
- 8001dac:	9519      	str	r5, [sp, #100]	@ 0x64
+ 8001da2:	9519      	str	r5, [sp, #100]	@ 0x64
   light_1_output_b.port = LAMP1_OUTB_GPIO_Port;
- 8001dae:	9513      	str	r5, [sp, #76]	@ 0x4c
+ 8001da4:	9513      	str	r5, [sp, #76]	@ 0x4c
   light_uv_output_b.port = UV_OUTB_GPIO_Port;
- 8001db0:	951b      	str	r5, [sp, #108]	@ 0x6c
+ 8001da6:	951b      	str	r5, [sp, #108]	@ 0x6c
   relay_setup(&light_1, light_1_output_a, light_1_output_b);
- 8001db2:	f7ff f8d6 	bl	8000f62 <relay_setup>
+ 8001da8:	f7ff f8db 	bl	8000f62 <relay_setup>
   relay_setup(&light_2, light_2_output_a, light_2_output_b);
- 8001db6:	9b18      	ldr	r3, [sp, #96]	@ 0x60
- 8001db8:	9915      	ldr	r1, [sp, #84]	@ 0x54
- 8001dba:	9a16      	ldr	r2, [sp, #88]	@ 0x58
- 8001dbc:	9300      	str	r3, [sp, #0]
- 8001dbe:	a848      	add	r0, sp, #288	@ 0x120
- 8001dc0:	9b17      	ldr	r3, [sp, #92]	@ 0x5c
- 8001dc2:	f7ff f8ce 	bl	8000f62 <relay_setup>
+ 8001dac:	9b18      	ldr	r3, [sp, #96]	@ 0x60
+ 8001dae:	9915      	ldr	r1, [sp, #84]	@ 0x54
+ 8001db0:	9a16      	ldr	r2, [sp, #88]	@ 0x58
+ 8001db2:	9300      	str	r3, [sp, #0]
+ 8001db4:	a848      	add	r0, sp, #288	@ 0x120
+ 8001db6:	9b17      	ldr	r3, [sp, #92]	@ 0x5c
+ 8001db8:	f7ff f8d3 	bl	8000f62 <relay_setup>
   relay_setup(&light_uv, light_uv_output_a, light_uv_output_b);
- 8001dc6:	9b1c      	ldr	r3, [sp, #112]	@ 0x70
- 8001dc8:	9919      	ldr	r1, [sp, #100]	@ 0x64
- 8001dca:	9a1a      	ldr	r2, [sp, #104]	@ 0x68
- 8001dcc:	9300      	str	r3, [sp, #0]
- 8001dce:	a851      	add	r0, sp, #324	@ 0x144
- 8001dd0:	9b1b      	ldr	r3, [sp, #108]	@ 0x6c
- 8001dd2:	f7ff f8c6 	bl	8000f62 <relay_setup>
+ 8001dbc:	9b1c      	ldr	r3, [sp, #112]	@ 0x70
+ 8001dbe:	9919      	ldr	r1, [sp, #100]	@ 0x64
+ 8001dc0:	9a1a      	ldr	r2, [sp, #104]	@ 0x68
+ 8001dc2:	9300      	str	r3, [sp, #0]
+ 8001dc4:	a851      	add	r0, sp, #324	@ 0x144
+ 8001dc6:	9b1b      	ldr	r3, [sp, #108]	@ 0x6c
+ 8001dc8:	f7ff f8cb 	bl	8000f62 <relay_setup>
   timer_buttons.msec = 100;
- 8001dd6:	4e3d      	ldr	r6, [pc, #244]	@ (8001ecc <main+0x288>)
- 8001dd8:	2364      	movs	r3, #100	@ 0x64
+ 8001dcc:	2364      	movs	r3, #100	@ 0x64
+ 8001dce:	4e3a      	ldr	r6, [pc, #232]	@ (8001eb8 <main+0x274>)
   deadline_timer_setup(&deadline_buttons, timer_buttons);
- 8001dda:	0031      	movs	r1, r6
- 8001ddc:	4f3c      	ldr	r7, [pc, #240]	@ (8001ed0 <main+0x28c>)
- 8001dde:	3108      	adds	r1, #8
- 8001de0:	2210      	movs	r2, #16
- 8001de2:	4668      	mov	r0, sp
+ 8001dd0:	4f3a      	ldr	r7, [pc, #232]	@ (8001ebc <main+0x278>)
   timer_buttons.msec = 100;
- 8001de4:	60b3      	str	r3, [r6, #8]
+ 8001dd2:	60b3      	str	r3, [r6, #8]
   deadline_timer_setup(&deadline_buttons, timer_buttons);
- 8001de6:	f001 ff59 	bl	8003c9c <memcpy>
- 8001dea:	ce0c      	ldmia	r6!, {r2, r3}
- 8001dec:	0038      	movs	r0, r7
- 8001dee:	f7ff fb1b 	bl	8001428 <deadline_timer_setup>
+ 8001dd4:	0033      	movs	r3, r6
+ 8001dd6:	3308      	adds	r3, #8
+ 8001dd8:	0019      	movs	r1, r3
+ 8001dda:	2210      	movs	r2, #16
+ 8001ddc:	4668      	mov	r0, sp
+ 8001dde:	f001 ff5d 	bl	8003c9c <memcpy>
+ 8001de2:	ce0c      	ldmia	r6!, {r2, r3}
+ 8001de4:	0038      	movs	r0, r7
+ 8001de6:	f7ff fb1f 	bl	8001428 <deadline_timer_setup>
   button_input.pin = LAMP1_IN_Pin;
- 8001df2:	2380      	movs	r3, #128	@ 0x80
- 8001df4:	ae1d      	add	r6, sp, #116	@ 0x74
- 8001df6:	009b      	lsls	r3, r3, #2
- 8001df8:	80b3      	strh	r3, [r6, #4]
+ 8001dea:	2380      	movs	r3, #128	@ 0x80
+ 8001dec:	ae1d      	add	r6, sp, #116	@ 0x74
+ 8001dee:	009b      	lsls	r3, r3, #2
+ 8001df0:	80b3      	strh	r3, [r6, #4]
   button_setup(&button_light_1, button_input);
- 8001dfa:	0029      	movs	r1, r5
- 8001dfc:	9a1e      	ldr	r2, [sp, #120]	@ 0x78
- 8001dfe:	4835      	ldr	r0, [pc, #212]	@ (8001ed4 <main+0x290>)
+ 8001df2:	0029      	movs	r1, r5
+ 8001df4:	9a1e      	ldr	r2, [sp, #120]	@ 0x78
+ 8001df6:	4832      	ldr	r0, [pc, #200]	@ (8001ec0 <main+0x27c>)
   button_input.port = LAMP1_IN_GPIO_Port;
- 8001e00:	951d      	str	r5, [sp, #116]	@ 0x74
+ 8001df8:	951d      	str	r5, [sp, #116]	@ 0x74
   button_setup(&button_light_1, button_input);
- 8001e02:	f7fe fcb6 	bl	8000772 <button_setup>
+ 8001dfa:	f7fe fcba 	bl	8000772 <button_setup>
   button_input.pin = LAMP2_IN_Pin;
- 8001e06:	2308      	movs	r3, #8
- 8001e08:	80b3      	strh	r3, [r6, #4]
+ 8001dfe:	2308      	movs	r3, #8
+ 8001e00:	80b3      	strh	r3, [r6, #4]
   button_setup(&button_light_2, button_input);
- 8001e0a:	991d      	ldr	r1, [sp, #116]	@ 0x74
- 8001e0c:	9a1e      	ldr	r2, [sp, #120]	@ 0x78
- 8001e0e:	4832      	ldr	r0, [pc, #200]	@ (8001ed8 <main+0x294>)
- 8001e10:	f7fe fcaf 	bl	8000772 <button_setup>
+ 8001e02:	991d      	ldr	r1, [sp, #116]	@ 0x74
+ 8001e04:	9a1e      	ldr	r2, [sp, #120]	@ 0x78
+ 8001e06:	482f      	ldr	r0, [pc, #188]	@ (8001ec4 <main+0x280>)
+ 8001e08:	f7fe fcb3 	bl	8000772 <button_setup>
   button_input.pin = UV_IN_Pin;
- 8001e14:	2304      	movs	r3, #4
- 8001e16:	80b3      	strh	r3, [r6, #4]
+ 8001e0c:	2304      	movs	r3, #4
+ 8001e0e:	80b3      	strh	r3, [r6, #4]
   button_setup(&button_uv, button_input);
- 8001e18:	991d      	ldr	r1, [sp, #116]	@ 0x74
- 8001e1a:	9a1e      	ldr	r2, [sp, #120]	@ 0x78
- 8001e1c:	482f      	ldr	r0, [pc, #188]	@ (8001edc <main+0x298>)
- 8001e1e:	f7fe fca8 	bl	8000772 <button_setup>
+ 8001e10:	991d      	ldr	r1, [sp, #116]	@ 0x74
+ 8001e12:	9a1e      	ldr	r2, [sp, #120]	@ 0x78
+ 8001e14:	482c      	ldr	r0, [pc, #176]	@ (8001ec8 <main+0x284>)
+ 8001e16:	f7fe fcac 	bl	8000772 <button_setup>
   signal_led_gpio.pin = LED_Pin;
- 8001e22:	2002      	movs	r0, #2
- 8001e24:	ab1f      	add	r3, sp, #124	@ 0x7c
- 8001e26:	8098      	strh	r0, [r3, #4]
+ 8001e1a:	2102      	movs	r1, #2
+ 8001e1c:	ab1f      	add	r3, sp, #124	@ 0x7c
+ 8001e1e:	8099      	strh	r1, [r3, #4]
   led_signal_setup(&signal_led, signal_led_gpio);
- 8001e28:	0029      	movs	r1, r5
- 8001e2a:	9a20      	ldr	r2, [sp, #128]	@ 0x80
- 8001e2c:	a832      	add	r0, sp, #200	@ 0xc8
+ 8001e20:	9a20      	ldr	r2, [sp, #128]	@ 0x80
+ 8001e22:	0029      	movs	r1, r5
+ 8001e24:	a832      	add	r0, sp, #200	@ 0xc8
   signal_led_gpio.port = LED_GPIO_Port;
- 8001e2e:	951f      	str	r5, [sp, #124]	@ 0x7c
+ 8001e26:	951f      	str	r5, [sp, #124]	@ 0x7c
   led_signal_setup(&signal_led, signal_led_gpio);
- 8001e30:	f7fe fd17 	bl	8000862 <led_signal_setup>
+ 8001e28:	f7fe fd1b 	bl	8000862 <led_signal_setup>
   deadline.sec = 0;
- 8001e34:	2200      	movs	r2, #0
+ 8001e2c:	2200      	movs	r2, #0
   deadline.msec = 500;
- 8001e36:	23fa      	movs	r3, #250	@ 0xfa
+ 8001e2e:	23fa      	movs	r3, #250	@ 0xfa
   deadline_timer_setup(&deadline_led_indicator, deadline);
- 8001e38:	4d29      	ldr	r5, [pc, #164]	@ (8001ee0 <main+0x29c>)
- 8001e3a:	4920      	ldr	r1, [pc, #128]	@ (8001ebc <main+0x278>)
+ 8001e30:	4d26      	ldr	r5, [pc, #152]	@ (8001ecc <main+0x288>)
+ 8001e32:	491d      	ldr	r1, [pc, #116]	@ (8001ea8 <main+0x264>)
   deadline.msec = 500;
- 8001e3c:	005b      	lsls	r3, r3, #1
+ 8001e34:	005b      	lsls	r3, r3, #1
   deadline.sec = 0;
- 8001e3e:	60e2      	str	r2, [r4, #12]
+ 8001e36:	60e2      	str	r2, [r4, #12]
   deadline_timer_setup(&deadline_led_indicator, deadline);
- 8001e40:	4668      	mov	r0, sp
- 8001e42:	3210      	adds	r2, #16
+ 8001e38:	4668      	mov	r0, sp
+ 8001e3a:	3210      	adds	r2, #16
   deadline.msec = 500;
- 8001e44:	60a3      	str	r3, [r4, #8]
+ 8001e3c:	60a3      	str	r3, [r4, #8]
   deadline_timer_setup(&deadline_led_indicator, deadline);
- 8001e46:	f001 ff29 	bl	8003c9c <memcpy>
- 8001e4a:	cc0c      	ldmia	r4!, {r2, r3}
- 8001e4c:	0028      	movs	r0, r5
- 8001e4e:	f7ff faeb 	bl	8001428 <deadline_timer_setup>
+ 8001e3e:	f001 ff2d 	bl	8003c9c <memcpy>
+ 8001e42:	cc0c      	ldmia	r4!, {r2, r3}
+ 8001e44:	0028      	movs	r0, r5
+ 8001e46:	f7ff faef 	bl	8001428 <deadline_timer_setup>
   led_signal_type_selector(&signal_led, LED_SIGNAL_SOLID);
- 8001e52:	2101      	movs	r1, #1
- 8001e54:	a832      	add	r0, sp, #200	@ 0xc8
- 8001e56:	f7fe fd0f 	bl	8000878 <led_signal_type_selector>
+ 8001e4a:	2101      	movs	r1, #1
+ 8001e4c:	a832      	add	r0, sp, #200	@ 0xc8
+ 8001e4e:	f7fe fd13 	bl	8000878 <led_signal_type_selector>
     switch(switch_selector.value)
- 8001e5a:	9e31      	ldr	r6, [sp, #196]	@ 0xc4
- 8001e5c:	4c21      	ldr	r4, [pc, #132]	@ (8001ee4 <main+0x2a0>)
- 8001e5e:	4922      	ldr	r1, [pc, #136]	@ (8001ee8 <main+0x2a4>)
- 8001e60:	4a22      	ldr	r2, [pc, #136]	@ (8001eec <main+0x2a8>)
- 8001e62:	4b23      	ldr	r3, [pc, #140]	@ (8001ef0 <main+0x2ac>)
- 8001e64:	4d23      	ldr	r5, [pc, #140]	@ (8001ef4 <main+0x2b0>)
- 8001e66:	2e02      	cmp	r6, #2
- 8001e68:	d814      	bhi.n	8001e94 <main+0x250>
- 8001e6a:	4823      	ldr	r0, [pc, #140]	@ (8001ef8 <main+0x2b4>)
- 8001e6c:	4684      	mov	ip, r0
- 8001e6e:	4823      	ldr	r0, [pc, #140]	@ (8001efc <main+0x2b8>)
- 8001e70:	2e00      	cmp	r6, #0
- 8001e72:	d045      	beq.n	8001f00 <main+0x2bc>
+ 8001e52:	9d31      	ldr	r5, [sp, #196]	@ 0xc4
+ 8001e54:	4c1e      	ldr	r4, [pc, #120]	@ (8001ed0 <main+0x28c>)
+ 8001e56:	491f      	ldr	r1, [pc, #124]	@ (8001ed4 <main+0x290>)
+ 8001e58:	4a1f      	ldr	r2, [pc, #124]	@ (8001ed8 <main+0x294>)
+ 8001e5a:	4b20      	ldr	r3, [pc, #128]	@ (8001edc <main+0x298>)
+ 8001e5c:	2d02      	cmp	r5, #2
+ 8001e5e:	d810      	bhi.n	8001e82 <main+0x23e>
+ 8001e60:	27e1      	movs	r7, #225	@ 0xe1
+ 8001e62:	4e1f      	ldr	r6, [pc, #124]	@ (8001ee0 <main+0x29c>)
+ 8001e64:	481f      	ldr	r0, [pc, #124]	@ (8001ee4 <main+0x2a0>)
+ 8001e66:	46b4      	mov	ip, r6
+ 8001e68:	00bf      	lsls	r7, r7, #2
+ 8001e6a:	4e1f      	ldr	r6, [pc, #124]	@ (8001ee8 <main+0x2a4>)
+ 8001e6c:	2d00      	cmp	r5, #0
+ 8001e6e:	d03f      	beq.n	8001ef0 <main+0x2ac>
 		  timer_motion_light_2.msec = RESIDENTIAL_LAMP2_ON_TIME_MS;
- 8001e74:	4666      	mov	r6, ip
- 8001e76:	2700      	movs	r7, #0
- 8001e78:	60b7      	str	r7, [r6, #8]
-		  timer_motion_uv_safe.msec = RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS;
- 8001e7a:	26e1      	movs	r6, #225	@ 0xe1
- 8001e7c:	00b6      	lsls	r6, r6, #2
+ 8001e70:	2500      	movs	r5, #0
     	  timer_motion_light_1.msec = RESIDENTIAL_LAMP1_ON_TIME_MS;
- 8001e7e:	60a0      	str	r0, [r4, #8]
+ 8001e72:	60a0      	str	r0, [r4, #8]
+		  timer_motion_light_2.msec = RESIDENTIAL_LAMP2_ON_TIME_MS;
+ 8001e74:	4660      	mov	r0, ip
 		  timer_motion_uv_safe.msec = RESIDENTIAL_LAMP_UV_SAFETY_TIME_MS;
- 8001e80:	608e      	str	r6, [r1, #8]
+ 8001e76:	608f      	str	r7, [r1, #8]
+		  timer_motion_light_2.msec = RESIDENTIAL_LAMP2_ON_TIME_MS;
+ 8001e78:	6085      	str	r5, [r0, #8]
 		  timer_motion_uv.msec = RESIDENTIAL_LAMP_UV_ON_TIME_MS;
- 8001e82:	6090      	str	r0, [r2, #8]
-		  timer_motion_uv_timeout.msec = RESIDENTIAL_LAMP_UV_TIMEOUT_MS;
- 8001e84:	609d      	str	r5, [r3, #8]
-    	  break;
- 8001e86:	e045      	b.n	8001f14 <main+0x2d0>
-		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
- 8001e88:	2203      	movs	r2, #3
- 8001e8a:	e713      	b.n	8001cb4 <main+0x70>
-		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
- 8001e8c:	2203      	movs	r2, #3
- 8001e8e:	70da      	strb	r2, [r3, #3]
+ 8001e7a:	491c      	ldr	r1, [pc, #112]	@ (8001eec <main+0x2a8>)
+ 8001e7c:	e03d      	b.n	8001efa <main+0x2b6>
 		__NOP();
- 8001e90:	46c0      	nop			@ (mov r8, r8)
+ 8001e7e:	46c0      	nop			@ (mov r8, r8)
 	  break;
- 8001e92:	e710      	b.n	8001cb6 <main+0x72>
+ 8001e80:	e717      	b.n	8001cb2 <main+0x6e>
     switch(switch_selector.value)
- 8001e94:	2e03      	cmp	r6, #3
- 8001e96:	d100      	bne.n	8001e9a <main+0x256>
- 8001e98:	e12f      	b.n	80020fa <main+0x4b6>
+ 8001e82:	2d03      	cmp	r5, #3
+ 8001e84:	d100      	bne.n	8001e88 <main+0x244>
+ 8001e86:	e12b      	b.n	80020e0 <main+0x49c>
     	  __NOP();
- 8001e9a:	46c0      	nop			@ (mov r8, r8)
+ 8001e88:	46c0      	nop			@ (mov r8, r8)
     	  break;
- 8001e9c:	e03a      	b.n	8001f14 <main+0x2d0>
- 8001e9e:	46c0      	nop			@ (mov r8, r8)
- 8001ea0:	200005d8 	.word	0x200005d8
- 8001ea4:	20000740 	.word	0x20000740
- 8001ea8:	50000800 	.word	0x50000800
- 8001eac:	50000400 	.word	0x50000400
- 8001eb0:	20000748 	.word	0x20000748
- 8001eb4:	20000728 	.word	0x20000728
- 8001eb8:	200006c0 	.word	0x200006c0
- 8001ebc:	20000730 	.word	0x20000730
- 8001ec0:	20000658 	.word	0x20000658
- 8001ec4:	200005f0 	.word	0x200005f0
- 8001ec8:	ffff8000 	.word	0xffff8000
- 8001ecc:	20000558 	.word	0x20000558
- 8001ed0:	20000570 	.word	0x20000570
- 8001ed4:	2000053c 	.word	0x2000053c
- 8001ed8:	20000520 	.word	0x20000520
- 8001edc:	20000504 	.word	0x20000504
- 8001ee0:	20000498 	.word	0x20000498
- 8001ee4:	20000418 	.word	0x20000418
- 8001ee8:	20000288 	.word	0x20000288
- 8001eec:	20000308 	.word	0x20000308
- 8001ef0:	20000208 	.word	0x20000208
- 8001ef4:	00001388 	.word	0x00001388
- 8001ef8:	20000390 	.word	0x20000390
- 8001efc:	00002710 	.word	0x00002710
+ 8001e8a:	e038      	b.n	8001efe <main+0x2ba>
+ 8001e8c:	200005d8 	.word	0x200005d8
+ 8001e90:	20000740 	.word	0x20000740
+ 8001e94:	50000400 	.word	0x50000400
+ 8001e98:	50000800 	.word	0x50000800
+ 8001e9c:	20000748 	.word	0x20000748
+ 8001ea0:	20000728 	.word	0x20000728
+ 8001ea4:	200006c0 	.word	0x200006c0
+ 8001ea8:	20000730 	.word	0x20000730
+ 8001eac:	20000658 	.word	0x20000658
+ 8001eb0:	200005f0 	.word	0x200005f0
+ 8001eb4:	ffff8000 	.word	0xffff8000
+ 8001eb8:	20000558 	.word	0x20000558
+ 8001ebc:	20000570 	.word	0x20000570
+ 8001ec0:	2000053c 	.word	0x2000053c
+ 8001ec4:	20000520 	.word	0x20000520
+ 8001ec8:	20000504 	.word	0x20000504
+ 8001ecc:	20000498 	.word	0x20000498
+ 8001ed0:	20000418 	.word	0x20000418
+ 8001ed4:	20000288 	.word	0x20000288
+ 8001ed8:	20000308 	.word	0x20000308
+ 8001edc:	20000208 	.word	0x20000208
+ 8001ee0:	20000390 	.word	0x20000390
+ 8001ee4:	000927c0 	.word	0x000927c0
+ 8001ee8:	00002710 	.word	0x00002710
+ 8001eec:	00a4cb80 	.word	0x00a4cb80
     	  timer_motion_light_2.msec = OFFICE_LAMP2_ON_TIME_MS;
- 8001f00:	4667      	mov	r7, ip
-    	  timer_motion_light_1.msec = OFFICE_LAMP1_ON_TIME_MS;
- 8001f02:	4ee0      	ldr	r6, [pc, #896]	@ (8002284 <main+0x640>)
-    	  timer_motion_uv_timeout.msec = OFFICE_LAMP_UV_TIMEOUT_MS;
- 8001f04:	6098      	str	r0, [r3, #8]
-    	  timer_motion_light_1.msec = OFFICE_LAMP1_ON_TIME_MS;
- 8001f06:	60a6      	str	r6, [r4, #8]
-    	  timer_motion_light_2.msec = OFFICE_LAMP2_ON_TIME_MS;
- 8001f08:	60be      	str	r6, [r7, #8]
+ 8001ef0:	4665      	mov	r5, ip
     	  timer_motion_uv_safe.msec = OFFICE_LAMP_UV_SAFETY_TIME_MS;
- 8001f0a:	26e1      	movs	r6, #225	@ 0xe1
- 8001f0c:	00b6      	lsls	r6, r6, #2
- 8001f0e:	608e      	str	r6, [r1, #8]
+ 8001ef2:	608f      	str	r7, [r1, #8]
     	  timer_motion_uv.msec = OFFICE_LAMP_UV_ON_TIME_MS;
- 8001f10:	49dd      	ldr	r1, [pc, #884]	@ (8002288 <main+0x644>)
- 8001f12:	6091      	str	r1, [r2, #8]
+ 8001ef4:	49e1      	ldr	r1, [pc, #900]	@ (800227c <main+0x638>)
+    	  timer_motion_light_1.msec = OFFICE_LAMP1_ON_TIME_MS;
+ 8001ef6:	60a0      	str	r0, [r4, #8]
+    	  timer_motion_light_2.msec = OFFICE_LAMP2_ON_TIME_MS;
+ 8001ef8:	60a8      	str	r0, [r5, #8]
+		  timer_motion_uv.msec = RESIDENTIAL_LAMP_UV_ON_TIME_MS;
+ 8001efa:	6091      	str	r1, [r2, #8]
+		  timer_motion_uv_timeout.msec = RESIDENTIAL_LAMP_UV_TIMEOUT_MS;
+ 8001efc:	609e      	str	r6, [r3, #8]
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
- 8001f14:	0027      	movs	r7, r4
+ 8001efe:	0026      	movs	r6, r4
   light_1_state = MOTION_LIGHT_IDLE;
- 8001f16:	2600      	movs	r6, #0
+ 8001f00:	2500      	movs	r5, #0
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
- 8001f18:	4bdc      	ldr	r3, [pc, #880]	@ (800228c <main+0x648>)
- 8001f1a:	3708      	adds	r7, #8
- 8001f1c:	0039      	movs	r1, r7
- 8001f1e:	2210      	movs	r2, #16
- 8001f20:	4668      	mov	r0, sp
- 8001f22:	9308      	str	r3, [sp, #32]
- 8001f24:	f001 feba 	bl	8003c9c <memcpy>
- 8001f28:	6822      	ldr	r2, [r4, #0]
- 8001f2a:	6863      	ldr	r3, [r4, #4]
- 8001f2c:	9808      	ldr	r0, [sp, #32]
- 8001f2e:	f7ff fa7b 	bl	8001428 <deadline_timer_setup>
+ 8001f02:	4bdf      	ldr	r3, [pc, #892]	@ (8002280 <main+0x63c>)
+ 8001f04:	3608      	adds	r6, #8
+ 8001f06:	0031      	movs	r1, r6
+ 8001f08:	2210      	movs	r2, #16
+ 8001f0a:	4668      	mov	r0, sp
+ 8001f0c:	9308      	str	r3, [sp, #32]
+ 8001f0e:	f001 fec5 	bl	8003c9c <memcpy>
+ 8001f12:	6822      	ldr	r2, [r4, #0]
+ 8001f14:	6863      	ldr	r3, [r4, #4]
+ 8001f16:	9808      	ldr	r0, [sp, #32]
+ 8001f18:	f7ff fa86 	bl	8001428 <deadline_timer_setup>
   light_1_state = MOTION_LIGHT_IDLE;
- 8001f32:	4bd7      	ldr	r3, [pc, #860]	@ (8002290 <main+0x64c>)
+ 8001f1c:	4bd9      	ldr	r3, [pc, #868]	@ (8002284 <main+0x640>)
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
- 8001f34:	0039      	movs	r1, r7
+ 8001f1e:	0031      	movs	r1, r6
   light_1_state = MOTION_LIGHT_IDLE;
- 8001f36:	701e      	strb	r6, [r3, #0]
+ 8001f20:	701d      	strb	r5, [r3, #0]
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
- 8001f38:	4bd6      	ldr	r3, [pc, #856]	@ (8002294 <main+0x650>)
- 8001f3a:	2210      	movs	r2, #16
- 8001f3c:	4668      	mov	r0, sp
- 8001f3e:	9309      	str	r3, [sp, #36]	@ 0x24
- 8001f40:	f001 feac 	bl	8003c9c <memcpy>
- 8001f44:	cc0c      	ldmia	r4!, {r2, r3}
- 8001f46:	9809      	ldr	r0, [sp, #36]	@ 0x24
- 8001f48:	f7ff fa6e 	bl	8001428 <deadline_timer_setup>
+ 8001f22:	4bd9      	ldr	r3, [pc, #868]	@ (8002288 <main+0x644>)
+ 8001f24:	2210      	movs	r2, #16
+ 8001f26:	4668      	mov	r0, sp
+ 8001f28:	9309      	str	r3, [sp, #36]	@ 0x24
+ 8001f2a:	f001 feb7 	bl	8003c9c <memcpy>
+ 8001f2e:	cc0c      	ldmia	r4!, {r2, r3}
+ 8001f30:	9809      	ldr	r0, [sp, #36]	@ 0x24
+ 8001f32:	f7ff fa79 	bl	8001428 <deadline_timer_setup>
   light_2_state = MOTION_LIGHT_IDLE;
- 8001f4c:	4bd2      	ldr	r3, [pc, #840]	@ (8002298 <main+0x654>)
+ 8001f36:	4bd5      	ldr	r3, [pc, #852]	@ (800228c <main+0x648>)
   deadline_timer_setup(&deadline_motion_uv, timer_motion_uv);
- 8001f4e:	4cd3      	ldr	r4, [pc, #844]	@ (800229c <main+0x658>)
+ 8001f38:	4cd5      	ldr	r4, [pc, #852]	@ (8002290 <main+0x64c>)
   light_2_state = MOTION_LIGHT_IDLE;
- 8001f50:	701e      	strb	r6, [r3, #0]
+ 8001f3a:	701d      	strb	r5, [r3, #0]
   deadline_timer_setup(&deadline_motion_uv, timer_motion_uv);
- 8001f52:	4bd3      	ldr	r3, [pc, #844]	@ (80022a0 <main+0x65c>)
+ 8001f3c:	4dd5      	ldr	r5, [pc, #852]	@ (8002294 <main+0x650>)
+ 8001f3e:	49d6      	ldr	r1, [pc, #856]	@ (8002298 <main+0x654>)
+ 8001f40:	2210      	movs	r2, #16
+ 8001f42:	4668      	mov	r0, sp
+ 8001f44:	f001 feaa 	bl	8003c9c <memcpy>
+ 8001f48:	cc0c      	ldmia	r4!, {r2, r3}
+ 8001f4a:	0028      	movs	r0, r5
+ 8001f4c:	f7ff fa6c 	bl	8001428 <deadline_timer_setup>
+  deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv_safe);
+ 8001f50:	4cd2      	ldr	r4, [pc, #840]	@ (800229c <main+0x658>)
+ 8001f52:	4fd3      	ldr	r7, [pc, #844]	@ (80022a0 <main+0x65c>)
  8001f54:	49d3      	ldr	r1, [pc, #844]	@ (80022a4 <main+0x660>)
  8001f56:	2210      	movs	r2, #16
  8001f58:	4668      	mov	r0, sp
- 8001f5a:	930a      	str	r3, [sp, #40]	@ 0x28
- 8001f5c:	f001 fe9e 	bl	8003c9c <memcpy>
- 8001f60:	cc0c      	ldmia	r4!, {r2, r3}
- 8001f62:	980a      	ldr	r0, [sp, #40]	@ 0x28
- 8001f64:	f7ff fa60 	bl	8001428 <deadline_timer_setup>
-  deadline_timer_setup(&deadline_motion_uv_safe, timer_motion_uv_safe);
- 8001f68:	4ccf      	ldr	r4, [pc, #828]	@ (80022a8 <main+0x664>)
- 8001f6a:	4fd0      	ldr	r7, [pc, #832]	@ (80022ac <main+0x668>)
- 8001f6c:	49d0      	ldr	r1, [pc, #832]	@ (80022b0 <main+0x66c>)
- 8001f6e:	2210      	movs	r2, #16
- 8001f70:	4668      	mov	r0, sp
- 8001f72:	f001 fe93 	bl	8003c9c <memcpy>
- 8001f76:	cc0c      	ldmia	r4!, {r2, r3}
- 8001f78:	0038      	movs	r0, r7
- 8001f7a:	f7ff fa55 	bl	8001428 <deadline_timer_setup>
+ 8001f5a:	f001 fe9f 	bl	8003c9c <memcpy>
+ 8001f5e:	cc0c      	ldmia	r4!, {r2, r3}
+ 8001f60:	0038      	movs	r0, r7
+ 8001f62:	f7ff fa61 	bl	8001428 <deadline_timer_setup>
   deadline_timer_setup(&deadline_motion_uv_timeout, timer_motion_uv_timeout);
- 8001f7e:	4ccd      	ldr	r4, [pc, #820]	@ (80022b4 <main+0x670>)
- 8001f80:	4ecd      	ldr	r6, [pc, #820]	@ (80022b8 <main+0x674>)
- 8001f82:	49ce      	ldr	r1, [pc, #824]	@ (80022bc <main+0x678>)
- 8001f84:	2210      	movs	r2, #16
+ 8001f66:	4cd0      	ldr	r4, [pc, #832]	@ (80022a8 <main+0x664>)
+ 8001f68:	4ed0      	ldr	r6, [pc, #832]	@ (80022ac <main+0x668>)
+ 8001f6a:	49d1      	ldr	r1, [pc, #836]	@ (80022b0 <main+0x66c>)
+ 8001f6c:	2210      	movs	r2, #16
+ 8001f6e:	4668      	mov	r0, sp
+ 8001f70:	f001 fe94 	bl	8003c9c <memcpy>
+ 8001f74:	cc0c      	ldmia	r4!, {r2, r3}
+ 8001f76:	0030      	movs	r0, r6
+ 8001f78:	f7ff fa56 	bl	8001428 <deadline_timer_setup>
+  deadline.msec = 5000;
+ 8001f7c:	4ccd      	ldr	r4, [pc, #820]	@ (80022b4 <main+0x670>)
+ 8001f7e:	4bce      	ldr	r3, [pc, #824]	@ (80022b8 <main+0x674>)
+  deadline_timer_setup(&deadline_uv_wait_timeout, deadline);
+ 8001f80:	0021      	movs	r1, r4
+ 8001f82:	2210      	movs	r2, #16
+ 8001f84:	3108      	adds	r1, #8
  8001f86:	4668      	mov	r0, sp
- 8001f88:	f001 fe88 	bl	8003c9c <memcpy>
- 8001f8c:	cc0c      	ldmia	r4!, {r2, r3}
- 8001f8e:	0030      	movs	r0, r6
- 8001f90:	f7ff fa4a 	bl	8001428 <deadline_timer_setup>
   deadline.msec = 5000;
- 8001f94:	4cca      	ldr	r4, [pc, #808]	@ (80022c0 <main+0x67c>)
+ 8001f88:	60a3      	str	r3, [r4, #8]
   deadline_timer_setup(&deadline_uv_wait_timeout, deadline);
- 8001f96:	2210      	movs	r2, #16
- 8001f98:	0021      	movs	r1, r4
-  deadline.msec = 5000;
- 8001f9a:	60a5      	str	r5, [r4, #8]
-  deadline_timer_setup(&deadline_uv_wait_timeout, deadline);
- 8001f9c:	4dc9      	ldr	r5, [pc, #804]	@ (80022c4 <main+0x680>)
- 8001f9e:	3108      	adds	r1, #8
- 8001fa0:	4668      	mov	r0, sp
- 8001fa2:	f001 fe7b 	bl	8003c9c <memcpy>
- 8001fa6:	cc0c      	ldmia	r4!, {r2, r3}
- 8001fa8:	0028      	movs	r0, r5
- 8001faa:	f7ff fa3d 	bl	8001428 <deadline_timer_setup>
+ 8001f8a:	f001 fe87 	bl	8003c9c <memcpy>
+ 8001f8e:	cc0c      	ldmia	r4!, {r2, r3}
+ 8001f90:	48ca      	ldr	r0, [pc, #808]	@ (80022bc <main+0x678>)
+ 8001f92:	f7ff fa49 	bl	8001428 <deadline_timer_setup>
   if(switch_selector.value == MOTION_SWITCH_MODE_3)
- 8001fae:	9b31      	ldr	r3, [sp, #196]	@ 0xc4
- 8001fb0:	2b03      	cmp	r3, #3
- 8001fb2:	d15e      	bne.n	8002072 <main+0x42e>
+ 8001f96:	9b31      	ldr	r3, [sp, #196]	@ 0xc4
+ 8001f98:	2b03      	cmp	r3, #3
+ 8001f9a:	d15d      	bne.n	8002058 <main+0x414>
 	  lights.relay = &light_uv;
- 8001fb4:	ab51      	add	r3, sp, #324	@ 0x144
- 8001fb6:	932b      	str	r3, [sp, #172]	@ 0xac
+ 8001f9c:	ab51      	add	r3, sp, #324	@ 0x144
+ 8001f9e:	932b      	str	r3, [sp, #172]	@ 0xac
 	  lights.deadline_timer = &deadline_timer_light_1;
- 8001fb8:	4bc3      	ldr	r3, [pc, #780]	@ (80022c8 <main+0x684>)
+ 8001fa0:	4bc7      	ldr	r3, [pc, #796]	@ (80022c0 <main+0x67c>)
 	  nutone_setup(&exhaust_fan, &lights, &fan, &ctrl_timer, &vyv_timeoff);
- 8001fba:	4ac4      	ldr	r2, [pc, #784]	@ (80022cc <main+0x688>)
+ 8001fa2:	4ac8      	ldr	r2, [pc, #800]	@ (80022c4 <main+0x680>)
 	  lights.deadline_timer = &deadline_timer_light_1;
- 8001fbc:	932c      	str	r3, [sp, #176]	@ 0xb0
+ 8001fa4:	932c      	str	r3, [sp, #176]	@ 0xb0
 	  fan.relay = &light_2;//This is not a UV relay but a simple relay
- 8001fbe:	ab48      	add	r3, sp, #288	@ 0x120
- 8001fc0:	932d      	str	r3, [sp, #180]	@ 0xb4
+ 8001fa6:	ab48      	add	r3, sp, #288	@ 0x120
+ 8001fa8:	932d      	str	r3, [sp, #180]	@ 0xb4
 	  fan.deadline_timer = &deadline_timer_light_2;
- 8001fc2:	4bc3      	ldr	r3, [pc, #780]	@ (80022d0 <main+0x68c>)
+ 8001faa:	4bc7      	ldr	r3, [pc, #796]	@ (80022c8 <main+0x684>)
 	  nutone_setup(&exhaust_fan, &lights, &fan, &ctrl_timer, &vyv_timeoff);
- 8001fc4:	9200      	str	r2, [sp, #0]
+ 8001fac:	9200      	str	r2, [sp, #0]
 	  fan.deadline_timer = &deadline_timer_light_2;
- 8001fc6:	932e      	str	r3, [sp, #184]	@ 0xb8
+ 8001fae:	932e      	str	r3, [sp, #184]	@ 0xb8
 	  nutone_setup(&exhaust_fan, &lights, &fan, &ctrl_timer, &vyv_timeoff);
- 8001fc8:	aa2d      	add	r2, sp, #180	@ 0xb4
- 8001fca:	4bc2      	ldr	r3, [pc, #776]	@ (80022d4 <main+0x690>)
- 8001fcc:	a92b      	add	r1, sp, #172	@ 0xac
- 8001fce:	a839      	add	r0, sp, #228	@ 0xe4
- 8001fd0:	f7ff f89e 	bl	8001110 <nutone_setup>
+ 8001fb0:	aa2d      	add	r2, sp, #180	@ 0xb4
+ 8001fb2:	4bc6      	ldr	r3, [pc, #792]	@ (80022cc <main+0x688>)
+ 8001fb4:	a92b      	add	r1, sp, #172	@ 0xac
+ 8001fb6:	a839      	add	r0, sp, #228	@ 0xe4
+ 8001fb8:	f7ff f8aa 	bl	8001110 <nutone_setup>
 	  button_white.button = &button_light_1;
- 8001fd4:	4bc0      	ldr	r3, [pc, #768]	@ (80022d8 <main+0x694>)
+ 8001fbc:	4bc4      	ldr	r3, [pc, #784]	@ (80022d0 <main+0x68c>)
 	  led_signal_hand.led_signal = &signal_led;
- 8001fd6:	ac29      	add	r4, sp, #164	@ 0xa4
+ 8001fbe:	ac29      	add	r4, sp, #164	@ 0xa4
 	  button_white.button = &button_light_1;
- 8001fd8:	9323      	str	r3, [sp, #140]	@ 0x8c
+ 8001fc0:	9323      	str	r3, [sp, #140]	@ 0x8c
 	  button_white.btn_timer = &deadline_buttons;
- 8001fda:	4bc0      	ldr	r3, [pc, #768]	@ (80022dc <main+0x698>)
+ 8001fc2:	4bc4      	ldr	r3, [pc, #784]	@ (80022d4 <main+0x690>)
 	  button_fan.button = &button_light_2;
- 8001fdc:	49c0      	ldr	r1, [pc, #768]	@ (80022e0 <main+0x69c>)
+ 8001fc4:	49c4      	ldr	r1, [pc, #784]	@ (80022d8 <main+0x694>)
 	  button_white.btn_timer = &deadline_buttons;
- 8001fde:	9324      	str	r3, [sp, #144]	@ 0x90
+ 8001fc6:	9324      	str	r3, [sp, #144]	@ 0x90
 	  button_fan.btn_timer = &deadline_buttons;
- 8001fe0:	9322      	str	r3, [sp, #136]	@ 0x88
+ 8001fc8:	9322      	str	r3, [sp, #136]	@ 0x88
 	  button_vyv.btn_timer = &deadline_buttons;
- 8001fe2:	9326      	str	r3, [sp, #152]	@ 0x98
+ 8001fca:	9326      	str	r3, [sp, #152]	@ 0x98
 	  motion_sensor_hand.motion_sensor = &motion_sensor;
- 8001fe4:	4bbf      	ldr	r3, [pc, #764]	@ (80022e4 <main+0x6a0>)
+ 8001fcc:	4bc3      	ldr	r3, [pc, #780]	@ (80022dc <main+0x698>)
 	  button_vyv.button = &button_uv;
- 8001fe6:	48c0      	ldr	r0, [pc, #768]	@ (80022e8 <main+0x6a4>)
+ 8001fce:	48c4      	ldr	r0, [pc, #784]	@ (80022e0 <main+0x69c>)
 	  motion_sensor_hand.motion_sensor = &motion_sensor;
- 8001fe8:	9327      	str	r3, [sp, #156]	@ 0x9c
+ 8001fd0:	9327      	str	r3, [sp, #156]	@ 0x9c
 	  led_signal_hand.led_signal = &signal_led;
- 8001fea:	ab32      	add	r3, sp, #200	@ 0xc8
- 8001fec:	9329      	str	r3, [sp, #164]	@ 0xa4
+ 8001fd2:	ab32      	add	r3, sp, #200	@ 0xc8
+ 8001fd4:	9329      	str	r3, [sp, #164]	@ 0xa4
 	  led_signal_hand.led_signal_timer = &deadline_led_indicator;
- 8001fee:	4bbf      	ldr	r3, [pc, #764]	@ (80022ec <main+0x6a8>)
+ 8001fd6:	4bc3      	ldr	r3, [pc, #780]	@ (80022e4 <main+0x6a0>)
 	  button_white.button = &button_light_1;
- 8001ff0:	aa23      	add	r2, sp, #140	@ 0x8c
+ 8001fd8:	aa23      	add	r2, sp, #140	@ 0x8c
 	  led_signal_hand.led_signal_timer = &deadline_led_indicator;
- 8001ff2:	6063      	str	r3, [r4, #4]
+ 8001fda:	6063      	str	r3, [r4, #4]
 	  nutone_app_config(&nutone_app_hand, &exhaust_fan, &motion_sensor_hand,
- 8001ff4:	9b0a      	ldr	r3, [sp, #40]	@ 0x28
+ 8001fdc:	9b08      	ldr	r3, [sp, #32]
 	  button_fan.button = &button_light_2;
- 8001ff6:	9121      	str	r1, [sp, #132]	@ 0x84
+ 8001fde:	9121      	str	r1, [sp, #132]	@ 0x84
 	  nutone_app_config(&nutone_app_hand, &exhaust_fan, &motion_sensor_hand,
- 8001ff8:	9305      	str	r3, [sp, #20]
- 8001ffa:	9b08      	ldr	r3, [sp, #32]
+ 8001fe0:	9304      	str	r3, [sp, #16]
+ 8001fe2:	9b09      	ldr	r3, [sp, #36]	@ 0x24
 	  button_vyv.button = &button_uv;
- 8001ffc:	a925      	add	r1, sp, #148	@ 0x94
+ 8001fe4:	a925      	add	r1, sp, #148	@ 0x94
+ 8001fe6:	9025      	str	r0, [sp, #148]	@ 0x94
 	  nutone_app_config(&nutone_app_hand, &exhaust_fan, &motion_sensor_hand,
- 8001ffe:	9304      	str	r3, [sp, #16]
- 8002000:	9b09      	ldr	r3, [sp, #36]	@ 0x24
-	  button_vyv.button = &button_uv;
- 8002002:	9025      	str	r0, [sp, #148]	@ 0x94
-	  nutone_app_config(&nutone_app_hand, &exhaust_fan, &motion_sensor_hand,
- 8002004:	9303      	str	r3, [sp, #12]
- 8002006:	9101      	str	r1, [sp, #4]
- 8002008:	ab21      	add	r3, sp, #132	@ 0x84
- 800200a:	a939      	add	r1, sp, #228	@ 0xe4
- 800200c:	9200      	str	r2, [sp, #0]
- 800200e:	48b8      	ldr	r0, [pc, #736]	@ (80022f0 <main+0x6ac>)
- 8002010:	aa27      	add	r2, sp, #156	@ 0x9c
- 8002012:	9402      	str	r4, [sp, #8]
- 8002014:	9707      	str	r7, [sp, #28]
- 8002016:	9606      	str	r6, [sp, #24]
- 8002018:	f7fe f92a 	bl	8000270 <nutone_app_config>
+ 8001fe8:	9505      	str	r5, [sp, #20]
+ 8001fea:	9303      	str	r3, [sp, #12]
+ 8001fec:	9101      	str	r1, [sp, #4]
+ 8001fee:	ab21      	add	r3, sp, #132	@ 0x84
+ 8001ff0:	a939      	add	r1, sp, #228	@ 0xe4
+ 8001ff2:	9200      	str	r2, [sp, #0]
+ 8001ff4:	48bc      	ldr	r0, [pc, #752]	@ (80022e8 <main+0x6a4>)
+ 8001ff6:	aa27      	add	r2, sp, #156	@ 0x9c
+ 8001ff8:	9402      	str	r4, [sp, #8]
+ 8001ffa:	9707      	str	r7, [sp, #28]
+ 8001ffc:	9606      	str	r6, [sp, #24]
+ 8001ffe:	f7fe f937 	bl	8000270 <nutone_app_config>
 	  relay_off(&light_1);
- 800201c:	a83f      	add	r0, sp, #252	@ 0xfc
- 800201e:	f7fe ff81 	bl	8000f24 <relay_off>
+ 8002002:	a83f      	add	r0, sp, #252	@ 0xfc
+ 8002004:	f7fe ff8e 	bl	8000f24 <relay_off>
 	  HAL_Delay(100);
- 8002022:	2064      	movs	r0, #100	@ 0x64
- 8002024:	f000 fcc6 	bl	80029b4 <HAL_Delay>
+ 8002008:	2064      	movs	r0, #100	@ 0x64
+ 800200a:	f000 fcd3 	bl	80029b4 <HAL_Delay>
 	  relay_deenergize(&light_1);
- 8002028:	a83f      	add	r0, sp, #252	@ 0xfc
- 800202a:	f7fe ff8a 	bl	8000f42 <relay_deenergize>
+ 800200e:	a83f      	add	r0, sp, #252	@ 0xfc
+ 8002010:	f7fe ff97 	bl	8000f42 <relay_deenergize>
 	  led_signal_start(&signal_led);
- 800202e:	a832      	add	r0, sp, #200	@ 0xc8
- 8002030:	f7fe fc82 	bl	8000938 <led_signal_start>
+ 8002014:	a832      	add	r0, sp, #200	@ 0xc8
+ 8002016:	f7fe fc8f 	bl	8000938 <led_signal_start>
 	  signal_led.type = LED_SIGNAL_BLINK;
- 8002034:	21c1      	movs	r1, #193	@ 0xc1
- 8002036:	2302      	movs	r3, #2
- 8002038:	aa04      	add	r2, sp, #16
- 800203a:	1852      	adds	r2, r2, r1
+ 800201a:	21c1      	movs	r1, #193	@ 0xc1
+ 800201c:	2302      	movs	r3, #2
+ 800201e:	aa04      	add	r2, sp, #16
+ 8002020:	1852      	adds	r2, r2, r1
 	  relay_off(lights.relay);
- 800203c:	982b      	ldr	r0, [sp, #172]	@ 0xac
+ 8002022:	982b      	ldr	r0, [sp, #172]	@ 0xac
 	  signal_led.type = LED_SIGNAL_BLINK;
- 800203e:	7013      	strb	r3, [r2, #0]
+ 8002024:	7013      	strb	r3, [r2, #0]
 	  relay_off(lights.relay);
- 8002040:	f7fe ff70 	bl	8000f24 <relay_off>
+ 8002026:	f7fe ff7d 	bl	8000f24 <relay_off>
 	  HAL_Delay(100);
- 8002044:	2064      	movs	r0, #100	@ 0x64
- 8002046:	f000 fcb5 	bl	80029b4 <HAL_Delay>
+ 800202a:	2064      	movs	r0, #100	@ 0x64
+ 800202c:	f000 fcc2 	bl	80029b4 <HAL_Delay>
 	  relay_deenergize(lights.relay);
- 800204a:	982b      	ldr	r0, [sp, #172]	@ 0xac
- 800204c:	f7fe ff79 	bl	8000f42 <relay_deenergize>
- 8002050:	250a      	movs	r5, #10
+ 8002030:	982b      	ldr	r0, [sp, #172]	@ 0xac
+ 8002032:	f7fe ff86 	bl	8000f42 <relay_deenergize>
+ 8002036:	250a      	movs	r5, #10
 		  HAL_Delay(1300);
- 8002052:	48a8      	ldr	r0, [pc, #672]	@ (80022f4 <main+0x6b0>)
+ 8002038:	48ac      	ldr	r0, [pc, #688]	@ (80022ec <main+0x6a8>)
 	  for(idx = 0; idx < 10; idx++)
- 8002054:	3d01      	subs	r5, #1
+ 800203a:	3d01      	subs	r5, #1
 		  HAL_Delay(1300);
- 8002056:	f000 fcad 	bl	80029b4 <HAL_Delay>
+ 800203c:	f000 fcba 	bl	80029b4 <HAL_Delay>
 	  for(idx = 0; idx < 10; idx++)
- 800205a:	b2ed      	uxtb	r5, r5
+ 8002040:	b2ed      	uxtb	r5, r5
 		  led_signal_fsm(led_signal_hand.led_signal);
- 800205c:	6820      	ldr	r0, [r4, #0]
- 800205e:	f7fe fc54 	bl	800090a <led_signal_fsm>
+ 8002042:	6820      	ldr	r0, [r4, #0]
+ 8002044:	f7fe fc61 	bl	800090a <led_signal_fsm>
 	  for(idx = 0; idx < 10; idx++)
- 8002062:	2d00      	cmp	r5, #0
- 8002064:	d1f5      	bne.n	8002052 <main+0x40e>
+ 8002048:	2d00      	cmp	r5, #0
+ 800204a:	d1f5      	bne.n	8002038 <main+0x3f4>
 	  led_signal_stop(led_signal_hand.led_signal);
- 8002066:	9829      	ldr	r0, [sp, #164]	@ 0xa4
- 8002068:	f7fe fc6a 	bl	8000940 <led_signal_stop>
+ 800204c:	9829      	ldr	r0, [sp, #164]	@ 0xa4
+ 800204e:	f7fe fc77 	bl	8000940 <led_signal_stop>
 	  relay_ask_off_pulse_fsm(&light_1);
- 800206c:	a83f      	add	r0, sp, #252	@ 0xfc
- 800206e:	f7fe ff26 	bl	8000ebe <relay_ask_off_pulse_fsm>
+ 8002052:	a83f      	add	r0, sp, #252	@ 0xfc
+ 8002054:	f7fe ff33 	bl	8000ebe <relay_ask_off_pulse_fsm>
 	HAL_TIM_Base_Start_IT(&htim1);
- 8002072:	48a1      	ldr	r0, [pc, #644]	@ (80022f8 <main+0x6b4>)
- 8002074:	f001 f996 	bl	80033a4 <HAL_TIM_Base_Start_IT>
+ 8002058:	48a5      	ldr	r0, [pc, #660]	@ (80022f0 <main+0x6ac>)
+ 800205a:	f001 f9a3 	bl	80033a4 <HAL_TIM_Base_Start_IT>
 	HAL_TIM_Base_Start_IT(&htim14);//SERIN communication timer
- 8002078:	48a0      	ldr	r0, [pc, #640]	@ (80022fc <main+0x6b8>)
- 800207a:	f001 f993 	bl	80033a4 <HAL_TIM_Base_Start_IT>
+ 800205e:	48a5      	ldr	r0, [pc, #660]	@ (80022f4 <main+0x6b0>)
+ 8002060:	f001 f9a0 	bl	80033a4 <HAL_TIM_Base_Start_IT>
 	HAL_TIM_Base_Start_IT(&htim16);//Used to generate a clock
- 800207e:	48a0      	ldr	r0, [pc, #640]	@ (8002300 <main+0x6bc>)
- 8002080:	f001 f990 	bl	80033a4 <HAL_TIM_Base_Start_IT>
+ 8002064:	48a4      	ldr	r0, [pc, #656]	@ (80022f8 <main+0x6b4>)
+ 8002066:	f001 f99d 	bl	80033a4 <HAL_TIM_Base_Start_IT>
 	HAL_NVIC_SetPriority(TIM17_IRQn, 0, 0);
- 8002084:	2200      	movs	r2, #0
- 8002086:	2016      	movs	r0, #22
- 8002088:	0011      	movs	r1, r2
- 800208a:	f000 fcad 	bl	80029e8 <HAL_NVIC_SetPriority>
+ 800206a:	2200      	movs	r2, #0
+ 800206c:	2016      	movs	r0, #22
+ 800206e:	0011      	movs	r1, r2
+ 8002070:	f000 fcba 	bl	80029e8 <HAL_NVIC_SetPriority>
 	HAL_NVIC_EnableIRQ(TIM17_IRQn);
- 800208e:	2016      	movs	r0, #22
- 8002090:	f000 fcd4 	bl	8002a3c <HAL_NVIC_EnableIRQ>
+ 8002074:	2016      	movs	r0, #22
+ 8002076:	f000 fce1 	bl	8002a3c <HAL_NVIC_EnableIRQ>
 	HAL_TIM_Base_Start_IT(&htim17);
- 8002094:	489b      	ldr	r0, [pc, #620]	@ (8002304 <main+0x6c0>)
- 8002096:	f001 f985 	bl	80033a4 <HAL_TIM_Base_Start_IT>
+ 800207a:	48a0      	ldr	r0, [pc, #640]	@ (80022fc <main+0x6b8>)
+ 800207c:	f001 f992 	bl	80033a4 <HAL_TIM_Base_Start_IT>
 	HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 1);
- 800209a:	2201      	movs	r2, #1
- 800209c:	2100      	movs	r1, #0
- 800209e:	2007      	movs	r0, #7
- 80020a0:	f000 fca2 	bl	80029e8 <HAL_NVIC_SetPriority>
+ 8002080:	2201      	movs	r2, #1
+ 8002082:	2100      	movs	r1, #0
+ 8002084:	2007      	movs	r0, #7
+ 8002086:	f000 fcaf 	bl	80029e8 <HAL_NVIC_SetPriority>
 	HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
- 80020a4:	2007      	movs	r0, #7
- 80020a6:	f000 fcc9 	bl	8002a3c <HAL_NVIC_EnableIRQ>
+ 800208a:	2007      	movs	r0, #7
+ 800208c:	f000 fcd6 	bl	8002a3c <HAL_NVIC_EnableIRQ>
 	HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
- 80020aa:	2200      	movs	r2, #0
- 80020ac:	2103      	movs	r1, #3
- 80020ae:	2006      	movs	r0, #6
- 80020b0:	f000 fc9a 	bl	80029e8 <HAL_NVIC_SetPriority>
+ 8002090:	2200      	movs	r2, #0
+ 8002092:	2103      	movs	r1, #3
+ 8002094:	2006      	movs	r0, #6
+ 8002096:	f000 fca7 	bl	80029e8 <HAL_NVIC_SetPriority>
 	HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
- 80020b4:	2006      	movs	r0, #6
- 80020b6:	f000 fcc1 	bl	8002a3c <HAL_NVIC_EnableIRQ>
+ 800209a:	2006      	movs	r0, #6
+ 800209c:	f000 fcce 	bl	8002a3c <HAL_NVIC_EnableIRQ>
   relay_ask_off_pulse_fsm(&light_1);
- 80020ba:	a83f      	add	r0, sp, #252	@ 0xfc
- 80020bc:	f7fe feff 	bl	8000ebe <relay_ask_off_pulse_fsm>
+ 80020a0:	a83f      	add	r0, sp, #252	@ 0xfc
+ 80020a2:	f7fe ff0c 	bl	8000ebe <relay_ask_off_pulse_fsm>
   relay_ask_off_pulse_fsm(&light_2);
- 80020c0:	a848      	add	r0, sp, #288	@ 0x120
- 80020c2:	f7fe fefc 	bl	8000ebe <relay_ask_off_pulse_fsm>
+ 80020a6:	a848      	add	r0, sp, #288	@ 0x120
+ 80020a8:	f7fe ff09 	bl	8000ebe <relay_ask_off_pulse_fsm>
   relay_ask_off_pulse_fsm(&light_uv);
- 80020c6:	a851      	add	r0, sp, #324	@ 0x144
- 80020c8:	f7fe fef9 	bl	8000ebe <relay_ask_off_pulse_fsm>
+ 80020ac:	a851      	add	r0, sp, #324	@ 0x144
+ 80020ae:	f7fe ff06 	bl	8000ebe <relay_ask_off_pulse_fsm>
   uv_state = MOTION_LIGHT_UV_IDLE;
- 80020cc:	2300      	movs	r3, #0
+ 80020b2:	2300      	movs	r3, #0
   abort_uv = MOTION_ABORT_FALSE;
- 80020ce:	2101      	movs	r1, #1
+ 80020b4:	2101      	movs	r1, #1
   uv_state = MOTION_LIGHT_UV_IDLE;
- 80020d0:	4a8d      	ldr	r2, [pc, #564]	@ (8002308 <main+0x6c4>)
+ 80020b6:	4a92      	ldr	r2, [pc, #584]	@ (8002300 <main+0x6bc>)
   led_signal_stop(&signal_led);
- 80020d2:	a832      	add	r0, sp, #200	@ 0xc8
+ 80020b8:	a832      	add	r0, sp, #200	@ 0xc8
   uv_state = MOTION_LIGHT_UV_IDLE;
- 80020d4:	7013      	strb	r3, [r2, #0]
+ 80020ba:	7013      	strb	r3, [r2, #0]
   abort_uv = MOTION_ABORT_FALSE;
- 80020d6:	4a8d      	ldr	r2, [pc, #564]	@ (800230c <main+0x6c8>)
- 80020d8:	7011      	strb	r1, [r2, #0]
+ 80020bc:	4a91      	ldr	r2, [pc, #580]	@ (8002304 <main+0x6c0>)
+ 80020be:	7011      	strb	r1, [r2, #0]
   motion_sensed_light_1 = MOTION_ISR_ATTENDED;
- 80020da:	4a8d      	ldr	r2, [pc, #564]	@ (8002310 <main+0x6cc>)
- 80020dc:	7013      	strb	r3, [r2, #0]
+ 80020c0:	4a91      	ldr	r2, [pc, #580]	@ (8002308 <main+0x6c4>)
+ 80020c2:	7013      	strb	r3, [r2, #0]
   motion_sensed_light_2 = MOTION_ISR_ATTENDED;
- 80020de:	4a8d      	ldr	r2, [pc, #564]	@ (8002314 <main+0x6d0>)
- 80020e0:	7013      	strb	r3, [r2, #0]
+ 80020c4:	4a91      	ldr	r2, [pc, #580]	@ (800230c <main+0x6c8>)
+ 80020c6:	7013      	strb	r3, [r2, #0]
   motion_sensed_uv = MOTION_ISR_ATTENDED;
- 80020e2:	4a8d      	ldr	r2, [pc, #564]	@ (8002318 <main+0x6d4>)
- 80020e4:	7013      	strb	r3, [r2, #0]
+ 80020c8:	4a91      	ldr	r2, [pc, #580]	@ (8002310 <main+0x6cc>)
+ 80020ca:	7013      	strb	r3, [r2, #0]
   led_signal_stop(&signal_led);
- 80020e6:	f7fe fc2b 	bl	8000940 <led_signal_stop>
+ 80020cc:	f7fe fc38 	bl	8000940 <led_signal_stop>
 	  switch(switch_selector.value)
- 80020ea:	9831      	ldr	r0, [sp, #196]	@ 0xc4
- 80020ec:	2803      	cmp	r0, #3
- 80020ee:	d900      	bls.n	80020f2 <main+0x4ae>
- 80020f0:	e0c5      	b.n	800227e <main+0x63a>
- 80020f2:	f7fe f813 	bl	800011c <__gnu_thumb1_case_uqi>
- 80020f6:	730d      	.short	0x730d
- 80020f8:	c0bc      	.short	0xc0bc
+ 80020d0:	9831      	ldr	r0, [sp, #196]	@ 0xc4
+ 80020d2:	2803      	cmp	r0, #3
+ 80020d4:	d900      	bls.n	80020d8 <main+0x494>
+ 80020d6:	e0ce      	b.n	8002276 <main+0x632>
+ 80020d8:	f7fe f820 	bl	800011c <__gnu_thumb1_case_uqi>
+ 80020dc:	c9be750f 	.word	0xc9be750f
 		  timer_motion_light_2.msec = SURFACESHIELD_LAMP2_ON_TIME_MS;
- 80020fa:	2700      	movs	r7, #0
- 80020fc:	4e87      	ldr	r6, [pc, #540]	@ (800231c <main+0x6d8>)
+ 80020e0:	2500      	movs	r5, #0
     	  timer_motion_light_1.msec = SURFACESHIELD_LAMP1_ON_TIME_MS;
- 80020fe:	4888      	ldr	r0, [pc, #544]	@ (8002320 <main+0x6dc>)
+ 80020e2:	488c      	ldr	r0, [pc, #560]	@ (8002314 <main+0x6d0>)
+ 80020e4:	60a0      	str	r0, [r4, #8]
 		  timer_motion_light_2.msec = SURFACESHIELD_LAMP2_ON_TIME_MS;
- 8002100:	60b7      	str	r7, [r6, #8]
+ 80020e6:	488c      	ldr	r0, [pc, #560]	@ (8002318 <main+0x6d4>)
+ 80020e8:	6085      	str	r5, [r0, #8]
 		  timer_motion_uv_safe.msec = SURFACESHIELD_LAMP_UV_SAFETY_TIME_MS;
- 8002102:	26e1      	movs	r6, #225	@ 0xe1
- 8002104:	00b6      	lsls	r6, r6, #2
-    	  timer_motion_light_1.msec = SURFACESHIELD_LAMP1_ON_TIME_MS;
- 8002106:	60a0      	str	r0, [r4, #8]
-		  timer_motion_uv_safe.msec = SURFACESHIELD_LAMP_UV_SAFETY_TIME_MS;
- 8002108:	608e      	str	r6, [r1, #8]
+ 80020ea:	20e1      	movs	r0, #225	@ 0xe1
+ 80020ec:	0080      	lsls	r0, r0, #2
+ 80020ee:	6088      	str	r0, [r1, #8]
 		  timer_motion_uv.msec = SURFACESHIELD_LAMP_UV_ON_TIME_MS;
- 800210a:	6090      	str	r0, [r2, #8]
+ 80020f0:	498a      	ldr	r1, [pc, #552]	@ (800231c <main+0x6d8>)
+ 80020f2:	6091      	str	r1, [r2, #8]
 		  timer_motion_uv_timeout.msec = SURFACESHIELD_LAMP_UV_TIMEOUT_MS;
- 800210c:	609d      	str	r5, [r3, #8]
+ 80020f4:	4a8a      	ldr	r2, [pc, #552]	@ (8002320 <main+0x6dc>)
+ 80020f6:	609a      	str	r2, [r3, #8]
     	  __NOP();
- 800210e:	e6c4      	b.n	8001e9a <main+0x256>
+ 80020f8:	e6c6      	b.n	8001e88 <main+0x244>
 			  events_detection_uv_waits(&motion_sensor, &deadline_buttons,
- 8002110:	4a7e      	ldr	r2, [pc, #504]	@ (800230c <main+0x6c8>)
- 8002112:	4d71      	ldr	r5, [pc, #452]	@ (80022d8 <main+0x694>)
- 8002114:	9204      	str	r2, [sp, #16]
- 8002116:	4a80      	ldr	r2, [pc, #512]	@ (8002318 <main+0x6d4>)
- 8002118:	4c72      	ldr	r4, [pc, #456]	@ (80022e4 <main+0x6a0>)
- 800211a:	9203      	str	r2, [sp, #12]
- 800211c:	4a7d      	ldr	r2, [pc, #500]	@ (8002314 <main+0x6d0>)
- 800211e:	4f7c      	ldr	r7, [pc, #496]	@ (8002310 <main+0x6cc>)
- 8002120:	9209      	str	r2, [sp, #36]	@ 0x24
- 8002122:	9202      	str	r2, [sp, #8]
- 8002124:	4a70      	ldr	r2, [pc, #448]	@ (80022e8 <main+0x6a4>)
- 8002126:	4b6e      	ldr	r3, [pc, #440]	@ (80022e0 <main+0x69c>)
- 8002128:	0020      	movs	r0, r4
- 800212a:	496c      	ldr	r1, [pc, #432]	@ (80022dc <main+0x698>)
+ 80020fa:	4a82      	ldr	r2, [pc, #520]	@ (8002304 <main+0x6c0>)
+ 80020fc:	4d74      	ldr	r5, [pc, #464]	@ (80022d0 <main+0x68c>)
+ 80020fe:	9204      	str	r2, [sp, #16]
+ 8002100:	4a83      	ldr	r2, [pc, #524]	@ (8002310 <main+0x6cc>)
+ 8002102:	4c76      	ldr	r4, [pc, #472]	@ (80022dc <main+0x698>)
+ 8002104:	9203      	str	r2, [sp, #12]
+ 8002106:	4a81      	ldr	r2, [pc, #516]	@ (800230c <main+0x6c8>)
+ 8002108:	4f7f      	ldr	r7, [pc, #508]	@ (8002308 <main+0x6c4>)
+ 800210a:	9209      	str	r2, [sp, #36]	@ 0x24
+ 800210c:	9202      	str	r2, [sp, #8]
+ 800210e:	4a74      	ldr	r2, [pc, #464]	@ (80022e0 <main+0x69c>)
+ 8002110:	4b71      	ldr	r3, [pc, #452]	@ (80022d8 <main+0x694>)
+ 8002112:	0020      	movs	r0, r4
+ 8002114:	496f      	ldr	r1, [pc, #444]	@ (80022d4 <main+0x690>)
+ 8002116:	9200      	str	r2, [sp, #0]
+ 8002118:	9701      	str	r7, [sp, #4]
+ 800211a:	002a      	movs	r2, r5
+ 800211c:	9308      	str	r3, [sp, #32]
+ 800211e:	f7ff fbb1 	bl	8001884 <events_detection_uv_waits>
+			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
+ 8002122:	4a58      	ldr	r2, [pc, #352]	@ (8002284 <main+0x640>)
+ 8002124:	ae3f      	add	r6, sp, #252	@ 0xfc
+ 8002126:	0029      	movs	r1, r5
+ 8002128:	0030      	movs	r0, r6
+ 800212a:	4b55      	ldr	r3, [pc, #340]	@ (8002280 <main+0x63c>)
  800212c:	9200      	str	r2, [sp, #0]
  800212e:	9701      	str	r7, [sp, #4]
- 8002130:	002a      	movs	r2, r5
- 8002132:	9308      	str	r3, [sp, #32]
- 8002134:	f7ff fba6 	bl	8001884 <events_detection_uv_waits>
-			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
- 8002138:	4a55      	ldr	r2, [pc, #340]	@ (8002290 <main+0x64c>)
- 800213a:	ae3f      	add	r6, sp, #252	@ 0xfc
- 800213c:	0029      	movs	r1, r5
- 800213e:	0030      	movs	r0, r6
- 8002140:	4b52      	ldr	r3, [pc, #328]	@ (800228c <main+0x648>)
- 8002142:	9200      	str	r2, [sp, #0]
- 8002144:	9701      	str	r7, [sp, #4]
- 8002146:	0022      	movs	r2, r4
- 8002148:	f7ff fbe2 	bl	8001910 <motion_light_control_fsm>
+ 8002130:	0022      	movs	r2, r4
+ 8002132:	f7ff fbed 	bl	8001910 <motion_light_control_fsm>
 			  motion_light_control_fsm(&light_2, &button_light_2, &motion_sensor,
- 800214c:	9a09      	ldr	r2, [sp, #36]	@ 0x24
- 800214e:	ad48      	add	r5, sp, #288	@ 0x120
- 8002150:	9201      	str	r2, [sp, #4]
- 8002152:	4a51      	ldr	r2, [pc, #324]	@ (8002298 <main+0x654>)
- 8002154:	4b4f      	ldr	r3, [pc, #316]	@ (8002294 <main+0x650>)
- 8002156:	9200      	str	r2, [sp, #0]
- 8002158:	0028      	movs	r0, r5
- 800215a:	0022      	movs	r2, r4
- 800215c:	9908      	ldr	r1, [sp, #32]
- 800215e:	f7ff fbd7 	bl	8001910 <motion_light_control_fsm>
+ 8002136:	9a09      	ldr	r2, [sp, #36]	@ 0x24
+ 8002138:	ad48      	add	r5, sp, #288	@ 0x120
+ 800213a:	9201      	str	r2, [sp, #4]
+ 800213c:	4a53      	ldr	r2, [pc, #332]	@ (800228c <main+0x648>)
+ 800213e:	4b52      	ldr	r3, [pc, #328]	@ (8002288 <main+0x644>)
+ 8002140:	9200      	str	r2, [sp, #0]
+ 8002142:	0028      	movs	r0, r5
+ 8002144:	0022      	movs	r2, r4
+ 8002146:	9908      	ldr	r1, [sp, #32]
+ 8002148:	f7ff fbe2 	bl	8001910 <motion_light_control_fsm>
 			  if((light_1.relay_status == RELAY_ON) ||
- 8002162:	7833      	ldrb	r3, [r6, #0]
+ 800214c:	7833      	ldrb	r3, [r6, #0]
 				  wait = MOTION_UV_WAIT_TRUE;
- 8002164:	2200      	movs	r2, #0
+ 800214e:	2200      	movs	r2, #0
 			  if((light_1.relay_status == RELAY_ON) ||
- 8002166:	2b01      	cmp	r3, #1
- 8002168:	d004      	beq.n	8002174 <main+0x530>
- 800216a:	782a      	ldrb	r2, [r5, #0]
- 800216c:	3a01      	subs	r2, #1
- 800216e:	1e53      	subs	r3, r2, #1
- 8002170:	419a      	sbcs	r2, r3
- 8002172:	b2d2      	uxtb	r2, r2
- 8002174:	4b6b      	ldr	r3, [pc, #428]	@ (8002324 <main+0x6e0>)
+ 8002150:	2b01      	cmp	r3, #1
+ 8002152:	d004      	beq.n	800215e <main+0x51a>
+ 8002154:	782a      	ldrb	r2, [r5, #0]
+ 8002156:	3a01      	subs	r2, #1
+ 8002158:	1e53      	subs	r3, r2, #1
+ 800215a:	419a      	sbcs	r2, r3
+ 800215c:	b2d2      	uxtb	r2, r2
+ 800215e:	4b71      	ldr	r3, [pc, #452]	@ (8002324 <main+0x6e0>)
 			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
- 8002176:	a832      	add	r0, sp, #200	@ 0xc8
- 8002178:	701a      	strb	r2, [r3, #0]
- 800217a:	9206      	str	r2, [sp, #24]
- 800217c:	4a63      	ldr	r2, [pc, #396]	@ (800230c <main+0x6c8>)
- 800217e:	4b48      	ldr	r3, [pc, #288]	@ (80022a0 <main+0x65c>)
- 8002180:	9205      	str	r2, [sp, #20]
- 8002182:	4a65      	ldr	r2, [pc, #404]	@ (8002318 <main+0x6d4>)
- 8002184:	4958      	ldr	r1, [pc, #352]	@ (80022e8 <main+0x6a4>)
- 8002186:	9204      	str	r2, [sp, #16]
- 8002188:	4a5f      	ldr	r2, [pc, #380]	@ (8002308 <main+0x6c4>)
- 800218a:	9007      	str	r0, [sp, #28]
- 800218c:	9203      	str	r2, [sp, #12]
- 800218e:	4a4d      	ldr	r2, [pc, #308]	@ (80022c4 <main+0x680>)
- 8002190:	a851      	add	r0, sp, #324	@ 0x144
- 8002192:	9202      	str	r2, [sp, #8]
- 8002194:	4a48      	ldr	r2, [pc, #288]	@ (80022b8 <main+0x674>)
- 8002196:	9201      	str	r2, [sp, #4]
- 8002198:	4a44      	ldr	r2, [pc, #272]	@ (80022ac <main+0x668>)
- 800219a:	9200      	str	r2, [sp, #0]
- 800219c:	0022      	movs	r2, r4
- 800219e:	f7ff fc38 	bl	8001a12 <motion_uv_ctrl_wait_fsm>
+ 8002160:	a832      	add	r0, sp, #200	@ 0xc8
+ 8002162:	701a      	strb	r2, [r3, #0]
+ 8002164:	9206      	str	r2, [sp, #24]
+ 8002166:	4a67      	ldr	r2, [pc, #412]	@ (8002304 <main+0x6c0>)
+ 8002168:	4b4a      	ldr	r3, [pc, #296]	@ (8002294 <main+0x650>)
+ 800216a:	9205      	str	r2, [sp, #20]
+ 800216c:	4a68      	ldr	r2, [pc, #416]	@ (8002310 <main+0x6cc>)
+ 800216e:	495c      	ldr	r1, [pc, #368]	@ (80022e0 <main+0x69c>)
+ 8002170:	9204      	str	r2, [sp, #16]
+ 8002172:	4a63      	ldr	r2, [pc, #396]	@ (8002300 <main+0x6bc>)
+ 8002174:	9007      	str	r0, [sp, #28]
+ 8002176:	9203      	str	r2, [sp, #12]
+ 8002178:	4a50      	ldr	r2, [pc, #320]	@ (80022bc <main+0x678>)
+ 800217a:	a851      	add	r0, sp, #324	@ 0x144
+ 800217c:	9202      	str	r2, [sp, #8]
+ 800217e:	4a4b      	ldr	r2, [pc, #300]	@ (80022ac <main+0x668>)
+ 8002180:	9201      	str	r2, [sp, #4]
+ 8002182:	4a47      	ldr	r2, [pc, #284]	@ (80022a0 <main+0x65c>)
+ 8002184:	9200      	str	r2, [sp, #0]
+ 8002186:	0022      	movs	r2, r4
+ 8002188:	f7ff fc43 	bl	8001a12 <motion_uv_ctrl_wait_fsm>
 			  output_fsm_ctrl(&light_1, &deadline_timer_light_1);
- 80021a2:	0030      	movs	r0, r6
- 80021a4:	4948      	ldr	r1, [pc, #288]	@ (80022c8 <main+0x684>)
- 80021a6:	f7ff f9af 	bl	8001508 <output_fsm_ctrl>
+ 800218c:	0030      	movs	r0, r6
+ 800218e:	494c      	ldr	r1, [pc, #304]	@ (80022c0 <main+0x67c>)
+ 8002190:	f7ff f9ba 	bl	8001508 <output_fsm_ctrl>
 			  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
- 80021aa:	0028      	movs	r0, r5
- 80021ac:	4948      	ldr	r1, [pc, #288]	@ (80022d0 <main+0x68c>)
+ 8002194:	0028      	movs	r0, r5
+ 8002196:	494c      	ldr	r1, [pc, #304]	@ (80022c8 <main+0x684>)
 			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
- 80021ae:	2423      	movs	r4, #35	@ 0x23
+ 8002198:	2423      	movs	r4, #35	@ 0x23
 			  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
- 80021b0:	f7ff f9aa 	bl	8001508 <output_fsm_ctrl>
+ 800219a:	f7ff f9b5 	bl	8001508 <output_fsm_ctrl>
 			  output_fsm_ctrl(&light_uv, &deadline_timer_uv);
- 80021b4:	495c      	ldr	r1, [pc, #368]	@ (8002328 <main+0x6e4>)
- 80021b6:	a851      	add	r0, sp, #324	@ 0x144
- 80021b8:	f7ff f9a6 	bl	8001508 <output_fsm_ctrl>
+ 800219e:	a851      	add	r0, sp, #324	@ 0x144
+ 80021a0:	4961      	ldr	r1, [pc, #388]	@ (8002328 <main+0x6e4>)
+ 80021a2:	f7ff f9b1 	bl	8001508 <output_fsm_ctrl>
 			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
- 80021bc:	ab04      	add	r3, sp, #16
- 80021be:	18e4      	adds	r4, r4, r3
- 80021c0:	0021      	movs	r1, r4
- 80021c2:	484a      	ldr	r0, [pc, #296]	@ (80022ec <main+0x6a8>)
- 80021c4:	f7ff f986 	bl	80014d4 <deadline_timer_check>
+ 80021a6:	ab04      	add	r3, sp, #16
+ 80021a8:	484e      	ldr	r0, [pc, #312]	@ (80022e4 <main+0x6a0>)
+ 80021aa:	18e4      	adds	r4, r4, r3
+ 80021ac:	0021      	movs	r1, r4
+ 80021ae:	f7ff f991 	bl	80014d4 <deadline_timer_check>
 			  if(indicator_timer_expired == TIMER_EXPIRED_TRUE)
- 80021c8:	7823      	ldrb	r3, [r4, #0]
- 80021ca:	2b01      	cmp	r3, #1
- 80021cc:	d18d      	bne.n	80020ea <main+0x4a6>
+ 80021b2:	7823      	ldrb	r3, [r4, #0]
+ 80021b4:	2b01      	cmp	r3, #1
+ 80021b6:	d18b      	bne.n	80020d0 <main+0x48c>
 				  led_signal_fsm(&signal_led);
- 80021ce:	a832      	add	r0, sp, #200	@ 0xc8
- 80021d0:	f7fe fb9b 	bl	800090a <led_signal_fsm>
+ 80021b8:	a832      	add	r0, sp, #200	@ 0xc8
+ 80021ba:	f7fe fba6 	bl	800090a <led_signal_fsm>
 				  deadline_timer_set_initial_time(&deadline_led_indicator);
- 80021d4:	4845      	ldr	r0, [pc, #276]	@ (80022ec <main+0x6a8>)
- 80021d6:	f7ff f948 	bl	800146a <deadline_timer_set_initial_time>
- 80021da:	e786      	b.n	80020ea <main+0x4a6>
+ 80021be:	4849      	ldr	r0, [pc, #292]	@ (80022e4 <main+0x6a0>)
+ 80021c0:	f7ff f953 	bl	800146a <deadline_timer_set_initial_time>
+ 80021c4:	e784      	b.n	80020d0 <main+0x48c>
 			  events_detection_uv_waits(&motion_sensor, &deadline_buttons,
- 80021dc:	4a4b      	ldr	r2, [pc, #300]	@ (800230c <main+0x6c8>)
- 80021de:	4c41      	ldr	r4, [pc, #260]	@ (80022e4 <main+0x6a0>)
- 80021e0:	9209      	str	r2, [sp, #36]	@ 0x24
- 80021e2:	9204      	str	r2, [sp, #16]
- 80021e4:	4a4c      	ldr	r2, [pc, #304]	@ (8002318 <main+0x6d4>)
- 80021e6:	4d3c      	ldr	r5, [pc, #240]	@ (80022d8 <main+0x694>)
- 80021e8:	920a      	str	r2, [sp, #40]	@ 0x28
- 80021ea:	9203      	str	r2, [sp, #12]
- 80021ec:	4a49      	ldr	r2, [pc, #292]	@ (8002314 <main+0x6d0>)
- 80021ee:	4f48      	ldr	r7, [pc, #288]	@ (8002310 <main+0x6cc>)
- 80021f0:	9202      	str	r2, [sp, #8]
- 80021f2:	4a3d      	ldr	r2, [pc, #244]	@ (80022e8 <main+0x6a4>)
- 80021f4:	4b3a      	ldr	r3, [pc, #232]	@ (80022e0 <main+0x69c>)
- 80021f6:	0020      	movs	r0, r4
- 80021f8:	4938      	ldr	r1, [pc, #224]	@ (80022dc <main+0x698>)
- 80021fa:	920b      	str	r2, [sp, #44]	@ 0x2c
+ 80021c6:	4a4f      	ldr	r2, [pc, #316]	@ (8002304 <main+0x6c0>)
+ 80021c8:	4c44      	ldr	r4, [pc, #272]	@ (80022dc <main+0x698>)
+ 80021ca:	9209      	str	r2, [sp, #36]	@ 0x24
+ 80021cc:	9204      	str	r2, [sp, #16]
+ 80021ce:	4a50      	ldr	r2, [pc, #320]	@ (8002310 <main+0x6cc>)
+ 80021d0:	4d3f      	ldr	r5, [pc, #252]	@ (80022d0 <main+0x68c>)
+ 80021d2:	920a      	str	r2, [sp, #40]	@ 0x28
+ 80021d4:	9203      	str	r2, [sp, #12]
+ 80021d6:	4a4d      	ldr	r2, [pc, #308]	@ (800230c <main+0x6c8>)
+ 80021d8:	4f4b      	ldr	r7, [pc, #300]	@ (8002308 <main+0x6c4>)
+ 80021da:	9202      	str	r2, [sp, #8]
+ 80021dc:	4a40      	ldr	r2, [pc, #256]	@ (80022e0 <main+0x69c>)
+ 80021de:	4b3e      	ldr	r3, [pc, #248]	@ (80022d8 <main+0x694>)
+ 80021e0:	0020      	movs	r0, r4
+ 80021e2:	493c      	ldr	r1, [pc, #240]	@ (80022d4 <main+0x690>)
+ 80021e4:	920b      	str	r2, [sp, #44]	@ 0x2c
+ 80021e6:	9200      	str	r2, [sp, #0]
+ 80021e8:	9701      	str	r7, [sp, #4]
+ 80021ea:	002a      	movs	r2, r5
+ 80021ec:	9308      	str	r3, [sp, #32]
+ 80021ee:	f7ff fb49 	bl	8001884 <events_detection_uv_waits>
+			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
+ 80021f2:	4a24      	ldr	r2, [pc, #144]	@ (8002284 <main+0x640>)
+ 80021f4:	ae3f      	add	r6, sp, #252	@ 0xfc
+ 80021f6:	0029      	movs	r1, r5
+ 80021f8:	0030      	movs	r0, r6
+ 80021fa:	4b21      	ldr	r3, [pc, #132]	@ (8002280 <main+0x63c>)
  80021fc:	9200      	str	r2, [sp, #0]
  80021fe:	9701      	str	r7, [sp, #4]
- 8002200:	002a      	movs	r2, r5
- 8002202:	9308      	str	r3, [sp, #32]
- 8002204:	f7ff fb3e 	bl	8001884 <events_detection_uv_waits>
-			  motion_light_control_fsm(&light_1, &button_light_1, &motion_sensor,
- 8002208:	4a21      	ldr	r2, [pc, #132]	@ (8002290 <main+0x64c>)
- 800220a:	ae3f      	add	r6, sp, #252	@ 0xfc
- 800220c:	0029      	movs	r1, r5
- 800220e:	0030      	movs	r0, r6
- 8002210:	4b1e      	ldr	r3, [pc, #120]	@ (800228c <main+0x648>)
- 8002212:	9200      	str	r2, [sp, #0]
- 8002214:	9701      	str	r7, [sp, #4]
- 8002216:	0022      	movs	r2, r4
- 8002218:	f7ff fb7a 	bl	8001910 <motion_light_control_fsm>
+ 8002200:	0022      	movs	r2, r4
+ 8002202:	f7ff fb85 	bl	8001910 <motion_light_control_fsm>
 			  direct_light_control_fsm(&light_2, &button_light_2,
- 800221c:	4b43      	ldr	r3, [pc, #268]	@ (800232c <main+0x6e8>)
- 800221e:	4a1d      	ldr	r2, [pc, #116]	@ (8002294 <main+0x650>)
- 8002220:	9908      	ldr	r1, [sp, #32]
- 8002222:	a848      	add	r0, sp, #288	@ 0x120
- 8002224:	f7ff fcc1 	bl	8001baa <direct_light_control_fsm>
+ 8002206:	4b49      	ldr	r3, [pc, #292]	@ (800232c <main+0x6e8>)
+ 8002208:	4a1f      	ldr	r2, [pc, #124]	@ (8002288 <main+0x644>)
+ 800220a:	9908      	ldr	r1, [sp, #32]
+ 800220c:	a848      	add	r0, sp, #288	@ 0x120
+ 800220e:	f7ff fccc 	bl	8001baa <direct_light_control_fsm>
 			  if(light_1.relay_status == RELAY_ON)
- 8002228:	7832      	ldrb	r2, [r6, #0]
+ 8002212:	7832      	ldrb	r2, [r6, #0]
 			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
- 800222a:	a932      	add	r1, sp, #200	@ 0xc8
+ 8002214:	a932      	add	r1, sp, #200	@ 0xc8
 			  if(light_1.relay_status == RELAY_ON)
- 800222c:	3a01      	subs	r2, #1
- 800222e:	1e53      	subs	r3, r2, #1
- 8002230:	419a      	sbcs	r2, r3
- 8002232:	4b3c      	ldr	r3, [pc, #240]	@ (8002324 <main+0x6e0>)
- 8002234:	b2d2      	uxtb	r2, r2
- 8002236:	701a      	strb	r2, [r3, #0]
+ 8002216:	3a01      	subs	r2, #1
+ 8002218:	1e53      	subs	r3, r2, #1
+ 800221a:	419a      	sbcs	r2, r3
+ 800221c:	4b41      	ldr	r3, [pc, #260]	@ (8002324 <main+0x6e0>)
+ 800221e:	b2d2      	uxtb	r2, r2
+ 8002220:	701a      	strb	r2, [r3, #0]
 			  motion_uv_ctrl_wait_fsm(&light_uv, &button_uv, &motion_sensor,
- 8002238:	9206      	str	r2, [sp, #24]
- 800223a:	9a09      	ldr	r2, [sp, #36]	@ 0x24
- 800223c:	4b18      	ldr	r3, [pc, #96]	@ (80022a0 <main+0x65c>)
- 800223e:	9205      	str	r2, [sp, #20]
- 8002240:	9a0a      	ldr	r2, [sp, #40]	@ 0x28
- 8002242:	9107      	str	r1, [sp, #28]
- 8002244:	9204      	str	r2, [sp, #16]
- 8002246:	4a30      	ldr	r2, [pc, #192]	@ (8002308 <main+0x6c4>)
- 8002248:	990b      	ldr	r1, [sp, #44]	@ 0x2c
- 800224a:	9203      	str	r2, [sp, #12]
- 800224c:	4a1d      	ldr	r2, [pc, #116]	@ (80022c4 <main+0x680>)
- 800224e:	a851      	add	r0, sp, #324	@ 0x144
- 8002250:	9202      	str	r2, [sp, #8]
- 8002252:	4a19      	ldr	r2, [pc, #100]	@ (80022b8 <main+0x674>)
- 8002254:	9201      	str	r2, [sp, #4]
- 8002256:	4a15      	ldr	r2, [pc, #84]	@ (80022ac <main+0x668>)
- 8002258:	9200      	str	r2, [sp, #0]
- 800225a:	0022      	movs	r2, r4
- 800225c:	f7ff fbd9 	bl	8001a12 <motion_uv_ctrl_wait_fsm>
+ 8002222:	9206      	str	r2, [sp, #24]
+ 8002224:	9a09      	ldr	r2, [sp, #36]	@ 0x24
+ 8002226:	4b1b      	ldr	r3, [pc, #108]	@ (8002294 <main+0x650>)
+ 8002228:	9205      	str	r2, [sp, #20]
+ 800222a:	9a0a      	ldr	r2, [sp, #40]	@ 0x28
+ 800222c:	9107      	str	r1, [sp, #28]
+ 800222e:	9204      	str	r2, [sp, #16]
+ 8002230:	4a33      	ldr	r2, [pc, #204]	@ (8002300 <main+0x6bc>)
+ 8002232:	990b      	ldr	r1, [sp, #44]	@ 0x2c
+ 8002234:	9203      	str	r2, [sp, #12]
+ 8002236:	4a21      	ldr	r2, [pc, #132]	@ (80022bc <main+0x678>)
+ 8002238:	a851      	add	r0, sp, #324	@ 0x144
+ 800223a:	9202      	str	r2, [sp, #8]
+ 800223c:	4a1b      	ldr	r2, [pc, #108]	@ (80022ac <main+0x668>)
+ 800223e:	9201      	str	r2, [sp, #4]
+ 8002240:	4a17      	ldr	r2, [pc, #92]	@ (80022a0 <main+0x65c>)
+ 8002242:	9200      	str	r2, [sp, #0]
+ 8002244:	0022      	movs	r2, r4
+ 8002246:	f7ff fbe4 	bl	8001a12 <motion_uv_ctrl_wait_fsm>
 			  output_fsm_ctrl(&light_1, &deadline_timer_light_1);
- 8002260:	0030      	movs	r0, r6
- 8002262:	4919      	ldr	r1, [pc, #100]	@ (80022c8 <main+0x684>)
- 8002264:	f7ff f950 	bl	8001508 <output_fsm_ctrl>
+ 800224a:	0030      	movs	r0, r6
+ 800224c:	491c      	ldr	r1, [pc, #112]	@ (80022c0 <main+0x67c>)
+ 800224e:	f7ff f95b 	bl	8001508 <output_fsm_ctrl>
 			  output_fsm_ctrl(&light_2, &deadline_timer_light_2);
- 8002268:	4919      	ldr	r1, [pc, #100]	@ (80022d0 <main+0x68c>)
- 800226a:	a848      	add	r0, sp, #288	@ 0x120
- 800226c:	e79f      	b.n	80021ae <main+0x56a>
-			  signal_led.type = LED_SIGNAL_BLINK;
- 800226e:	2202      	movs	r2, #2
- 8002270:	ab32      	add	r3, sp, #200	@ 0xc8
- 8002272:	725a      	strb	r2, [r3, #9]
-			  break;
- 8002274:	e739      	b.n	80020ea <main+0x4a6>
+ 8002252:	491d      	ldr	r1, [pc, #116]	@ (80022c8 <main+0x684>)
+ 8002254:	a848      	add	r0, sp, #288	@ 0x120
+ 8002256:	e79f      	b.n	8002198 <main+0x554>
+			  signal_led.control = LED_SIGNAL_CTRL_START;
+ 8002258:	2280      	movs	r2, #128	@ 0x80
+ 800225a:	ab32      	add	r3, sp, #200	@ 0xc8
+ 800225c:	0092      	lsls	r2, r2, #2
+ 800225e:	811a      	strh	r2, [r3, #8]
+			  deadline_led_indicator.deadline.msec = 100;
+ 8002260:	2364      	movs	r3, #100	@ 0x64
+			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
+ 8002262:	2423      	movs	r4, #35	@ 0x23
+			  deadline_led_indicator.deadline.msec = 100;
+ 8002264:	481f      	ldr	r0, [pc, #124]	@ (80022e4 <main+0x6a0>)
+ 8002266:	6203      	str	r3, [r0, #32]
+			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
+ 8002268:	ab04      	add	r3, sp, #16
+ 800226a:	18e4      	adds	r4, r4, r3
+ 800226c:	e79e      	b.n	80021ac <main+0x568>
 			  nutone_app_process(&nutone_app_hand);
- 8002276:	481e      	ldr	r0, [pc, #120]	@ (80022f0 <main+0x6ac>)
- 8002278:	f7fe fa6f 	bl	800075a <nutone_app_process>
+ 800226e:	481e      	ldr	r0, [pc, #120]	@ (80022e8 <main+0x6a4>)
+ 8002270:	f7fe fa73 	bl	800075a <nutone_app_process>
 			  break;
- 800227c:	e735      	b.n	80020ea <main+0x4a6>
+ 8002274:	e72c      	b.n	80020d0 <main+0x48c>
 			  __NOP();
- 800227e:	46c0      	nop			@ (mov r8, r8)
+ 8002276:	46c0      	nop			@ (mov r8, r8)
 			  break;
- 8002280:	e733      	b.n	80020ea <main+0x4a6>
- 8002282:	46c0      	nop			@ (mov r8, r8)
- 8002284:	0000ea60 	.word	0x0000ea60
- 8002288:	0001d4c0 	.word	0x0001d4c0
- 800228c:	20000430 	.word	0x20000430
- 8002290:	20000410 	.word	0x20000410
- 8002294:	200003a8 	.word	0x200003a8
- 8002298:	20000389 	.word	0x20000389
- 800229c:	20000308 	.word	0x20000308
- 80022a0:	20000320 	.word	0x20000320
- 80022a4:	20000310 	.word	0x20000310
- 80022a8:	20000288 	.word	0x20000288
- 80022ac:	200002a0 	.word	0x200002a0
- 80022b0:	20000290 	.word	0x20000290
- 80022b4:	20000208 	.word	0x20000208
- 80022b8:	20000220 	.word	0x20000220
- 80022bc:	20000210 	.word	0x20000210
- 80022c0:	20000728 	.word	0x20000728
- 80022c4:	200001a0 	.word	0x200001a0
- 80022c8:	200006c0 	.word	0x200006c0
- 80022cc:	200000c8 	.word	0x200000c8
- 80022d0:	20000658 	.word	0x20000658
- 80022d4:	20000130 	.word	0x20000130
- 80022d8:	2000053c 	.word	0x2000053c
- 80022dc:	20000570 	.word	0x20000570
- 80022e0:	20000520 	.word	0x20000520
- 80022e4:	20000748 	.word	0x20000748
- 80022e8:	20000504 	.word	0x20000504
- 80022ec:	20000498 	.word	0x20000498
- 80022f0:	20000084 	.word	0x20000084
- 80022f4:	00000514 	.word	0x00000514
- 80022f8:	200008dc 	.word	0x200008dc
- 80022fc:	20000844 	.word	0x20000844
- 8002300:	200007f8 	.word	0x200007f8
- 8002304:	200007ac 	.word	0x200007ac
- 8002308:	20000198 	.word	0x20000198
- 800230c:	20000009 	.word	0x20000009
- 8002310:	20000502 	.word	0x20000502
- 8002314:	20000501 	.word	0x20000501
- 8002318:	20000500 	.word	0x20000500
- 800231c:	20000390 	.word	0x20000390
+ 8002278:	e72a      	b.n	80020d0 <main+0x48c>
+ 800227a:	46c0      	nop			@ (mov r8, r8)
+ 800227c:	00124f80 	.word	0x00124f80
+ 8002280:	20000430 	.word	0x20000430
+ 8002284:	20000410 	.word	0x20000410
+ 8002288:	200003a8 	.word	0x200003a8
+ 800228c:	20000389 	.word	0x20000389
+ 8002290:	20000308 	.word	0x20000308
+ 8002294:	20000320 	.word	0x20000320
+ 8002298:	20000310 	.word	0x20000310
+ 800229c:	20000288 	.word	0x20000288
+ 80022a0:	200002a0 	.word	0x200002a0
+ 80022a4:	20000290 	.word	0x20000290
+ 80022a8:	20000208 	.word	0x20000208
+ 80022ac:	20000220 	.word	0x20000220
+ 80022b0:	20000210 	.word	0x20000210
+ 80022b4:	20000728 	.word	0x20000728
+ 80022b8:	00001388 	.word	0x00001388
+ 80022bc:	200001a0 	.word	0x200001a0
+ 80022c0:	200006c0 	.word	0x200006c0
+ 80022c4:	200000c8 	.word	0x200000c8
+ 80022c8:	20000658 	.word	0x20000658
+ 80022cc:	20000130 	.word	0x20000130
+ 80022d0:	2000053c 	.word	0x2000053c
+ 80022d4:	20000570 	.word	0x20000570
+ 80022d8:	20000520 	.word	0x20000520
+ 80022dc:	20000748 	.word	0x20000748
+ 80022e0:	20000504 	.word	0x20000504
+ 80022e4:	20000498 	.word	0x20000498
+ 80022e8:	20000084 	.word	0x20000084
+ 80022ec:	00000514 	.word	0x00000514
+ 80022f0:	200008dc 	.word	0x200008dc
+ 80022f4:	20000844 	.word	0x20000844
+ 80022f8:	200007f8 	.word	0x200007f8
+ 80022fc:	200007ac 	.word	0x200007ac
+ 8002300:	20000198 	.word	0x20000198
+ 8002304:	20000009 	.word	0x20000009
+ 8002308:	20000502 	.word	0x20000502
+ 800230c:	20000501 	.word	0x20000501
+ 8002310:	20000500 	.word	0x20000500
+ 8002314:	000927c0 	.word	0x000927c0
+ 8002318:	20000390 	.word	0x20000390
+ 800231c:	00a4cb80 	.word	0x00a4cb80
  8002320:	00002710 	.word	0x00002710
  8002324:	20000008 	.word	0x20000008
  8002328:	200005f0 	.word	0x200005f0

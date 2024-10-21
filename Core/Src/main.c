@@ -80,11 +80,22 @@
 /******************************************************************************/
 #define DEBUG_MEMORY//<<----This is inverted, if you want to enable all the modes available UNCOMMENT THIS (LOGIC NAME IS WRONG)
 
-//#define PRODUCTION_PARAM //<<---------Comment for fast tests
+#define PRODUCTION_PARAM //<<---------Comment for fast tests
 
 #ifndef PRODUCTION_PARAM//Time parameters for the app
 #define 	FAST_TEST
 #endif //FAST_TEST
+
+//You can only activate one sensitivity level
+#define MOTION_SENSITIVITY_MEDIUM
+
+#ifndef MOTION_SENSITIVITY_MEDIUM
+#define MOTION_SENSITIVITY_LOW
+#ifndef 	MOTION_SENSITIVITY_LOW
+#define MOTION_SENSITIVITY_HIGH
+#endif 		//MOTION_SENSITIVITY_LOW
+#endif //MOTION_SENSITIVITY_MEDIUM
+
 
 #define MINUTES_2_MILI_SECONDS	60000
 #define HOURS_2_MILI_SECONDS	60 * MINUTES_2_MILI_SECONDS
@@ -92,8 +103,25 @@
 #ifdef PRODUCTION_PARAM
 //Office Mode:
 //-------------------------------------------------
-#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		6		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#ifdef MOTION_SENSITIVITY_LOW
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		4		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
+#endif	//MOTION_SENSITIVITY_LOW
+
+#ifdef MOTION_SENSITIVITY_MEDIUM
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		7		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_2_PULSES;
+const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+#endif	//MOTION_SENSITIVITY_MEDIUM
+
+#ifdef MOTION_SENSITIVITY_HIGH
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		3		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
+const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_4_SEC;
+#endif	//MOTION_SENSITIVITY_HIGH
+
+
 
 #define OFFICE_LAMP1_ON_TIME_MS				10 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
 #define OFFICE_LAMP2_ON_TIME_MS				10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 2 illumination in milisec
@@ -107,8 +135,25 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 //Residential mode:
 //-------------------------------------------------
-#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	7		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#ifdef MOTION_SENSITIVITY_LOW
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	4		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
+#endif	//MOTION_SENSITIVITY_LOW
+
+#ifdef MOTION_SENSITIVITY_MEDIUM
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	7		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t RESIDENTIAL_MOTION_PULSE_COUNTER = PYD1598_PC_2_PULSES;
+const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+#endif	//MOTION_SENSITIVITY_MEDIUM
+
+#ifdef MOTION_SENSITIVITY_HIGH
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	3		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
+const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_4_SEC;
+#endif	//MOTION_SENSITIVITY_HIGH
+
+
 
 #define RESIDENTIAL_LAMP1_ON_TIME_MS		10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define RESIDENTIAL_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
@@ -123,8 +168,25 @@ const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 //Broan NuTone SurfaceShield mode:
 //-------------------------------------------------
-#define SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD	7		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#ifdef MOTION_SENSITIVITY_LOW
+#define SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD	4		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
 const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
+#endif	//MOTION_SENSITIVITY_LOW
+
+#ifdef MOTION_SENSITIVITY_MEDIUM
+#define SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD	7		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t SURFACESHIELD_MOTION_PULSE_COUNTER = PYD1598_PC_2_PULSES;
+const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_6_SEC;
+#endif	//MOTION_SENSITIVITY_MEDIUM
+
+#ifdef MOTION_SENSITIVITY_HIGH
+#define SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD	3		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
+const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_4_SEC;
+#endif	//MOTION_SENSITIVITY_HIGH
+
+
 
 #define SURFACESHIELD_LAMP1_ON_TIME_MS		10 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
 #define SURFACESHIELD_LAMP2_ON_TIME_MS		0							//!<Waiting period of Lamp 2 illumination in milisec
@@ -143,7 +205,8 @@ const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SE
 #ifdef FAST_TEST
 
 //Office Mode:
-#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		60		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD		20		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
 const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
 
 #define OFFICE_LAMP1_ON_TIME_MS				1 * MINUTES_2_MILI_SECONDS	//!<Waiting period of Lamp 1 illumination in milisec
@@ -157,7 +220,8 @@ const pyd1598_window_time_t OFFICE_MOTION_SENSOR_WINDOW = PYD1598_WT_2_SEC;
 #endif	//TEST_TIMEOUT
 
 //Residential mode:
-#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	60		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD	20		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
 const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 #define RESIDENTIAL_LAMP1_ON_TIME_MS		10000//1 * MINUTES_2_MILI_SECONDS 	//!<Waiting period of Lamp 1 illumination in milisec
@@ -173,7 +237,8 @@ const pyd1598_window_time_t RESIDENTIAL_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 //Broan NuTone SurfaceShield mode:
 //-------------------------------------------------
-#define SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD	60		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+#define SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD	20		//!< Range 0-255 (0 more sensitive -255 less sensitive)
+const pyd1598_pulse_counter_t OFFICE_MOTION_PULSE_COUNTER = PYD1598_PC_3_PULSES;
 const pyd1598_window_time_t SURFACESHIELD_MOTION_SENSOR_WINDOW = PYD1598_WT_8_SEC;
 
 #define SURFACESHIELD_LAMP1_ON_TIME_MS		10000 	//!<Waiting period of Lamp 1 illumination in milisec
@@ -444,22 +509,24 @@ int main(void)
 	case MOTION_SWITCH_MODE_0:
 		motion_initial_conf.threshold = OFFICE_MOTION_SENSOR_DETECTION_THRESHOLD;
 		motion_initial_conf.window_time = OFFICE_MOTION_SENSOR_WINDOW;
+		motion_initial_conf.pulse_counter = OFFICE_MOTION_PULSE_COUNTER;
+
 	  break;
 	case MOTION_SWITCH_MODE_1:
 		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
-		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
+		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;;
+		motion_initial_conf.pulse_counter = RESIDENTIAL_MOTION_PULSE_COUNTER;
 	  break;
 	case MOTION_SWITCH_MODE_2:
 		motion_initial_conf.threshold = RESIDENTIAL_MOTION_SENSOR_DETECTION_THRESHOLD;
-		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;
-		//do nothing
-		__NOP();
+		motion_initial_conf.window_time = RESIDENTIAL_MOTION_SENSOR_WINDOW;;
+		motion_initial_conf.pulse_counter = RESIDENTIAL_MOTION_PULSE_COUNTER;
 		break;
 #endif //DEBUG_MEMORY
 	case MOTION_SWITCH_MODE_3:
-		//do nothing
 		motion_initial_conf.threshold = SURFACESHIELD_MOTION_SENSOR_DETECTION_THRESHOLD;
-		motion_initial_conf.window_time =SURFACESHIELD_MOTION_SENSOR_WINDOW;
+		motion_initial_conf.window_time =SURFACESHIELD_MOTION_SENSOR_WINDOW;;
+		motion_initial_conf.pulse_counter = SURFACESHIELD_MOTION_PULSE_COUNTER;
 		break;
 	default:
 		//do nothing
@@ -472,7 +539,6 @@ int main(void)
   motion_initial_conf.count_mode = PYD1598_COUNT_MODE_NO_BPF_SIGN_CHANGE;
   motion_initial_conf.hpf_cutoff = PYD1598_HPF_0_2HZ;
   motion_initial_conf.op_mode = PYD1598_WAKE_UP;
-  motion_initial_conf.pulse_counter = PYD1598_PC_2_PULSES;
   motion_initial_conf.signal_source = PYD1598_SOURCE_PIR_BFP;
 
   //Hardware assignation:
@@ -624,8 +690,7 @@ int main(void)
 
   //Light 1
   deadline_timer_setup(&deadline_motion_light_1, timer_motion_light_1);
-//  deadline_timer_setup_shared_clock(&deadline_motion_light_1, &general_clock,
-//		  	  	  	  	  	  	  	  	  	  timer_motion_light_1);
+
   light_1_state = MOTION_LIGHT_IDLE;
   //Light 2
   deadline_timer_setup(&deadline_motion_light_2, timer_motion_light_1);
@@ -710,10 +775,6 @@ int main(void)
 
 	  relay_ask_off_pulse_fsm(&light_1);
 
-
-
-
-
   }
 
 
@@ -749,12 +810,6 @@ int main(void)
   motion_sensed_uv = MOTION_ISR_ATTENDED;
 
   led_signal_stop(&signal_led);
-
-
-
-#ifdef DEBUG_REYNOLDS
-#endif //DEBUG_REYNOLDS
-
 
   /**************************************************************************/
   /* USER CODE END 2 */
@@ -870,15 +925,27 @@ int main(void)
 				  led_signal_fsm(&signal_led);
 				  deadline_timer_set_initial_time(&deadline_led_indicator);
 			  }
-#endif
+#endif	//DEBUG_MEMORY
 
 			  break;
 		  case MOTION_SWITCH_MODE_2:
 			  //do nothing
 			  signal_led.type = LED_SIGNAL_BLINK;
+			  signal_led.control = LED_SIGNAL_CTRL_START;
+			  deadline_led_indicator.deadline.msec = 100;
+			  //LED indicator
+
+			  deadline_timer_check(&deadline_led_indicator, &indicator_timer_expired);
+
+			  if(indicator_timer_expired == TIMER_EXPIRED_TRUE)
+			  {
+				  led_signal_fsm(&signal_led);
+				  deadline_timer_set_initial_time(&deadline_led_indicator);
+			  }
 
 			  break;
 		  case MOTION_SWITCH_MODE_3:
+			  //SurfaceShield App
 			  nutone_app_process(&nutone_app_hand);
 
 			  break;
@@ -1312,7 +1379,6 @@ void motion_uv_ctrl_wait_fsm(relay_t *light_uv,
 		case MOTION_LIGHT_UV_TURN_ON_LIGHT:
 			//this is done in another fsm
 			relay_ask_on_pulse_fsm(light_uv);
-//			signal->type = LED_SIGNAL_SOLID;
 			*fsm_state = MOTION_LIGHT_UV_INIT_TIMER;
 
 			break;
@@ -1498,7 +1564,6 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 
 	if(GPIO_Pin == motion_sensor.direct_link.hardware_inteface.pin)
 	{
-//		pyd1598_direct_link_isr_init_set();
 		motion_sensor.direct_link.start_fsm = true;
 		TIM17->CNT = 0;
 	}
